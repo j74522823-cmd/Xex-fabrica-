@@ -1,0 +1,49 @@
+name: Build XEX
+ on:
+   push:
+     branches: [ main, master ]
+   workflow_dispatch:
+ jobs:
+   build:
+     runs-on: ubuntu-latest
+     steps:
+       - name: Baixar código
+         uses: actions/checkout@v4
+       - name: Restaurar cache do toolchain
+         id: cache-toolchain
+         uses: actions/cache@v4
+         with:
+           path: toolchain
+           key: toolchain-xsdk-v1
+       - name: Baixar e preparar xsdk
+         if: steps.cache-toolchain.outputs.cache-hit != 'true'
+         run: |
+           mkdir -p toolchain
+           cd toolchain
+           git clone --depth 1 https://github.com/Free60Project/xenon-tools.git .
+           ./build.sh
+       - name: Configurar variáveis de ambiente
+         run: |
+           echo "TOOLCHAIN_PATH=$GITHUB_WORKSPACE/toolchain" >> $GITHUB_ENV
+           echo "CC=$GITHUB_WORKSPACE/toolchain/bin/powerpc64-xenon-elf-gcc" >> $GITHUB_ENV
+       - name: Compilar hello.c para XEX
+         run: |
+           export PATH=$TOOLCHAIN_PATH/bin:$PATH
+           $CC -o hello.elf hello.c -lxenon -lstdc -lm
+           $TOOLCHAIN_PATH/bin/elf2xex hello.elf hello.xex
+       - name: Salvar log de compilação
+         run: |
+           echo "Compilado em: $(date)" > log.txt
+           echo "Commit: $GITHUB_SHA" >> log.txt
+       - name: Upload do resultado
+         uses: softprops/action-gh-release@v1
+         if: startsWith(github.ref, 'refs/tags/') == false
+         with:
+           tag_name: ultimo-xex
+           files: |
+             hello.xex
+             log.txt
+           body: |
+             ✅ Compilação pronta!
+             Baixe o hello.xex e copie para seu pendrive.
+             Use por sua conta e risco — é seu primeiro passo! 💪✨
