@@ -1,0 +1,152 @@
+name: Fabrica de XEX (xsdk)
+
+# Compila cada pasta projetos/<nome>/ (arquivos .c) em um .xex usando o xsdk (GCC + GPU + controle + arquivos + rede).
+# Resultado: aba Releases > "ultimo-xex" (o .xex e o log.txt).
+# A 1a execucao constroi o compilador (~1 a 2 h) e guarda em Releases > "toolchain-xsdk". As seguintes levam minutos.
+
+on:
+  push:
+    paths:
+      - 'projetos/**'
+      - '.github/workflows/xex.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: xex
+  cancel-in-progress: false
+
+env:
+  XSDK_SHA: 49307c7b5fe6cc0e262da7b31af58e4e309aa18e
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  xex:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Conferir que existe projetos/<nome>/
+        run: |
+          if ! ls -d projetos/*/ >/dev/null 2>&1; then
+            echo "ERRO: crie primeiro projetos/hello/main.c (a pasta projetos precisa de uma subpasta com .c)"
+            exit 1
+          fi
+          ls -d projetos/*/
+
+      - name: Baixar o xsdk (versao fixa)
+        run: |
+          mkdir -p "$HOME/xsdk"
+          cd "$HOME/xsdk"
+          git init -q
+          git remote add origin https://github.com/xenosworks/xsdk.git
+          git fetch -q --depth 1 origin "$XSDK_SHA"
+          git checkout -q FETCH_HEAD
+          git rev-parse HEAD
+
+      - name: Instalar ferramentas do sistema
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q build-essential bison flex texinfo libgmp-dev libmpfr-dev libmpc-dev \
+            curl xz-utils patch python3 cmake ninja-build git
+
+      - name: Compilador (baixa o pronto ou constroi)
+        run: |
+          set -e
+          TC="$HOME/xsdk-gcc"
+          WANT=$(cat "$HOME/xsdk"/tools/toolchain/* | sha256sum | cut -c1-16)
+          have_ok() { [ -x "$TC/bin/powerpc-xsdk-elf-gcc" ] && [ "$(cat "$TC/.tchash" 2>/dev/null)" = "$WANT" ]; }
+          if gh release download toolchain-xsdk -p toolchain.tar.gz -D "$RUNNER_TEMP" 2>/dev/null; then
+            tar -C "$HOME" -xzf "$RUNNER_TEMP/toolchain.tar.gz"
+            rm -f "$RUNNER_TEMP/toolchain.tar.gz"
+          fi
+          if have_ok; then
+            echo "Compilador pronto reaproveitado."
+          else
+            echo "Construindo o compilador (demora; so na 1a vez)..."
+            rm -rf "$TC"
+            cd "$HOME/xsdk"
+            PREFIX="$TC" WORK="$HOME/xsdk-gcc-work" JOBS=$(nproc) bash tools/toolchain/build.sh
+            echo "$WANT" > "$TC/.tchash"
+            rm -rf "$HOME/xsdk-gcc-work"
+            tar -C "$HOME" -czf "$RUNNER_TEMP/toolchain.tar.gz" xsdk-gcc
+            ls -la "$RUNNER_TEMP/toolchain.tar.gz"
+            gh release delete toolchain-xsdk --cleanup-tag -y 2>/dev/null || true
+            gh release create toolchain-xsdk "$RUNNER_TEMP/toolchain.tar.gz" \
+              --target "$GITHUB_SHA" --title "toolchain-xsdk" \
+              --notes "Compilador do xsdk ja construido (cache). Nao apague."
+          fi
+          "$TC/bin/powerpc-xsdk-elf-gcc" --version | head -1
+
+      - name: Construir a biblioteca do xsdk
+        run: |
+          cd "$HOME/xsdk"
+          make -j"$(nproc)" TOOLCHAIN="$HOME/xsdk-gcc/bin/powerpc-xsdk-elf-" build/libxsdk.a build/host/libxsc.so
+          ls -la build/libxsdk.a
+
+      - name: Compilar os projetos
+        run: |
+          mkdir -p build/gen build/obj
+          : > build/log.txt
+          fail=0
+          for dir in projetos/*/; do
+            nome=$(basename "$dir")
+            echo "=== $nome ===" | tee -a build/log.txt
+            if ! printf '%s' "$nome" | grep -Eq '^[A-Za-z0-9_-]+$'; then
+              echo "ERRO: nome de pasta invalido '$nome' (use so letras, numeros, - e _)" | tee -a build/log.txt
+              fail=1; continue
+            fi
+            abs="$PWD/${dir%/}"
+            if [ -f "$abs/CMakeLists.txt" ]; then
+              src="$abs"
+            else
+              if ! ls "$abs"/*.c >/dev/null 2>&1; then
+                echo "ERRO: nenhum arquivo .c em $dir" | tee -a build/log.txt
+                fail=1; continue
+              fi
+              src="$PWD/build/gen/$nome"; mkdir -p "$src"
+              cat > "$src/CMakeLists.txt" <<'CMK'
+          cmake_minimum_required(VERSION 3.25)
+          project(@NOME@ C)
+          file(GLOB SRCS "@DIR@/*.c")
+          file(GLOB SHADERS "@DIR@/*.vert" "@DIR@/*.frag")
+          add_executable(@NOME@ ${SRCS})
+          target_include_directories(@NOME@ PRIVATE "@DIR@")
+          set_target_properties(@NOME@ PROPERTIES C_STANDARD 17 C_EXTENSIONS ON)
+          target_compile_options(@NOME@ PRIVATE -Wall -Wextra)
+          if(SHADERS)
+            xsdk_add_shaders(@NOME@ ${SHADERS})
+          endif()
+          xsdk_add_xex(@NOME@)
+          CMK
+              sed -i "s|@NOME@|$nome|g; s|@DIR@|$abs|g" "$src/CMakeLists.txt"
+            fi
+            obj="$PWD/build/obj/$nome"
+            if cmake -S "$src" -B "$obj" -G Ninja \
+                 -DCMAKE_TOOLCHAIN_FILE="$HOME/xsdk/cmake/xsdk.cmake" \
+                 -DXSDK_TOOLCHAIN="$HOME/xsdk-gcc" -DCMAKE_BUILD_TYPE=Release >> build/log.txt 2>&1 \
+               && cmake --build "$obj" >> build/log.txt 2>&1 \
+               && [ -n "$(find "$obj" -maxdepth 2 -name '*.xex' | head -1)" ]; then
+              find "$obj" -maxdepth 2 -name '*.xex' -exec cp {} build/ \;
+              echo "OK: $nome gerado" | tee -a build/log.txt
+            else
+              echo "ERRO ao compilar $nome (detalhes acima no log.txt)" | tee -a build/log.txt
+              fail=1
+            fi
+          done
+          echo "--- erros do compilador ---"; grep -E "error|Error|ERRO" build/log.txt | head -40 || true
+          ls -la build/*.xex 2>/dev/null || true
+          exit $fail
+
+      - name: Publicar resultado (Releases > ultimo-xex)
+        if: always()
+        run: |
+          [ -f build/log.txt ] || { mkdir -p build; echo "falhou antes de compilar; veja a aba Actions" > build/log.txt; }
+          gh release delete ultimo-xex --cleanup-tag -y 2>/dev/null || true
+          gh release create ultimo-xex build/*.xex build/log.txt \
+            --target "$GITHUB_SHA" --title "ultimo-xex" \
+            --notes "Resultado da ultima compilacao. Baixe o .xex; o log.txt mostra erros."
+            
