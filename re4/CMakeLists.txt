@@ -55,7 +55,8 @@ file(GLOB_RECURSE RE4_SOURCES CONFIGURE_DEPENDS
 # Gekko exception handler reads OSContext gpr/srr0: nothing to port, xsdk has its own fault handling.
 list(FILTER RE4_SOURCES EXCLUDE REGEX "src/game/exception\\.cpp$")
 # Debug tools, the SN libc (xsdk has its own) and the t_esp debug port: see tools/xenon/excluded.txt
-list(FILTER RE4_SOURCES EXCLUDE REGEX "src/game/(sprintf|sscanf|fprintf|printf)\\.c$")
+# src/game/*.c is the SN compiler's C library (stdio, locale, string, malloc...): newlib in xsdk provides all of it.
+list(FILTER RE4_SOURCES EXCLUDE REGEX "src/game/[^/]*\\.c$")
 list(FILTER RE4_SOURCES EXCLUDE REGEX "src/[Tt]ools/")
 list(FILTER RE4_SOURCES EXCLUDE REGEX "src/t_esp/(db_port|t_esp)\\.cpp$")
 # The t_* directories are the debug editors' screens (event / camera / light / id tools): they call the Tools code above.
@@ -112,7 +113,7 @@ foreach (M ${RE4_MODULES})
   set(OBJ "${CMAKE_CURRENT_BINARY_DIR}/rel/${M}.o")
   add_custom_command(OUTPUT "${OBJ}"
       COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/rel"
-      COMMAND ${XSDK_PREFIX}ld -r -d -o "${OBJ}.1" $<TARGET_OBJECTS:rel_${M}>
+      COMMAND ${XSDK_PREFIX}ld -r -d --force-group-allocation -o "${OBJ}.1" $<TARGET_OBJECTS:rel_${M}>
       COMMAND ${XSDK_PREFIX}objcopy --redefine-sym _prolog=${M}__prolog --redefine-sym _epilog=${M}__epilog
               --redefine-sym _unresolved=${M}__unresolved "${OBJ}.1" "${OBJ}.2"
       COMMAND ${XSDK_PREFIX}objcopy --keep-global-symbol=${M}__prolog --keep-global-symbol=${M}__epilog

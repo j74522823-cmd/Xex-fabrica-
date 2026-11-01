@@ -1,6 +1,6 @@
 # Units NOT built on the 360 (extended regex, matched against the path)
 src/game/exception\.cpp$
-src/game/(sprintf|sscanf|fprintf|printf)\.c$
+src/game/[^/]*\.c$
 src/tools/
 src/Tools/
 src/t_esp/(db_port|t_esp)\.cpp$
