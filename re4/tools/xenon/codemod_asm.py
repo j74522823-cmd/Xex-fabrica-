@@ -33,7 +33,7 @@ print(stats)
 # --- second pass: top-level section-switching asm used only for byte-matching (".section .data; .balign 8" ...) ---
 def strip_section_asm(root='src'):
     import os, re
-    pat = re.compile(r'^[ \t]*asm[ \t]*\("\.(?:section|data|text|rodata|balign|align)[^;\n]*?"\);[ \t]*\n', re.M)
+    pat = re.compile(r'^[ \t]*asm[ \t]*\("\.(?:section|data|text|rodata|balign|align)(?![^\n]*(?::|\.long|\.word|\.comm))[^\n]*?"\);[ \t]*\n', re.M)
     n = 0
     for d, _, fs in os.walk(root):
         for f in fs:

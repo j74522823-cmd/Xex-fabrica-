@@ -4,3 +4,5 @@ src/game/(sprintf|sscanf|fprintf|printf)\.c$
 src/tools/
 src/Tools/
 src/t_esp/(db_port|t_esp)\.cpp$
+src/t_[A-Za-z_]*/
+src/game/db_widget\.cpp$

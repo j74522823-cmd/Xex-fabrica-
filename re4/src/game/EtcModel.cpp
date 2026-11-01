@@ -176,7 +176,7 @@ int EtcModelSet(ETS_DATA* pDat);
 int EtcGetDasAddr(int id, void** out);
 int getRoomEtcBreak(int no, cEm** out, int flag);
 int setRoomEtcDisp(int no, int on, int flag);
-static int setRoomEtcBreakDisp(int no, int on, int flag);
+int setRoomEtcBreakDisp(int no, int on, int flag);
 int getRoomEtcWindow(int no, cEmWindow** out, int flag);
 int getRoomEtcBox(int no, cEmBox** out, int flag);
 int getRoomEtcDoor(int no, cEmDoor** out, int flag);
@@ -2613,7 +2613,7 @@ int setRoomEtcDisp(int no, int bDisp, int bErrDisp)
 }
 
 // Shows / hides a breakable etc object.
-static int setRoomEtcBreakDisp(int no, int bDisp, int bErrDisp)
+int setRoomEtcBreakDisp(int no, int bDisp, int bErrDisp)
 {
     cEm* em;
 

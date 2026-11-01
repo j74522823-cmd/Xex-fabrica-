@@ -6450,6 +6450,7 @@ void em39WaistMove(cEm39* em)
 // dead-stripped body; ours drops unreferenced pool entries (mark_constant_pool).
 // COMPILER-DIFF: candidate #10 (unreferenced constant-pool entries kept).
 
+asm(".section .rodata\n\t.long 0x3f666666, 0x3ca3d70b, 0x3f800000\n\t.text");
 // Laser marker: from the machine gun muzzle (x8B4 == 3) or the bow (x8B4 == 4) to the target.
 void em39MarkerMove(cEm39* em)
 {

@@ -368,6 +368,7 @@ static void r224_toroko()
 // `lfs acc` depend on the store (target: `lfs f30,acc` last). The dead `if (spd == 1.85f) up = 0;`
 // is a 4th ref for the hoisted 1.85 constant so it ranks above zero in global-alloc (f27 vs f26;
 // zero has no REG_EQUIV doubling, the pool constant has).
+asm(".section \".rodata\"\n\t.align 2\nr224_zero:\n\t.long 0\n\t.section \".text\"");
 extern const f32 r224_zero;
 extern const f32 r224_zero_v asm("r224_zero");
 

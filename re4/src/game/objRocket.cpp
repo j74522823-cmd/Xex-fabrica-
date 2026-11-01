@@ -483,3 +483,5 @@ void cManager<T>::destroyNow(T* p)
     destroy(p);
     flag = f;
 }
+// 360 port: GCC 2.95 emitted the instantiation in this unit; GCC 15 needs it asked for (pl_wep.cpp calls it).
+template void cManager<cObj>::destroyNow(cObj*);

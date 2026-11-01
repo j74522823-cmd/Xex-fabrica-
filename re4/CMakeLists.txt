@@ -49,7 +49,8 @@ file(GLOB_RECURSE RE4_SOURCES CONFIGURE_DEPENDS
     src/pl*/*.c   src/pl*/*.cpp
     src/st*/*.c   src/st*/*.cpp
     src/Sscrn/*.cpp
-    src/t_*/*.cpp)
+    src/t_*/*.cpp
+    src/lib/texPalette.c)   # charPipeline: not in Aurora
 # Debug editors (src/Tools, src/tools) stay out until the game itself runs.
 # Gekko exception handler reads OSContext gpr/srr0: nothing to port, xsdk has its own fault handling.
 list(FILTER RE4_SOURCES EXCLUDE REGEX "src/game/exception\\.cpp$")
@@ -57,11 +58,15 @@ list(FILTER RE4_SOURCES EXCLUDE REGEX "src/game/exception\\.cpp$")
 list(FILTER RE4_SOURCES EXCLUDE REGEX "src/game/(sprintf|sscanf|fprintf|printf)\\.c$")
 list(FILTER RE4_SOURCES EXCLUDE REGEX "src/[Tt]ools/")
 list(FILTER RE4_SOURCES EXCLUDE REGEX "src/t_esp/(db_port|t_esp)\\.cpp$")
+# The t_* directories are the debug editors' screens (event / camera / light / id tools): they call the Tools code above.
+list(FILTER RE4_SOURCES EXCLUDE REGEX "src/t_[A-Za-z_]*/")
+list(FILTER RE4_SOURCES EXCLUDE REGEX "src/game/db_widget\\.cpp$")
 # Direct GameCube-debugger I/O (PCinit/PCopen...), the HIO/PC host link of the debug build.
 # list(FILTER ... ) of the files that need it goes here once they are identified.
 
 # First link: the game's own `int main()` (src/game/main.cpp) is the entry; platforms/xenon/main_xenon.cpp comes later.
-add_executable(re4 ${RE4_SOURCES} platforms/xenon/gc_compat.cpp)
+add_executable(re4 ${RE4_SOURCES} platforms/xenon/gc_compat.cpp platforms/xenon/os_compat.cpp
+    platforms/xenon/audio_stubs.cpp platforms/xenon/legacy_syms.cpp)
 target_include_directories(re4 PRIVATE include src)
 # Aurora's <dolphin/...> headers must win over RE4's own include/dolphin/*.h (the GameCube SDK headers), as in tools/xenon/check_compile.sh.
 target_include_directories(re4 BEFORE PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/extern/aurora/include")

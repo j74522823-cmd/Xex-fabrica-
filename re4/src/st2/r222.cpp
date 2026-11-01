@@ -245,6 +245,7 @@ static void r222_TreasureBoxOpened(int id)
 // then hold 0 instead of the section offset), and a `static const` at file scope is deferred to the
 // end of the file. The wait body reads the word through the asm-labelled alias (a distinct
 // SYMBOL_REF: gcse cannot share the `high` r10 of the arms with it, the target reloads `lis r11`).
+asm(".section \".rodata\"\n\t.align 2\nr222_k212:\n\t.long 0x4007b8a5\n\t.section \".text\"");
 extern const f32 r222_k212;
 extern const f32 r222_k212_v asm("r222_k212");
 

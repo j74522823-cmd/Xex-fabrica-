@@ -164,7 +164,7 @@ static u16 em21_flip_tbl[50] = {
 
 // The camera plemTrapCancel installs (the trap release cut): explicitly zero-initialised so it
 // stays in .data.
-static CAMERA em21_trap_cam = { 0 };
+CAMERA em21_trap_cam = { 0 };
 // COMPILER-DIFF: candidate #12 (cse related-value): `cam = &em21_trap_cam` after the `&em21_trap_cam.param.Campos/at`
 // pointers are known is a fresh `lis/addi` pair in the original; our cse rewrites it as `at - 0xB0`.
 // An asm-labelled alias declaration gives cse a distinct SYMBOL_REF and keeps the fresh pair.

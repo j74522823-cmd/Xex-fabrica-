@@ -16,9 +16,7 @@ void TprimDrawMtxDirection(Mtx mat, GXColor* c0, GXColor* c1);
 
 // The full build (Tools REL, tools/t_prim.cpp with TPRIM_FULL): 2D-only environment, line strips, tiles,
 // the hit marker (Htr) and its cone, and the s16 vertex variants.
-struct S16Vec {
-    s16 x, y, z;
-};
+// S16Vec (s16 x, y, z) is the typedef of Aurora's <dolphin/mtx.h>.
 
 void TprimInitEnv2D(f32* rect);
 void TprimDrawLineFn(Vec* v, GXColor* c, u16 n);
