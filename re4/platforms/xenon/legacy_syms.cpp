@@ -8,6 +8,9 @@
 
 void Filter09Render();
 
+// exception.cpp (the Gekko exception handler) is not built: xsdk has its own fault handling.
+void ExceptionInit() {}
+
 // Aliases made with asm("...") in game units (a calling convention / register-allocation trick for byte matching): the old
 // GCC 2.95 mangled name of the function, forwarded to the real one.
 extern "C" {

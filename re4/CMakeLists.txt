@@ -50,7 +50,7 @@ file(GLOB_RECURSE RE4_SOURCES CONFIGURE_DEPENDS
     src/st*/*.c   src/st*/*.cpp
     src/Sscrn/*.cpp
     src/t_*/*.cpp
-    src/lib/texPalette.c)   # charPipeline: not in Aurora
+    src/lib/texPalette.c src/lib/fileCache.c)   # charPipeline + its file cache: not in Aurora
 # Debug editors (src/Tools, src/tools) stay out until the game itself runs.
 # Gekko exception handler reads OSContext gpr/srr0: nothing to port, xsdk has its own fault handling.
 list(FILTER RE4_SOURCES EXCLUDE REGEX "src/game/exception\\.cpp$")
@@ -64,20 +64,61 @@ list(FILTER RE4_SOURCES EXCLUDE REGEX "src/game/db_widget\\.cpp$")
 # Direct GameCube-debugger I/O (PCinit/PCopen...), the HIO/PC host link of the debug build.
 # list(FILTER ... ) of the files that need it goes here once they are identified.
 
-# First link: the game's own `int main()` (src/game/main.cpp) is the entry; platforms/xenon/main_xenon.cpp comes later.
-add_executable(re4 ${RE4_SOURCES} platforms/xenon/gc_compat.cpp platforms/xenon/os_compat.cpp
-    platforms/xenon/audio_stubs.cpp platforms/xenon/legacy_syms.cpp)
-target_include_directories(re4 PRIVATE include src)
-# Aurora's <dolphin/...> headers must win over RE4's own include/dolphin/*.h (the GameCube SDK headers), as in tools/xenon/check_compile.sh.
-target_include_directories(re4 BEFORE PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/extern/aurora/include")
-target_compile_definitions(re4 PRIVATE
-    TARGET_PC AURORA                 # Aurora's software GX command stream (GXWGFifo is not a memory address here)
-    BUILD_VERSION=1 VERSION_G4BE08 NDEBUG=1)
-# The decomp is GCC 2.95 C++/C: be lenient. Do NOT add -fsigned-char (Dusklight does, for CodeWarrior code): PowerPC char is
-# unsigned and the SN compiler used that default.
-target_compile_options(re4 PRIVATE -fpermissive -w)
-set_target_properties(re4 PROPERTIES C_STANDARD 11 C_EXTENSIONS ON CXX_STANDARD 17 CXX_EXTENSIONS ON)
-target_link_libraries(re4 PRIVATE aurora::main aurora::core aurora::gx aurora::gd aurora::si aurora::vi aurora::pad
+# ---- REL overlays, linked statically --------------------------------------------------------------------------------------
+# On the GameCube the stage / weapon / enemy modules (config/G4BE08) were separate RELs, each linked on its own, so they
+# define the same global names. tools/xenon/gen_modules.py lists each module's sources and writes the table that maps a REL's
+# module id to its entry points. Every module is built with -DREL_MODULE=<name> (as configure.py does), partially linked into
+# one object, and all of its symbols are made local but <name>__prolog / __epilog / __unresolved. OSLink (os_compat.cpp) then
+# hands the game those entry points instead of relocating the REL it read from the disc.
+set(RE4_GEN "${CMAKE_CURRENT_BINARY_DIR}/gen")
+execute_process(COMMAND python3 "${CMAKE_CURRENT_SOURCE_DIR}/tools/xenon/gen_modules.py" "${CMAKE_CURRENT_SOURCE_DIR}" "${RE4_GEN}"
+    RESULT_VARIABLE RE4_GEN_RESULT)
+if (NOT RE4_GEN_RESULT EQUAL 0)
+  message(FATAL_ERROR "gen_modules.py failed")
+endif ()
+include("${RE4_GEN}/modules.cmake")
+list(REMOVE_ITEM RE4_SOURCES ${RE4_MODULE_SOURCES})   # what is left is the DOL: the main game
+
+set(RE4_AURORA_LIBS aurora::main aurora::core aurora::gx aurora::gd aurora::si aurora::vi aurora::pad
     aurora::mtx aurora::os aurora::dvd aurora::card vulkan4xenon)
+
+function(re4_settings tgt)
+  target_include_directories(${tgt} PRIVATE include src)
+  # Aurora's <dolphin/...> headers must win over RE4's own include/dolphin/*.h (the GameCube SDK headers), as in
+  # tools/xenon/check_compile.sh.
+  target_include_directories(${tgt} BEFORE PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/extern/aurora/include")
+  target_compile_definitions(${tgt} PRIVATE
+      TARGET_PC AURORA                 # Aurora's software GX command stream (GXWGFifo is not a memory address here)
+      BUILD_VERSION=1 VERSION_G4BE08 NDEBUG=1)
+  # The decomp is GCC 2.95 C++/C: be lenient. Do NOT add -fsigned-char (Dusklight does, for CodeWarrior code): PowerPC char is
+  # unsigned and the SN compiler used that default.
+  target_compile_options(${tgt} PRIVATE -fpermissive -w)
+  set_target_properties(${tgt} PROPERTIES C_STANDARD 11 C_EXTENSIONS ON CXX_STANDARD 17 CXX_EXTENSIONS ON)
+endfunction()
+
+set(RE4_MODULE_OBJECTS)
+foreach (M ${RE4_MODULES})
+  add_library(rel_${M} OBJECT ${RE4_MOD_${M}_SRCS})
+  re4_settings(rel_${M})
+  target_compile_definitions(rel_${M} PRIVATE REL_MODULE=${M})
+  target_link_libraries(rel_${M} PRIVATE ${RE4_AURORA_LIBS})
+  set(OBJ "${CMAKE_CURRENT_BINARY_DIR}/rel/${M}.o")
+  add_custom_command(OUTPUT "${OBJ}"
+      COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/rel"
+      COMMAND ${XSDK_PREFIX}ld -r -d -o "${OBJ}.1" $<TARGET_OBJECTS:rel_${M}>
+      COMMAND ${XSDK_PREFIX}objcopy --redefine-sym _prolog=${M}__prolog --redefine-sym _epilog=${M}__epilog
+              --redefine-sym _unresolved=${M}__unresolved "${OBJ}.1" "${OBJ}.2"
+      COMMAND ${XSDK_PREFIX}objcopy --keep-global-symbol=${M}__prolog --keep-global-symbol=${M}__epilog
+              --keep-global-symbol=${M}__unresolved "${OBJ}.2" "${OBJ}"
+      DEPENDS $<TARGET_OBJECTS:rel_${M}> COMMAND_EXPAND_LISTS VERBATIM)
+  set_source_files_properties("${OBJ}" PROPERTIES EXTERNAL_OBJECT TRUE GENERATED TRUE)
+  list(APPEND RE4_MODULE_OBJECTS "${OBJ}")
+endforeach ()
+
+# First link: the game's own `int main()` (src/game/main.cpp) is the entry; platforms/xenon/main_xenon.cpp comes later.
+add_executable(re4 ${RE4_SOURCES} ${RE4_MODULE_OBJECTS} "${RE4_GEN}/rel_table.cpp"
+    platforms/xenon/gc_compat.cpp platforms/xenon/os_compat.cpp platforms/xenon/audio_stubs.cpp platforms/xenon/legacy_syms.cpp)
+re4_settings(re4)
+target_link_libraries(re4 PRIVATE ${RE4_AURORA_LIBS})
 
 xsdk_add_xex(re4 TITLE_ID 0x52453420 NAME "RE4" VERSION 0.0.1.0)   # TITLE_ID is a placeholder
