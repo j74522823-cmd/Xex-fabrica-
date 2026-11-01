@@ -50,7 +50,7 @@ void st4_initAdaGame();   // st4.cpp
 
 
 static void snd_tbl_set();
-void setTexRender();
+static void setTexRender();
 static void R405ExecEventS00();
 void Evt_R405S00_Func(Event* e, u32);
 static void em_set();
@@ -135,7 +135,7 @@ void R405Main()
 }
 
 // The water surface: two render targets blended into the water objects.
-void setTexRender()
+static void setTexRender()
 {
     cObj* obj;
     u8* tbl0 = r405_texTbl0;
