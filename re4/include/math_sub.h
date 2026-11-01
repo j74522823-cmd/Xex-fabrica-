@@ -5,18 +5,8 @@
 #include "vec.h"
 #include "db_log.h"
 
-// libm's own declaration of fabsf clashes with the inline below (C linkage against static), so it is
-// renamed out of the way while <math.h> is read.
-#define fabsf fabsf_libm
+// 360 port: the SDK's volatile-asm fabsf (a scheduling barrier for byte-matching) is gone; libm's fabsf is used.
 #include <math.h>
-#undef fabsf
-
-// Float abs as the original SDK header defines it: a volatile asm, which also acts as a
-// scheduling barrier (loads after it are not hoisted above it).
-static inline f32 fabsf(f32 x)
-{
-    return __builtin_fabsf(x);   // was `asm volatile("fabs ...")`, a scheduling barrier for byte-matching
-}
 
 // Column `c` of a matrix read into a Vec.
 static inline void getColumn(Mtx m, int c, Vec* v) { v->x = m[0][c]; v->y = m[1][c]; v->z = m[2][c]; }

@@ -52,9 +52,7 @@ typedef int BOOL;
 #ifdef __MWERKS__
 #include "cmath.h"
 #else
-#define fabsf fabsf_libm  // math_sub.h defines its own inline fabsf
-#include <math.h>
-#undef fabsf
+#include <math.h>   // 360 port: libm fabsf is used as is
 #endif
 
 #endif
