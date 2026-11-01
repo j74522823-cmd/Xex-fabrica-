@@ -1,0 +1,48 @@
+Sections:
+	.text       type:code align:4
+	.ctors      type:rodata align:4
+	.dtors      type:rodata align:4
+	.rodata     type:rodata align:4
+	.data       type:data align:4
+	.bss        type:bss align:4
+
+st3_1/em_wrap.cpp:
+	.text       start:0x00000000 end:0x00000C4C
+	.rodata     start:0x00000000 end:0x00000AE8 align:4
+
+st3_1/cSceObj.cpp:
+	.text       start:0x00000C4C end:0x00002DE0
+	.rodata     start:0x00000AE8 end:0x00000B80 align:4
+
+st3_1/r30d.cpp:
+	.text       start:0x00002DE0 end:0x00004B18
+	.rodata     start:0x00000B80 end:0x00000CB0 align:4
+	.data       start:0x00000000 end:0x00000010 align:4
+	.bss        start:0x00000000 end:0x00000004 align:4
+
+st3_1/r30f.cpp:
+	.text       start:0x00004B18 end:0x0000A2FC
+	.rodata     start:0x00000CB0 end:0x00000FA8 align:4
+	.data       start:0x00000010 end:0x00000048 align:4
+	.bss        start:0x00000004 end:0x00000008 align:4
+	.bss        start:0x00000014 end:0x00000048 align:4 common
+
+st3_1/r310.cpp:
+	.text       start:0x0000A2FC end:0x0000C7C0
+	.rodata     start:0x00000FA8 end:0x00001158 align:4
+	.bss        start:0x00000008 end:0x0000000C align:4
+
+st3_1/r311.cpp:
+	.text       start:0x0000C7C0 end:0x0000EAF4
+	.rodata     start:0x00001158 end:0x000013D0 align:4
+	.bss        start:0x0000000C end:0x00000010 align:4
+
+st3_1/r312.cpp:
+	.text       start:0x0000EAF4 end:0x0000EBE4
+	.rodata     start:0x000013D0 end:0x0000144C align:4
+	.bss        start:0x00000010 end:0x00000014 align:4
+
+st3_1/st3.cpp:
+	.text       start:0x0000EBE4 end:0x0000F46C
+	.rodata     start:0x0000144C end:0x000015F8 align:4
+	.data       start:0x00000048 end:0x0000004C skip

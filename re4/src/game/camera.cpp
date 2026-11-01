@@ -1,0 +1,193 @@
+// game/camera.cpp: the game camera front end. CameraMove lets the camera controller (cam_ctrl.cpp)
+// compute the frame's camera and builds pG->Camera, the camera used for rendering.
+
+#include "types.h"
+#include "vec.h"
+#include "global.h"
+#include "camera.h"
+#include "cam_ctrl.h"
+#include "map_obj.h"
+#include "light.h"
+#include "widget.h"
+#include "view.h"
+#include "db_cam.h"
+#include "db_log.h"
+#include "joy.h"
+#include "quake.h"
+#include "main_sub.h"
+#include "gx.h"
+#include <string.h>
+#include <math.h>
+#include "math_sub_decl.h"
+
+int ProjType = 1;
+
+// Loads pG->Camera's projection into GX: type 1 perspective, type 2 orthographic (ProjType
+// remembers it for CameraCurrentProjection).
+void CameraSetProjection(int projType)
+{
+    ProjType = projType;
+    switch (projType) {
+    case 1:
+        GXSetProjection(pG->Camera.ProjMat, 0);
+        break;
+    case 2:
+        GXSetProjection(pG->Camera.ProjMat, 1);
+        break;
+    }
+}
+
+// Re-loads the current projection (effects and debug draws restore it after their own).
+void CameraCurrentProjection()
+{
+    CameraSetProjection(ProjType);
+}
+
+// The current projection type (1 perspective, 2 ortho).
+int CameraGetProjection()
+{
+    return ProjType;
+}
+
+// Game start: a default camera (1000 up, 2000 back, fov 50), perspective projection, room init.
+void CameraGameInit()
+{
+    Vec at = {0.0f, 0.0f, 0.0f};
+    Vec pos = {0.0f, 1000.0f, 2000.0f};
+
+    CameraSetWithRoll(&pG->Camera, &pos, &at, 0.0f, 50.0f);
+    CameraSetOrientationRoll(&pG->Camera);
+    ProjType = 1;
+    CameraRoomInit();
+}
+
+// Room start: resets the debug camera move gain.
+void CameraRoomInit()
+{
+    CamDbg.m_move_gain = 1.0f;
+}
+
+// Per-frame camera update from the game loop: copies the controller's camera into pG->Camera
+// unless the debug camera overrides it, then builds the projection and view. A fovy of 0 is an
+// error and is replaced by 50.
+void CameraMove()
+{
+    CAMERA* cam = &pG->Camera;
+
+    CamCtrl.Check();
+    if (!SpfFlagChk(pG, SPF_CAMERA)) {
+        CamCtrl.Move();
+        if (StaFlagChk(pG, STA_CAMERA) && !DbgFlagChk(pG, DBG_DBG_CAM)) {
+            pG->Camera = CamCtrl.camera;
+            if (CamCtrl.m_pExtraCamera != 0) {
+                pG->Camera = *CamCtrl.m_pExtraCamera;
+            }
+        }
+        CamCtrl.m_pExtraCamera = 0;
+        if (!SpfFlagChk(pG, SPF_EARTHQUAKE)) {
+            QuakeMove();
+        }
+    }
+    CamDbg.move(cam, &Joy[1], 0);
+    if (cam->param.Fovy == 0.0f) {
+        pLog->err(0, 0, "CameraMove(): Fovy = 0.0f");
+        cam->param.Fovy = 50.0f;
+    }
+    switch (ProjType) {
+    case 1:
+        C_MTXPerspective(cam->ProjMat, cam->param.Fovy, 1.3333334f, ZNEAR, ZFAR);
+        break;
+    case 2:
+        C_MTXOrtho(cam->ProjMat, ORTHO_T, ORTHO_B, ORTHO_L, ORTHO_R, 0.0f, ZFAR);
+        break;
+    }
+    cam->Distance = PSVECDistance(&cam->param.Campos, &cam->param.Target);
+    C_MTXLookAt(cam->v_mat, &cam->param.Campos, &cam->Up, &cam->param.Target);
+    View.move();
+    CameraDebugInformation();
+}
+
+// Analog stick as a world-space move direction: rotated by the camera matrix, or by the previous
+// camera's matrix while the stick is held through a camera cut (so the run direction does not
+// flip on a cut).
+void CamStick2World(CAMERA* pCam, JOY* pJoy, Vec* pVec)
+{
+    static Mtx mat_prev;
+    static int carry_on_flag = 0;
+    Vec v;
+
+    v.x = (f32) pJoy->stickX;
+    v.y = 0.0f;
+    v.z = (f32) -pJoy->stickY;
+    if (CamCtrl.IsChangeCamera()) {
+        if (v.x != 0.0f || v.y != 0.0f || v.z != 0.0f) {
+            MTX_COPY(CamCtrl.prev_mat, mat_prev);
+            carry_on_flag = 1;
+        }
+    }
+    if (v.x == 0.0f && v.y == 0.0f && v.z == 0.0f) {
+        carry_on_flag = 0;
+    }
+    if (carry_on_flag) {
+        PSMTXMultVecSR(mat_prev, &v, pVec);
+    } else {
+        PSMTXMultVecSR(pCam->mat, &v, pVec);
+    }
+}
+
+// The world-space view frustum of the current camera (View._box).
+GEOM_HEXAHEDRON* CameraViewFrustumPtr(CAMERA* pCam)
+{
+    return &View._box;
+}
+
+// The camera's up vector.
+void CameraGetUpVec(CAMERA* pCam, Vec* up)
+{
+    *up = pCam->Up;
+}
+
+// The camera's look vector (pos - at, normalised: points backwards).
+void CameraGetLookVec(CAMERA* pCam, Vec* look)
+{
+    *look = pCam->Look;
+}
+
+// The forward view direction (-Look).
+void CameraGetLookVecInverse(CAMERA* pCam, Vec* look_inv)
+{
+    look_inv->x = -pCam->Look.x;
+    look_inv->y = -pCam->Look.y;
+    look_inv->z = -pCam->Look.z;
+}
+
+// Never called; dead-stripped from the DOL. Its constant pool (0.0f, the int->float magic
+// double, -1.0f) is still in .rodata right before CamPos2ScrnVec's.
+static f32 ScrnY2Ratio(int y)
+{
+    f32 r = 0.0f;
+
+    if (y != 0) {
+        r = (f32) y + -1.0f;
+    }
+    return r;
+}
+
+// World-space ray direction through screen pixel (sx, sy): the pixel offset from the screen
+// centre in 640 x 480 units, z from the vertical fov, rotated by the camera matrix (aiming /
+// picking).
+void CamPos2ScrnVec(f32 sX, f32 sY, Vec* vec)
+{
+    f32 ang = pG->Camera.param.Fovy;
+    f32 h = 480.0f;  // first constant of the pool
+
+    vec->x = sX - Screen.width * 0.5f;
+    vec->y = -(sY - Screen.height * 0.5f);
+    vec->x *= 640.0f / Screen.width;
+    ang = ang * 0.5f;
+    ang = ang * PI;
+    ang = ang / 180.0f;
+    vec->y *= h / Screen.height;
+    vec->z = -(cosf(ang) * 240.0f / sinf(ang));
+    PSMTXMultVecSR(pG->Camera.mat, vec, vec);
+}

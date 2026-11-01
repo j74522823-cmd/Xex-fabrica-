@@ -1,0 +1,1318 @@
+// game/obj16 (D:/Bio4/Prog/obj16.cpp): object id 0x16, the plaga head that bursts from a Ganado's
+// neck. It hangs on the `body` model and is owned by the enemy work `target`.
+#include "atari.h"
+#include "light.h"
+#include "ctrl.h"
+#include "obj.h"
+#include "obj16.h"
+#include "em.h"
+#include "emhit.h"
+#include "esp.h"
+#include "est.h"
+#include "global.h"
+#include "main.h"
+#include "math_sub.h"
+#include "snd.h"
+#include "rnd.h"
+#include "pad.h"
+#include "quake.h"
+#include "player.h"
+#include "pl_npc.h"
+#include "pl_sub.h"
+#include "motion.h"
+#include "em_sub.h"
+
+cObj* SetObj16(void* bin, void* tpl, cModel* target, cModel* body, int partsNo, u8 type, Vec* pos, Vec* rot);
+void obj16_R1_Set(cObj16* obj);
+void obj16_R1_CoreMove(cObj16* obj);
+void obj16_R1_Atk(cObj16* obj);
+void obj16_R1_Critical(cObj16* obj);
+void obj16_R1_Damage(cObj16* obj);
+void obj16MatCalc(cObj16* obj);
+int obj16AtkCk(cObj16* obj, u32 kind, int partsNo);
+void obj16PlHeadLost(cObj16* obj);
+static void obj16NeckMove(cObj16* obj);
+void plemDmMStar(cPlayer* pl);
+
+void (*Obj16_R1_move_tbl[5])(cObj16*) = {
+    obj16_R1_Set, obj16_R1_CoreMove, obj16_R1_Atk, obj16_R1_Critical, obj16_R1_Damage,
+};
+
+// Attack parameters per obj16AtkCk kind (EmAtkHitCk).
+ATK_INFO obj16_atk_info[4] = {
+    { 500.0f, PL_DM_AUTO, 0x320, 0, 0xA, 0 },
+    { 500.0f, PL_DM_AUTO, 0x320, 0, 0xA, 0 },
+    { 500.0f, PL_DM_AUTO, 0x1F4, 0, 0xA, 0 },
+    { 800.0f, PL_DM_AUTO, 0x270F, 0, 0xA, 0 },
+};
+
+// Creates the head on parts partsNo of `body` for enemy `target`, scale growing from 0 to Scale,
+// effect owner kinds 0x3D/0x3E, appear timer 60, Lost_wait 150. 0 when target/body have no parts.
+cObj* SetObj16(void* bin, void* tpl, cModel* target, cModel* body, int partsNo, u8 type, Vec* pos, Vec* rot)
+{
+    cObj* obj;
+    FREE_OBJ16* w;
+
+    if (target == 0) {
+        return 0;
+    }
+    if (target->pList == 0) {
+        return 0;
+    }
+    if (body == 0) {
+        return 0;
+    }
+    if (body->pList == 0) {
+        return 0;
+    }
+    obj = ObjMgr.createBack(cObjMgr::ID_EM10_PARASITE);
+    if (obj == 0) {
+        return 0;
+    }
+    w = OBJ16_WK((cObj16*) obj);
+    if (obj->modelInit(bin, tpl) == 0) {
+        pLog->err(0, 0, "SetObj16() failed.");
+        ObjMgr.destroy(obj);
+        return 0;
+    }
+    static const Vec p0 = { 0.0f, 0.0f, 0.0f };
+    static const Vec p1 = { 2000.0f, 2000.0f, 2000.0f };
+
+    obj->atari.off();
+    obj->LightInfo.init2(0, 1, &p0, &p1, 2);
+    obj->type = type;
+    if (pos) {
+        obj->pos = *pos;
+    } else {
+        obj->pos.x = 0.0f;
+        obj->pos.y = 0.0f;
+        obj->pos.z = 0.0f;
+    }
+    if (rot) {
+        obj->ang = *rot;
+    } else {
+        obj->ang.x = 0.0f;
+        obj->ang.y = 0.0f;
+        obj->ang.z = 0.0f;
+    }
+    obj->pos_old = obj->pos;
+    obj->scale.x = 0.0f;
+    obj->scale.y = 0.0f;
+    obj->scale.z = 0.0f;
+    w->Scale.x = 1.0f;
+    w->Scale.y = 1.0f;
+    w->Scale.z = 1.0f;
+    w->pCtrlGroup = GetCtrlCtrl12();
+    w->pOya = body;
+    w->parts_no = partsNo;
+    w->pEm = target;
+    w->Se_wait = 60;
+    w->Seid = 0;
+    w->Eff_wait = 0;
+    w->EffKindId = 0x3D;
+    w->EffKindId2 = 0x3E;
+    w->Lost_wait = 150;
+    w->Eff_wait2 = (Rnd() & 3) + 9;
+    w->Neck_dir = 0.0f;
+    w->Appear_timer = 60;
+    w->Eff_wait3 = 0;
+    w->mot[0] = 0;
+    w->mot[1] = 0;
+    w->mot[2] = 0;
+    w->mot[4] = 0;
+    w->mot[5] = 0;
+    w->mot[6] = 0;
+    w->mot[7] = 0;
+    w->mot[8] = 0;
+    w->mot[9] = 0;
+    w->mot[10] = 0;
+    w->Mot_pl_dm = 0;
+    w->Seq_pl_dm = 0;
+    w->mot[3] = 0;
+    w->Mot_no = 0;
+    w->Atk_wait = 0;
+    w->Atk_timer = 0;
+    w->Wait_mode = 0;
+    w->Atk_ck = 0;
+    obj16MatCalc((cObj16*) obj);
+    w->Wait_mno = 0;
+    obj->r_no_0 = 1;
+    obj->r_no_1 = 0;
+    obj->r_no_2 = 0;
+    obj->r_no_3 = 0;
+    if (target->be_flag & 0x800) {
+        obj->setNoSuspend(1);
+    } else {
+        obj->setNoSuspend(0);
+    }
+    return obj;
+}
+
+// Delete the effects the head owns and the head itself.
+#define OBJ16_LOST(obj, w)                                    \
+    EffectEspDelete(0, (w)->EffKindId, obj, 0);         \
+    EffectEspgenDelete(0, (w)->EffKindId, obj);         \
+    EffectEfmDelete(0, (w)->EffKindId, obj);            \
+    EffectEspDelete(0, (w)->EffKindId2, obj, 0);        \
+    EffectEspgenDelete(0, (w)->EffKindId2, obj);        \
+    EffectEfmDelete(0, (w)->EffKindId2, obj);           \
+    ObjMgr.destroy(obj)
+
+// Per-frame: dies with target/body; fades and shrinks when the target is dead or Lost_wait ran out
+// (deleting its effects); eases scale to Scale (half size while the body's x39D flag); runs the R1
+// routine; the looping plaga sound and the periodic drip/glow effects per type (thermal mode swaps
+// the light class); follows the target's no-suspend flag.
+void cObj16::move()
+{
+    FREE_OBJ16* w = OBJ16_WK(this);
+    int alive;
+    const f32 decRate = 0.9f;
+    const f32 addRate = 0.1f;
+
+    if (w->pEm && !w->pEm->isAlive()) {
+        OBJ16_LOST(this, w);
+        return;
+    }
+    if (w->pOya && !w->pOya->isAlive()) {
+        OBJ16_LOST(this, w);
+        return;
+    }
+    if (w->At_hit_wait) {
+        w->At_hit_wait--;
+    }
+    switch (type) {
+    case 8:
+    case 9:
+    case 0xA:
+    case 0x11:
+        break;
+    default:
+        if (w->Be_flag & 1) {
+            if (w->Lost_wait) {
+                w->Lost_wait--;
+            }
+        }
+        break;
+    }
+    if (w->pEm) {
+        switch (type) {
+        case 6:
+        case 8:
+        case 9:
+        case 0xA:
+        case 0x11:
+            break;
+        default:
+            if (!(w->Be_flag & 1)) {
+                if (((cEm*) w->pEm)->hp > 0) {
+                    w->Lost_wait = 90;
+                }
+            }
+            break;
+        }
+        alive = 0;
+        if (w->Lost_wait) {
+            alive = 1;
+        }
+        switch (type) {
+        case 6:
+        case 8:
+        case 9:
+        case 0xA:
+        case 0x11:
+            break;
+        default:
+            if (!(w->Be_flag & 1)) {
+                if (((cEm*) w->pEm)->hp > 0) {
+                    alive = 1;
+                }
+            }
+            break;
+        }
+        if (alive == 0) {
+            scale.y = scale.z = scale.x = scale.x * decRate;
+            invisible_factor *= 0.85f;
+            if (invisible_factor <= 0.01f) {
+                invisible_factor = 0.0f;
+                OBJ16_LOST(this, w);
+                return;
+            }
+        } else {
+            scale.x = scale.x * decRate + w->Scale.x * addRate;
+            scale.y = scale.y * decRate + w->Scale.y * addRate;
+            scale.z = scale.z * decRate + w->Scale.z * addRate;
+        }
+    }
+    if (w->Appear_timer) {
+        w->Appear_timer--;
+    }
+    if (w->pOya && type == 1) {
+        if (((cEm*) w->pOya)->x39D) {
+            w->Scale.x = 0.5f;
+            w->Scale.y = 0.5f;
+            w->Scale.z = 0.5f;
+        } else {
+            w->Scale.x = 1.0f;
+            w->Scale.y = 1.0f;
+            w->Scale.z = 1.0f;
+        }
+    }
+    w->Atk_enable = 0;
+    Obj16_R1_move_tbl[r_no_1](this);
+    if (w->pEm) {
+        switch (type) {
+        case 2:
+        case 3:
+            if (((cEm*) w->pEm)->hp > 0) {
+                if (w->Se_wait) {
+                    w->Se_wait--;
+                } else {
+                    w->Se_wait = 29;
+                    w->Seid = SndCall(8, 0x13, &w->pEm->pos, w->pEm->id, 0, 0);
+                }
+            } else {
+                SndStop(w->Seid, 0);
+            }
+            break;
+        }
+        if (w->pEm) {
+            switch (type) {
+            case 2:
+            case 3:
+                if (w->Eff_wait) {
+                    if (--w->Eff_wait == 0) {
+                        w->Eff_wait = 2;
+                        if (be_flag & 0x800) {
+                            EstSet(this, -1, 0, 0, EFF_EM10, 0x2E, 1, ESP_CORE_KIND_NONE, this, 0);
+                        } else {
+                            EstSet(this, -1, 0, 0, EFF_EM10, 0x2E, 0, ESP_CORE_KIND_NONE, this, 0);
+                        }
+                    }
+                }
+                break;
+            case 0xB:
+            case 0xD:
+                if (w->Eff_wait) {
+                    if (--w->Eff_wait == 0) {
+                        w->Eff_wait = 2;
+                        if (be_flag & 0x800) {
+                            EstSet(this, -1, 0, 0, EFF_EM3C, 0x16, 1, ESP_CORE_KIND_NONE, this, 0);
+                        } else {
+                            EstSet(this, -1, 0, 0, EFF_EM3C, 0x16, 0, ESP_CORE_KIND_NONE, this, 0);
+                        }
+                    }
+                }
+                break;
+            }
+        }
+    }
+    switch (type) {
+    case 1:
+        if (w->Eff_wait2) {
+            if (--w->Eff_wait2 == 0) {
+                w->Eff_wait2 = (Rnd() & 3) + 15;
+                if (be_flag & 0x800) {
+                    EstSet(this, -1, 0, 0, EFF_EM10, 4, 1, ESP_CORE_KIND_NONE, this, 0);
+                } else {
+                    EstSet(this, -1, 0, 0, EFF_EM10, 4, 0, ESP_CORE_KIND_NONE, this, 0);
+                }
+            }
+        }
+        break;
+    case 0xC:
+        if (w->Eff_wait2) {
+            if (--w->Eff_wait2 == 0) {
+                w->Eff_wait2 = (Rnd() & 3) + 15;
+                if (be_flag & 0x800) {
+                    EstSet(this, -1, 0, 0, EFF_EM3C, 0x10, 1, ESP_CORE_KIND_NONE, this, 0);
+                } else {
+                    EstSet(this, -1, 0, 0, EFF_EM3C, 0x10, 0, ESP_CORE_KIND_NONE, this, 0);
+                }
+            }
+        }
+        break;
+    case 2:
+        if (w->Wait_mode) {
+            if (w->Eff_wait2) {
+                if (--w->Eff_wait2 == 0) {
+                    w->Eff_wait2 = 3;
+                    EstSet(this, -1, 0, 0, EFF_EM10, 0x52, 0, ESP_CORE_KIND_NONE, this, 0);
+                }
+            }
+        }
+        break;
+    case 0xD:
+        if (w->Wait_mode) {
+            if (w->Eff_wait2) {
+                if (--w->Eff_wait2 == 0) {
+                    w->Eff_wait2 = 3;
+                    EstSet(this, -1, 0, 0, EFF_EM3C, 0x18, 0, ESP_CORE_KIND_NONE, this, 0);
+                }
+            }
+        }
+        break;
+    case 5:
+        if (w->Eff_wait2) {
+            if (--w->Eff_wait2 == 0) {
+                w->Eff_wait2 = (Rnd() & 3) + 15;
+                if (be_flag & 0x800) {
+                    EstSet(this, -1, 0, 0, EFF_EM22, 0xE, 1, ESP_CORE_KIND_NONE, this, 0);
+                } else {
+                    EstSet(this, -1, 0, 0, EFF_EM22, 0xE, 0, ESP_CORE_KIND_NONE, this, 0);
+                }
+            }
+        }
+        break;
+    case 6:
+        if (w->Eff_wait2) {
+            if (--w->Eff_wait2 == 0) {
+                w->Eff_wait2 = (Rnd() & 3) + 9;
+                if (be_flag & 0x800) {
+                    EstSet(this, -1, 0, 0, EFF_EM22, 0xF, 1, ESP_CORE_KIND_NONE, this, 0);
+                } else {
+                    EstSet(this, -1, 0, 0, EFF_EM22, 0xF, 0, ESP_CORE_KIND_NONE, this, 0);
+                }
+            }
+        }
+        break;
+    }
+    if (w->pEm) {
+        if (w->pEm->be_flag & 0x800) {
+            setNoSuspend(1);
+        } else {
+            setNoSuspend(0);
+        }
+    }
+    if (StaFlagChk(pG, STA_THERMO_GRAPH)) {
+        LightInfo.EnableMask = 4;
+    } else {
+        LightInfo.EnableMask = 2;
+    }
+}
+
+// Rno1 == 0: plays the current motion and follows the body.
+void obj16_R1_Set(cObj16* obj)
+{
+    if (obj->Motion.pMot) {
+        MotionMove(obj, 0);
+    }
+    obj16MatCalc(obj);
+}
+
+// Rno1 == 1 (idle cycle): Rno2 0 starts the idle/wait motion (mot[0..2]) with a random timer, 1
+// loops it deciding to attack (types 2/0xB spit when the player is near / far by random), 2 the
+// attack wind-up (mot[10]) with its effects, 3 the spit (mot[9]) with the spit effects; obj16AtkCk
+// kind 2 on parts 0x10..0x15 while spitting.
+void obj16_R1_CoreMove(cObj16* obj)
+{
+    FREE_OBJ16* w = OBJ16_WK(obj);
+    int atk;
+    f32 dist;
+
+    w->Atk_enable = 1;
+    w->Atk_ck = 0;
+    atk = 0;
+    switch (obj->r_no_2) {
+    case 0:
+        if (w->Wait_mode) {
+            MotionSetCore(obj, &obj->Motion, w->mot[2], 0, 3, 4, (u8) ((u32) Rnd() % 15));
+        } else if (Rnd() & 1) {
+            MotionSetCore(obj, &obj->Motion, w->mot[0], 0, 3, 4, 0);
+        } else {
+            MotionSetCore(obj, &obj->Motion, w->mot[1], 0, 3, 4, 0);
+        }
+        w->Timer = (u8) ((u32) Rnd() % 5) + 15;
+        obj->r_no_2++;
+    case 1:
+        if (MotionMove(obj, 0)) {
+            if (obj->type == 4) {
+                break;
+            }
+            if (obj->type == 3 || obj->type == 0xD) {
+                obj->r_no_2 = 0;
+                break;
+            }
+            if (obj->type == 2 || obj->type == 0xB || obj->type == 0xE) {
+                cParts* p = obj->getPartsPtr(0);
+                dist = (p->world.x - pPL->pos.x) * (p->world.x - pPL->pos.x) +
+                       (p->world.y - pPL->pos.y) * (p->world.y - pPL->pos.y) +
+                       (p->world.z - pPL->pos.z) * (p->world.z - pPL->pos.z);
+                if (w->Wait_mode) {
+                    if ((Rnd() & 3) == 0 && dist > 49000000.0f) {
+                        obj->r_no_2 = 2;
+                        break;
+                    }
+                } else {
+                    if ((Rnd() & 3) == 0 || dist < 25000000.0f) {
+                        obj->r_no_2 = 4;
+                        break;
+                    }
+                }
+            } else if ((Rnd() & 3) == 0) {
+                obj->r_no_2 = 0;
+                break;
+            }
+        }
+        if (obj->type == 2 && w->Wait_mode) {
+            atk = 1;
+            if (w->Timer) {
+                w->Timer--;
+            } else {
+                w->Timer = (u8) ((u32) Rnd() % 5) + 15;
+                SndCall(8, 0x10, &w->pEm->pos, w->pEm->id, 0, 0);
+            }
+        }
+        if (obj->type == 0xB && w->Wait_mode) {
+            atk = 1;
+            if (w->Timer) {
+                w->Timer--;
+            } else {
+                w->Timer = (u8) ((u32) Rnd() % 5) + 15;
+                SndCall(8, 0x21, &w->pEm->pos, w->pEm->id, 0, 0);
+            }
+        }
+        break;
+    case 2:
+        MotionSetCore(obj, &obj->Motion, w->mot[10], 0, 3, 0, 0);
+        if (obj->type == 2) {
+            EstSet(obj, -1, 0, 0, EFF_EM10, 0x53, 0, ESP_CORE_KIND_NONE, obj, 0);
+            EffectEspDelete(0, w->EffKindId2, obj, 0);
+            EffectEspgenDelete(0, w->EffKindId2, obj);
+            EffectEfmDelete(0, w->EffKindId2, obj);
+        }
+        if (obj->type == 0xB) {
+            EstSet(obj, -1, 0, 0, EFF_EM3C, 0x19, 0, ESP_CORE_KIND_NONE, obj, 0);
+            EffectEspDelete(0, w->EffKindId2, obj, 0);
+            EffectEspgenDelete(0, w->EffKindId2, obj);
+            EffectEfmDelete(0, w->EffKindId2, obj);
+        }
+        w->Timer = 36;
+        obj->r_no_2++;
+    case 3:
+        if (w->Timer) {
+            if (--w->Timer == 0) {
+                w->Wait_mode = 0;
+            }
+        }
+        if (MotionMove(obj, 0)) {
+            w->Wait_mode = 0;
+            obj->r_no_2 = 0;
+        }
+        break;
+    case 4:
+        MotionSetCore(obj, &obj->Motion, w->mot[9], 0, 3, 0, 0);
+        if (obj->type == 2) {
+            EstSet(obj, -1, 0, 0, EFF_EM10, 0xA, 0, ESP_CORE_KIND_NONE, obj, 0);
+            EstSet(obj, -1, 0, 0, EFF_EM10, 0x51, 0, w->EffKindId2, obj, 0);
+            w->Eff_wait2 = 3;
+        }
+        if (obj->type == 0xB) {
+            EstSet(obj, -1, 0, 0, EFF_EM3C, 0xC, 0, ESP_CORE_KIND_NONE, obj, 0);
+            EstSet(obj, -1, 0, 0, EFF_EM3C, 0x17, 0, w->EffKindId2, obj, 0);
+            w->Eff_wait2 = 3;
+        }
+        w->Timer = 20;
+        obj->r_no_2++;
+    case 5:
+        if (w->Timer) {
+            if (--w->Timer == 0) {
+                w->Wait_mode = 1;
+            }
+        }
+        if (MotionMove(obj, 0)) {
+            obj->r_no_2 = 0;
+        }
+        break;
+    }
+    obj16MatCalc(obj);
+    if (atk) {
+        obj16AtkCk(obj, 2, 0x10);
+        obj16AtkCk(obj, 2, 0x11);
+        obj16AtkCk(obj, 2, 0x12);
+        obj16AtkCk(obj, 2, 0x13);
+        obj16AtkCk(obj, 2, 0x14);
+        obj16AtkCk(obj, 2, 0x15);
+    }
+}
+
+// Rno1 == 2 (bite attack, setAtk): Rno2 0 spit motion (mot[9]), 1 one of two bite motions
+// (mot[3]/mot[4], r_no_3 forces the second) with their effects and sound, 2 the bite window
+// (atkTimer) with obj16AtkCk kind 0/1, 3 recovery; Atk_ck reports a hit to the body.
+void obj16_R1_Atk(cObj16* obj)
+{
+    FREE_OBJ16* w = OBJ16_WK(obj);
+    int atk;
+    int flag;
+
+    if (obj->r_no_2 == 0 && w->Wait_mode) {
+        obj->r_no_2 = 2;
+    }
+    w->Atk_ck = 0;
+    atk = 0;
+    switch (obj->r_no_2) {
+    case 0:
+        MotionSetCore(obj, &obj->Motion, w->mot[9], 0, 0xA, 0, 0);
+        if (obj->type == 2) {
+            EstSet(obj, -1, 0, 0, EFF_EM10, 0xA, 0, ESP_CORE_KIND_NONE, obj, 0);
+            EstSet(obj, -1, 0, 0, EFF_EM10, 0x51, 0, w->EffKindId2, obj, 0);
+            w->Eff_wait2 = 3;
+        }
+        if (obj->type == 0xB) {
+            EstSet(obj, -1, 0, 0, EFF_EM3C, 0xC, 0, ESP_CORE_KIND_NONE, obj, 0);
+            EstSet(obj, -1, 0, 0, EFF_EM3C, 0x17, 0, w->EffKindId2, obj, 0);
+            w->Eff_wait2 = 3;
+        }
+        obj->r_no_2++;
+    case 1:
+        if (MotionMove(obj, 0)) {
+            w->Wait_mode = 1;
+            obj->r_no_2++;
+        }
+        break;
+    case 2:
+        if ((Rnd() & 1) || obj->r_no_3) {
+            MotionSetCore(obj, &obj->Motion, w->mot[3], 0, 0xA, 0, 0);
+            w->Timer = 34;
+            w->Timer2 = 8;
+            obj->r_no_3 = 0;
+            if (obj->type == 2) {
+                EstSet(obj, -1, 0, 0, EFF_EM10, 0x6C, 0, ESP_CORE_KIND_NONE, obj, 0);
+            }
+            if (obj->type == 0xB) {
+                EstSet(obj, -1, 0, 0, EFF_EM3C, 0x1C, 0, ESP_CORE_KIND_NONE, obj, 0);
+            }
+        } else {
+            MotionSetCore(obj, &obj->Motion, w->mot[4], 0, 3, 0, 0);
+            w->Timer = 28;
+            w->Timer2 = 6;
+            obj->r_no_3 = 1;
+            if (obj->type == 2) {
+                EstSet(obj, -1, 0, 0, EFF_EM10, 0x6F, 0, ESP_CORE_KIND_NONE, obj, 0);
+            }
+            if (obj->type == 0xB) {
+                EstSet(obj, -1, 0, 0, EFF_EM3C, 0x1F, 0, ESP_CORE_KIND_NONE, obj, 0);
+            }
+        }
+        if (obj->type == 2) {
+            SndCall(8, 9, &w->pEm->pos, w->pEm->id, 0, 0);
+        }
+        if (obj->type == 0xB) {
+            SndCall(8, 0x1E, &w->pEm->pos, w->pEm->id, 0, 0);
+        }
+        obj->r_no_2++;
+    case 3:
+        if (MotionMove(obj, 0)) {
+            obj->r_no_0 = 1;
+            obj->r_no_1 = 1;
+            obj->r_no_2 = 0;
+            obj->r_no_3 = 0;
+        } else {
+            if (w->Timer) {
+                if (--w->Timer == 0) {
+                    if (obj->type == 2) {
+                        SndCall(8, 0xA, &w->pEm->pos, w->pEm->id, 0, 0);
+                    }
+                    if (obj->type == 0xB) {
+                        SndCall(8, 0x1F, &w->pEm->pos, w->pEm->id, 0, 0);
+                    }
+                }
+            } else {
+                if (w->Timer2) {
+                    w->Timer2--;
+                    atk = 1;
+                }
+            }
+            if (obj->Motion.Seq_frame > 44.7f && obj->Motion.Seq_frame < 45.3f) {
+                if (obj->type == 2) {
+                    SndCall(8, 0xF, &w->pEm->pos, w->pEm->id, 0, 0);
+                }
+                if (obj->type == 0xB) {
+                    SndCall(8, 0x20, &w->pEm->pos, w->pEm->id, 0, 0);
+                }
+            }
+        }
+        break;
+    }
+    obj16MatCalc(obj);
+    if (atk) {
+        flag = 0;
+        if (obj->r_no_3) {
+            flag = 1;
+        }
+        obj16AtkCk(obj, flag, 0x10);
+        obj16AtkCk(obj, flag, 0x11);
+        obj16AtkCk(obj, flag, 0x12);
+        obj16AtkCk(obj, flag, 0x13);
+        obj16AtkCk(obj, flag, 0x14);
+        obj16AtkCk(obj, flag, 0x15);
+    }
+}
+
+// Rno1 == 3 (decapitation bite, types 3/0xD): Rno2 0 wind-up (mot[9]), 1 chooses the bite by the
+// victim's head position (player or nearer partner: high mot[6], near mot[3], mid mot[4], far
+// mot[5]), 2 plays it with sounds at frames 10 and 42 and obj16AtkCk kind 3 on parts 9 after
+// Timer (kills the player outright through obj16PlHeadLost).
+void obj16_R1_Critical(cObj16* obj)
+{
+    FREE_OBJ16* w = OBJ16_WK(obj);
+    int atk;
+    Vec head;
+    Vec tgt;
+    f32 d;
+    cParts* p;
+
+    w->Atk_ck = 0;
+    atk = 0;
+    switch (obj->r_no_2) {
+    case 0:
+        MotionSetCore(obj, &obj->Motion, w->mot[9], 0, 3, 0, 0);
+        if (obj->type == 3) {
+            EstSet(obj, -1, 0, 0, EFF_EM10, 0x5F, 0, ESP_CORE_KIND_NONE, obj, 0);
+            SndCall(8, 9, &w->pEm->pos, w->pEm->id, 0, 0);
+        }
+        if (obj->type == 0xD) {
+            EstSet(obj, -1, 0, 0, EFF_EM3C, 0x1B, 0, ESP_CORE_KIND_NONE, obj, 0);
+            SndCall(8, 0x28, &w->pEm->pos, w->pEm->id, 0, 0);
+        }
+        w->Timer = 0;
+        obj->r_no_2++;
+    case 1:
+        if (MotionMove(obj, 0)) {
+            obj->r_no_2++;
+        }
+        break;
+    case 2:
+        head.x = obj->mat[0][3];
+        head.y = obj->mat[1][3];
+        head.z = obj->mat[2][3];
+        // one `p` for both parts lookups: a pointer local assigned in two blocks is not
+        // local-allocated, so the worldPos copy's address register is not tied to r3
+        p = pPL->getPartsPtr(3);
+        tgt = p->world;
+        if (pSUB && w->pOya) {
+            d = VEC_DIST(&w->pOya->pos, &pPL->pos);
+            if (d > VEC_DIST(&w->pOya->pos, &pSUB->pos) +
+                        3000.0f) {
+                p = pSUB->getPartsPtr(3);
+                tgt = p->world;
+            }
+        }
+        // `w->timer = 14` repeated in every arm: the last arm's block then does not end in a
+        // call (no flow nop), so all four tails cross-jump into one MotionSetCore
+        if (head.y - tgt.y > 500.0f) {
+            MotionSetCore(obj, &obj->Motion, w->mot[6], 0, 0, 0, 0);
+            w->Timer = 14;
+        } else {
+            f32 d2 = (head.x - tgt.x) * (head.x - tgt.x) + (head.z - tgt.z) * (head.z - tgt.z);
+            if (d2 < 1440000.0f) {
+                MotionSetCore(obj, &obj->Motion, w->mot[3], 0, 0, 0, 0);
+                w->Timer = 14;
+            } else if (d2 < 3240000.0f) {
+                MotionSetCore(obj, &obj->Motion, w->mot[4], 0, 0, 0, 0);
+                w->Timer = 14;
+            } else {
+                MotionSetCore(obj, &obj->Motion, w->mot[5], 0, 0, 0, 0);
+                w->Timer = 14;
+            }
+        }
+        if (obj->type == 3) {
+            EstSet(obj, -1, 0, 0, EFF_EM10, 0x5D, 0, ESP_CORE_KIND_NONE, obj, 0);
+            SndCall(8, 0xA, &w->pEm->pos, w->pEm->id, 0, 0);
+        }
+        if (obj->type == 0xD) {
+            EstSet(obj, -1, 0, 0, EFF_EM3C, 0xB, 0, ESP_CORE_KIND_NONE, obj, 0);
+            SndCall(8, 0x29, &w->pEm->pos, w->pEm->id, 0, 0);
+        }
+        obj->r_no_2++;
+    case 3:
+        if (MotionMove(obj, 0)) {
+            obj->r_no_0 = 1;
+            obj->r_no_1 = 1;
+            obj->r_no_2 = 0;
+            obj->r_no_3 = 0;
+        } else {
+            if (w->Timer) {
+                if (--w->Timer == 0) {
+                    atk = 1;
+                }
+            }
+            if (obj->Motion.Seq_frame > 9.7f && obj->Motion.Seq_frame < 10.3f) {
+                if (obj->type == 3) {
+                    SndCall(8, 0xAB, &w->pEm->pos, w->pEm->id, 0, 0);
+                }
+                if (obj->type == 0xD) {
+                    SndCall(8, 0x2B, &w->pEm->pos, w->pEm->id, 0, 0);
+                }
+            }
+            if (obj->Motion.Seq_frame > 41.7f && obj->Motion.Seq_frame < 42.3f) {
+                if (obj->type == 3) {
+                    SndCall(8, 0xF, &w->pEm->pos, w->pEm->id, 0, 0);
+                }
+                if (obj->type == 0xD) {
+                    SndCall(8, 0x2A, &w->pEm->pos, w->pEm->id, 0, 0);
+                }
+            }
+        }
+        break;
+    }
+    obj16MatCalc(obj);
+    if (atk) {
+        if (obj16AtkCk(obj, 3, 9)) {
+            if (obj->type == 3) {
+                EstSet(obj, -1, 0, 0, EFF_EM10, 0x5E, 0, ESP_CORE_KIND_NONE, obj, 0);
+            }
+            if (obj->type == 0xD) {
+                EstSet(obj, -1, 0, 0, EFF_EM3C, 0xE, 0, ESP_CORE_KIND_NONE, obj, 0);
+            }
+        }
+    }
+}
+
+// Rno1 == 4 (hit reaction, setDamage): plays mot[7]/mot[8] (types 3/0xD shrink to 0.3 for 30
+// frames), the pain sound loop for type 4, then back to the idle cycle (a live body may go
+// straight to an attack for type 2).
+void obj16_R1_Damage(cObj16* obj)
+{
+    FREE_OBJ16* w = OBJ16_WK(obj);
+
+    switch (obj->r_no_2) {
+    case 0:
+        if (w->Wait_mode) {
+            MotionSetCore(obj, &obj->Motion, w->mot[8], 0, 0, 0, 0);
+        } else {
+            MotionSetCore(obj, &obj->Motion, w->mot[7], 0, 0, 0, 0);
+        }
+        if (obj->type == 3 || obj->type == 0xD) {
+            w->Scale.x = 0.3f;
+            w->Scale.y = 0.3f;
+            w->Scale.z = 0.3f;
+        }
+        if (w->pEm && (obj->type == 2 || obj->type == 3)) {
+            SndCall(8, 0x88, &w->pEm->pos, w->pEm->id, 0, 0);
+        }
+        if (obj->type == 3) {
+            if (w->pOya) {
+                EstSet(w->pOya, -1, 0, 0, EFF_EM10, 0x86, 0, ESP_CORE_KIND_NONE, w->pOya, 0);
+            }
+        }
+        w->Timer = 30;
+        w->Timer2 = 0;
+        obj->r_no_2++;
+    case 1:
+        if (obj->type == 3 || obj->type == 0xD) {
+            if (w->Timer) {
+                if (--w->Timer == 0) {
+                    w->Scale.x = 1.0f;
+                    w->Scale.y = 1.0f;
+                    w->Scale.z = 1.0f;
+                }
+            }
+        }
+        if (obj->type == 4) {
+            if (w->pEm) {
+                if (w->Timer2) {
+                    w->Timer2--;
+                } else {
+                    w->Timer2 = 29;
+                    w->Seid = SndCall(8, 0x13, &w->pEm->pos, w->pEm->id, 0, 0);
+                }
+            }
+        }
+        if (MotionMove(obj, 0)) {
+            if (obj->type == 4) {
+                if (w->pEm) {
+                    SndStop(w->Seid, 0);
+                }
+            }
+            if (w->pOya && ((cEm*) w->pOya)->hp > 0 && (u8) ((u32) Rnd() % 10) > 5 && obj->type == 2) {
+                obj->r_no_0 = 1;
+                obj->r_no_1 = 2;
+                obj->r_no_2 = 0;
+                obj->r_no_3 = 0;
+            } else {
+                obj->r_no_0 = 1;
+                obj->r_no_1 = 1;
+                obj->r_no_2 = 0;
+                obj->r_no_3 = 0;
+            }
+        }
+        break;
+    }
+    obj16MatCalc(obj);
+}
+
+// Starts a motion on the head with attr a and frame b (10-frame blend).
+void MotSetObj16(cObj* obj, void* mot, int a, int b)
+{
+    if (obj == 0) {
+        return;
+    }
+    MotionSetCore(obj, &obj->Motion, mot, 0, 0xA, (u16) a, (u16) b);
+}
+
+// Places the head: its pos/ang/scale under the body parts' matrix (or free), then the parts with
+// the neck tracking rotation applied.
+void obj16MatCalc(cObj16* obj)
+{
+    FREE_OBJ16* w = OBJ16_WK(obj);
+    cParts* p;
+
+    if (w->pOya) {
+        p = w->pOya->getPartsPtr(w->parts_no);
+        RotMatrix(obj->mat, &obj->ang);
+        TransMatrix(obj->mat, &obj->pos);
+        ScaleMatrix(obj->mat, &obj->scale);
+        PSMTXConcat(p->mat, obj->mat, obj->mat);
+        obj->Motion.Mot_flag |= 0x40000000;
+    } else {
+        obj->matCalc();
+    }
+    if (obj->Motion.pMot == 0) {
+        obj->partsMatCalc();
+    }
+    obj16NeckMove(obj);
+    obj->partsWorldCalc();
+}
+
+// Target scale the head eases towards.
+void cObj16::setScale(Vec* pScale)
+{
+    OBJ16_WK(this)->Scale = *pScale;
+}
+
+// Starts the death drip effect (Eff_wait 3).
+void cObj16::setDieEff()
+{
+    OBJ16_WK(this)->Eff_wait = 3;
+}
+
+// Makes the head fade out now (Be_flag bit 0, Lost_wait 0).
+void cObj16::clearLostWait()
+{
+    OBJ16_WK(this)->Lost_wait = 0;
+    OBJ16_WK(this)->Be_flag |= 1;
+}
+
+// Fades the head out after n frames.
+void cObj16::setLostWait(int wait)
+{
+    OBJ16_WK(this)->Lost_wait = wait;
+    OBJ16_WK(this)->Be_flag |= 1;
+}
+
+// Installs the 11 head motions (idle, wait, wait2, bites 3..6, damage 7/8, spit 9, wind-up 10) and
+// starts the idle/wait one.
+void cObj16::setMotData(void* m0, void* m1, void* m2, void* m3, void* m4, void* m5, void* m6, void* m7, void* m8,
+                        void* m9, void* m10)
+{
+    FREE_OBJ16* w = OBJ16_WK(this);
+
+    w->mot[0] = m0;
+    w->mot[1] = m1;
+    w->mot[2] = m2;
+    w->mot[3] = m3;
+    w->mot[4] = m4;
+    w->mot[5] = m5;
+    w->mot[6] = m6;
+    w->mot[7] = m7;
+    w->mot[8] = m8;
+    w->mot[9] = m9;
+    w->mot[10] = m10;
+    if (type == 3 || type == 0xD) {
+        MotionSetCore(this, &Motion, m2, 0, 0, 4, 0);
+    } else {
+        MotionSetCore(this, &Motion, m0, 0, 0, 4, 0);
+    }
+    w->Mot_no = 0;
+    if (type == 3) {
+        EstSet(this, -1, 0, 0, EFF_EM10, 0x5C, 0, w->EffKindId, this, 0);
+        EstSet(this, -1, 0, 0, EFF_EM10, 0x70, 0, w->EffKindId2, this, 0);
+    }
+    if (type == 0xD) {
+        EstSet(this, -1, 0, 0, EFF_EM3C, 0x1A, 0, w->EffKindId, this, 0);
+        EstSet(this, -1, 0, 0, EFF_EM3C, 0xF, 0, w->EffKindId2, this, 0);
+    }
+    r_no_0 = 1;
+    r_no_1 = 1;
+    r_no_2 = 1;
+    r_no_3 = 0;
+}
+
+// Player damage motion (and sequence) played on a bite hit (plemDmMStar).
+void cObj16::setPlDmgMot(void* mot, void* seq)
+{
+    FREE_OBJ16* w = OBJ16_WK(this);
+
+    w->Mot_pl_dm = mot;
+    w->Seq_pl_dm = seq;
+}
+
+// Starts the bite attack routine (flag -> r_no_3: force the second bite motion).
+void cObj16::setAtk(u8 mode)
+{
+    r_no_0 = 1;
+    r_no_1 = 2;
+    OBJ16_WK(this)->Atk_ck = 0;
+    r_no_2 = 0;
+    r_no_3 = mode;
+}
+
+// Starts the decapitation routine.
+void cObj16::setCritical()
+{
+    r_no_0 = 1;
+    r_no_1 = 3;
+    OBJ16_WK(this)->Atk_ck = 0;
+    r_no_2 = 0;
+    r_no_3 = 0;
+}
+
+// Starts the hit reaction routine.
+void cObj16::setDamage()
+{
+    r_no_0 = 1;
+    r_no_1 = 4;
+    r_no_2 = 0;
+    r_no_3 = 0;
+}
+
+// 1 while the head is in its idle cycle (an attack may be started).
+int cObj16::ckAtkEnable()
+{
+    if (OBJ16_WK(this)->Atk_enable == 0) {
+        return 0;
+    }
+    return 1;
+}
+
+// The player is dead (the upper half of the damage word).
+static inline int PlIsDead()
+{
+    return pPL->dmg.m_Flag || pPL->dmg.m_Timer;
+}
+
+// Attack hit test of parts partsNo with obj16_atk_info[kind] (0/1 bite, 2 spit, 3 decapitation):
+// on a player hit plays the blood/hit effects, sound, vibration and quake, puts the player into the
+// damage motion (plemDmMStar, turned towards/away from the body), kind 3 kills him
+// (obj16PlHeadLost); a partner hit (bit 1) kills the partner (LifeDownSet 9999). Sets Atk_ck.
+int obj16AtkCk(cObj16* obj, u32 atk_type, int parts_no)
+{
+    FREE_OBJ16* w = OBJ16_WK(obj);
+    cModel* body = w->pOya;
+    cParts* p;
+    Vec* pp;
+    Vec plPos;
+    ATK_INFO info;
+    Vec pos;
+    int hit;
+    f32 ang;
+
+    if (body == 0) {
+        return 0;
+    }
+    if (((cEm*) body)->hp <= 0) {
+        return 0;
+    }
+    if ((s16) pG->pl_life <= 0) {
+        return 0;
+    }
+    if (PlIsDead()) {
+        return 0;
+    }
+    if (w->At_hit_wait != 0) {
+        if (atk_type == 2) {
+            return 0;
+        }
+    }
+    p = obj->getPartsPtr(parts_no);
+    pp = &p->world;
+    pos = *pp;
+    if (atk_type == 3) {
+        pos.y -= 500.0f;
+    }
+    plPos = pPL->pos;
+    plPos.y += 1600.0f;
+    if (pos.y > body->pos.y + 2500.0f) {
+        return 0;
+    }
+    info = obj16_atk_info[atk_type];
+    hit = EmAtkHitCk(&info, pp, pp, 0);
+    if (hit & 1) {
+        switch (atk_type) {
+        default:
+        case 0:
+            if (obj->type == 2) {
+                EmPlBloodSet2(obj, pp, 1, 0x10, 0x6D);
+            }
+            Ctrl12Set(w->pCtrlGroup, CTRL12_ID_EM10_NOT_NEAR, 0x1E);
+            if (obj->type == 2 && w->pEm) {
+                SndCall(8, 0x3E, &w->pEm->pos, w->pEm->id, 0, 0);
+            }
+            if (obj->type == 0xB && w->pEm) {
+                SndCall(8, 0x12, &w->pEm->pos, w->pEm->id, 0, 0);
+            }
+            VibSetData((VibDataTbl*) CORE_ARC(CORE_VIBRATION), 7, 1);
+            QuakeExec(0, 0, 5, 22.0f, 2);
+            if (w->Mot_pl_dm && (s16) pG->pl_life > 0 && w->pOya) {
+                if (obj->type == 2) {
+                    EstSet(pPL, -1, 0, 0, EFF_EM10, 0x74, 0, ESP_CORE_KIND_NONE, pPL, 0);
+                }
+                if (obj->type == 0xB) {
+                    EstSet(pPL, -1, 0, 0, EFF_EM3C, 9, 0, ESP_CORE_KIND_NONE, pPL, 0);
+                }
+                SetPlDamage((cEm*) obj, plemDmMStar);
+                if (fabsf(Muku(&pPL->pos, &w->pOya->pos, pPL->ang.y, PI)) < PI / 2) {
+                    ang = Muku(&pPL->pos, &w->pOya->pos, pPL->ang.y, PI);
+                    pPL->ang.y = pPL->ang.y + ang;
+                    pPL->r_no_3 = 0;
+                } else {
+                    ang = Muku(&w->pOya->pos, &pPL->pos, pPL->ang.y, PI);
+                    pPL->ang.y = pPL->ang.y + ang;
+                    pPL->r_no_3 = 1;
+                }
+            } else {
+                if (obj->type == 2) {
+                    EstSet(obj, -1, 0, 0, EFF_EM10, 0x73, 0, ESP_CORE_KIND_NONE, obj, 0);
+                }
+                if (obj->type == 0xB) {
+                    EstSet(obj, -1, 0, 0, EFF_EM3C, 8, 0, ESP_CORE_KIND_NONE, obj, 0);
+                }
+            }
+            break;
+        case 1:
+            if (obj->type == 2) {
+                EmPlBloodSet2(obj, pp, 1, 0x10, 0x6E);
+            }
+            Ctrl12Set(w->pCtrlGroup, CTRL12_ID_EM10_NOT_NEAR, 0x1E);
+            if (obj->type == 2 && w->pEm) {
+                SndCall(8, 0x3E, &w->pEm->pos, w->pEm->id, 0, 0);
+            }
+            if (obj->type == 0xB && w->pEm) {
+                SndCall(8, 0x12, &w->pEm->pos, w->pEm->id, 0, 0);
+            }
+            VibSetData((VibDataTbl*) CORE_ARC(CORE_VIBRATION), 7, 1);
+            QuakeExec(0, 0, 5, 22.0f, 2);
+            if (obj->type == 2) {
+                EstSet(obj, -1, 0, 0, EFF_EM10, 0x73, 0, ESP_CORE_KIND_NONE, obj, 0);
+            }
+            break;
+        case 2:
+            w->At_hit_wait = 90;
+            if (obj->type == 2) {
+                EmPlBloodSet2(obj, pp, 1, 0x10, 0x72);
+            }
+            if (obj->type == 0xB) {
+                EmPlBloodSet2(obj, pp, 1, 0x31, 7);
+            }
+            Ctrl12Set(w->pCtrlGroup, CTRL12_ID_EM10_NOT_NEAR, 0x1E);
+            if (obj->type == 2 && w->pEm) {
+                SndCall(8, 0x3E, &w->pEm->pos, w->pEm->id, 0, 0);
+            }
+            if (obj->type == 0xB && w->pEm) {
+                SndCall(8, 0x12, &w->pEm->pos, w->pEm->id, 0, 0);
+            }
+            VibSetData((VibDataTbl*) CORE_ARC(CORE_VIBRATION), 7, 1);
+            QuakeExec(0, 0, 5, 22.0f, 2);
+            if (obj->type == 2) {
+                EstSet(obj, -1, 0, 0, EFF_EM10, 0x73, 0, ESP_CORE_KIND_NONE, obj, 0);
+            }
+            break;
+        case 3:
+            obj16PlHeadLost(obj);
+            VibSetData((VibDataTbl*) CORE_ARC(CORE_VIBRATION), 7, 1);
+            QuakeExec(0, 0, 5, 22.0f, 2);
+            break;
+        }
+        w->Atk_ck = 1;
+    }
+    if (hit & 2) {
+        if (atk_type != 3) {
+            Ctrl12Set(w->pCtrlGroup, CTRL12_ID_EM10_NOT_NEAR, 0x1E);
+        } else {
+            if (pSUB->id & 3) {
+                LifeDownSet(pSUB, 9999, 0);
+            }
+        }
+    }
+    return 1;
+}
+
+// The decapitation: player life 0, death damage type 6, region-specific scream, the player's head
+// hidden and the body's own head-lost effect by enemy id.
+// The head bit the player's head off: game over.
+void obj16PlHeadLost(cObj16* obj)
+{
+    FREE_OBJ16* w = OBJ16_WK(obj);
+    u8 region;
+
+    pG->pl_life = 0;
+    PlSetDamage(PL_DM_FRONT, 0, 0);
+    region = pSys->eff_country;
+    if (region == 0) {
+        PlSetDamageSe(0xD);
+        if (w->pOya) {
+            switch (w->pOya->id) {
+            case 0x10 ... 0x17:
+            case 0x19 ... 0x20:
+                EstSet(pPL, -1, 0, 0, EFF_EM10, 0x57, 0, ESP_CORE_KIND_NONE, pPL, 0);
+                break;
+            case 0x3C:
+                EstSet(pPL, -1, 0, 0, EFF_EM3C, 0x28, 0, ESP_CORE_KIND_NONE, pPL, 0);
+                break;
+            }
+        }
+    } else {
+        pPL->setHead(0);
+        if (w->pOya) {
+            switch (w->pOya->id) {
+            case 0x10 ... 0x17:
+            case 0x19 ... 0x20:
+                EstSet(pPL, -1, 0, 0, EFF_EM10, 0x45, 0, ESP_CORE_KIND_NONE, pPL, 0);
+                break;
+            case 0x3C:
+                EstSet(pPL, -1, 0, 0, EFF_EM3C, 0x27, 0, ESP_CORE_KIND_NONE, pPL, 0);
+                break;
+            }
+        }
+        SndCall(1, 0x3E, &pPL->pos, 0, 0, 0);
+    }
+}
+
+// Eases Neck_dir towards the direction of the player (or the nearer partner) and writes it as an
+// override rotation (flag 0x40000000) on the neck parts (1/2 for the tentacle types, others per type).
+// Turn the neck parts (1, 2) toward the player and tilt the head (parts 0) along the body parts.
+static void obj16NeckMove(cObj16* obj)
+{
+    FREE_OBJ16* w = OBJ16_WK(obj);
+    cModel* body = w->pOya;
+    Vec tgt;
+    Vec dir;
+    f32 ang;
+    cParts* p;
+
+    if (body == 0) {
+        return;
+    }
+    switch (obj->type) {
+    case 2:
+    case 3:
+    case 0xB:
+    case 0xD:
+    case 0xE:
+        break;
+    default:
+        return;
+    }
+    tgt = pPL->pos;
+    if (pSUB) {
+        f32 d = VEC_DIST(&body->pos, &pPL->pos);
+        if (d > VEC_DIST(&body->pos, &pSUB->pos) +
+                    3000.0f) {
+            tgt = pSUB->pos;
+        }
+    }
+    tgt.y += 1600.0f;
+    w->Neck_dir = w->Neck_dir * 0.9f + Muku(&body->pos, &tgt, body->ang.y, PI / 2) * 0.1f;
+    switch (obj->type) {
+    case 2:
+    case 0xE:
+        ang = w->Neck_dir * 0.5f;
+        p = obj->getPartsPtr(1);
+        p->inv_offset.x = 0.0f;
+        p->inv_offset.y = ang;
+        p->motParts.flags |= 0x40000000;
+        p->inv_offset.z = 0.0f;
+        p = obj->getPartsPtr(2);
+        p->inv_offset.x = 0.0f;
+        p->inv_offset.y = ang;
+        p->motParts.flags |= 0x40000000;
+        p->inv_offset.z = 0.0f;
+        if (w->pOya) {
+            cParts* bp = w->pOya->getPartsPtr(w->parts_no);
+            dir.x = 0.0f;
+            dir.y = 0.0f;
+            dir.z = 1.0f;
+            PSMTXMultVecSR(bp->mat, &dir, &dir);
+            if (dir.x == 0.0f && dir.y == 0.0f && dir.z == 0.0f) {
+                dir.z = 1.0f;
+            }
+#line 1850 "D:/Bio4/Prog/obj16.cpp"
+            VECNormalize(&dir, &dir);
+            ang = asinf(dir.y);
+            p = obj->getPartsPtr(0);
+            p->inv_offset.x = ang;
+            p->inv_offset.y = 0.0f;
+            p->motParts.flags |= 0x40000000;
+            p->inv_offset.z = 0.0f;
+        }
+        break;
+    case 3:
+    case 0xB:
+    case 0xD:
+        ang = w->Neck_dir * 0.5f;
+        p = obj->getPartsPtr(1);
+        p->inv_offset.x = 0.0f;
+        p->inv_offset.y = ang;
+        p->motParts.flags |= 0x40000000;
+        p->inv_offset.z = 0.0f;
+        p = obj->getPartsPtr(2);
+        p->inv_offset.x = 0.0f;
+        p->inv_offset.y = ang;
+        p->motParts.flags |= 0x40000000;
+        p->inv_offset.z = 0.0f;
+        break;
+    }
+}
+
+// Tints the head dark (burnt).
+void cObj16::setBurn()
+{
+    cModelInfo* info;
+
+    for (info = pModelInfo; info; info = info->pList) {
+        info->color[0] = 0x20;
+        info->color[1] = 0x20;
+        info->color[2] = 0x20;
+    }
+}
+
+// 1 when the last attack routine hit.
+int cObj16::ckAtkHit()
+{
+    return OBJ16_WK(this)->Atk_ck ? 1 : 0;
+}
+
+// Player damage routine for a plaga bite (SetPlDamage): plays Mot_pl_dm (mirrored blend for
+// r_no_3), damage sound, then EndPlDamage.
+// Player damage routine while the head holds him (SetPlDamage callback).
+void plemDmMStar(cPlayer* pEm)
+{
+    FREE_OBJ16* w = OBJ16_WK((cObj16*) pPL->pEmCatch);
+    int hokan;
+
+    if (pEm->r_no_3 == 0) {
+        pEm->dmg.set(0, 2);
+    }
+    switch (pEm->r_no_2) {
+    case 0:
+        if (pEm->r_no_3) {
+            hokan = 0x41;
+        } else {
+            hokan = 1;
+        }
+        MotionSetCore(pEm, &pEm->Motion, w->Mot_pl_dm, (void*) w->Seq_pl_dm, 3, hokan, 0);
+        PlSetDamageSe(0);
+        if (pEm->r_no_3) {
+            pEm->dmg.set(0, 0xF);
+        }
+        pEm->r_no_2++;
+    case 1:
+        if (MotionMove(pEm, 0)) {
+            EndPlDamage();
+            if (pEm->r_no_3 == 0) {
+                pEm->dmg.set(0, 0xF);
+            }
+        }
+        break;
+    }
+}

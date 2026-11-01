@@ -1,0 +1,213 @@
+// game/obj05: object id 5, the scattering effect model Efm05 (D:/Bio4/Prog/obj05.cpp), whose parts
+// burst away from `center` one by one as the burst radius grows.
+#include "atari.h"
+#include "obj.h"
+#include "obj05.h"
+#include "esp.h"
+#include "global.h"
+#include "math_sub.h"
+#include "rnd.h"
+
+void Efm05RotMatrix(cObj* obj, Mtx m);
+
+// Per-frame Efm05 update: body scale/colour/life envelopes; parts within the growing radius start
+// flying (Kaboom_flg 1) with speed pow/range along the radial direction plus random spread; flying
+// parts move in parent space with damping/gravity, bounce, and stop (Kaboom_flg 2) below speed 15.
+void cObj05::move()
+{
+    OBJ05_FREE* w = EFM05_WK(this);
+    Mtx inv;
+    Vec d;
+    Vec old;
+    Vec v;
+    Vec ref;
+    Vec hitPos;
+    Vec nrm;
+    Vec* pNorm;
+    f32 range;
+    f32 pow;
+    f32 rnd;
+    f32 rotAmp;
+    f32 amp;
+    f32 len;
+    int hit;
+    u32 i;
+    cParts* p;
+
+    if (w->Size_start_cnt <= w->Life_time) {
+        w->Size_mul += w->Size_plus;
+        w->Size_plus *= w->D_size_plus;
+        if (w->Size_mul <= 0.0f) {
+            ObjMgr.destroy(this);
+            return;
+        }
+    }
+    PSVECAdd(&ang, &w->Ang_plus, &ang);
+    if (w->Col_max_cnt < w->Life_time) {
+        if (w->Col_max_cnt + w->Col_start_cnt <= w->Life_time) {
+            w->Col_r *= w->Col_d_r;
+            w->Col_g *= w->Col_d_g;
+            w->Col_b *= w->Col_d_b;
+            w->Col_a *= w->Col_d_a;
+            if (w->Col_r > 255.0f) {
+                w->Col_r = 255.0f;
+            }
+            if (w->Col_g > 255.0f) {
+                w->Col_g = 255.0f;
+            }
+            if (w->Col_b > 255.0f) {
+                w->Col_b = 255.0f;
+            }
+            if (w->Col_a > 255.0f) {
+                w->Col_a = 255.0f;
+            }
+            if (w->Col_a < 4.0f) {
+                ObjMgr.destroy(this);
+                return;
+            }
+        }
+    } else if (w->Col_max_cnt != 0) {
+        f32 ratio = (f32) w->Life_time / (f32) w->Col_max_cnt;
+        w->Col_a = (f32) w->Col_start_a * ratio;
+    }
+    if (ot_type != 2) {
+        if (w->Col_a < 250.0f) {
+            ot_type = 1;
+        } else {
+            ot_type = 0;
+        }
+    }
+    if (w->Life_max != 0 && w->Life_max <= w->Life_time) {
+        ObjMgr.destroy(this);
+        return;
+    }
+    w->Life_time++;
+    pModelInfo->color[0] = (u8) w->Col_r;
+    pModelInfo->color[1] = (u8) w->Col_g;
+    pModelInfo->color[2] = (u8) w->Col_b;
+    pModelInfo->color[3] = 0xFF;
+    invisible_factor = w->Col_a * (1.0f / 255.0f);
+    scale.y = w->Size_base_y * w->Size_mul;
+    scale.z = scale.x = w->Size_base_x * w->Size_mul;
+
+    range = (f32) ((w->Life_time + 1) * (w->Kaboom_spd * 2 + 1)) + 1.0f;
+    pow = (f32) (int) w->Kaboom_pow * 4096.0f / range;
+    rnd = (f32) (int) w->Kaboom_rnd / 32.0f;
+    rotAmp = (f32) (int) w->Kaboom_rot * 0.005f;
+
+    for (i = 0, p = pList; i < nParts; i++, p = p->pList) {
+        if (p->Kaboom_flg == 0) {
+            PSVECAdd(&pos, &w->Kaboom_pos, &d);
+            PSVECSubtract(&p->world, &d, &d);
+            if (PSVECMag(&d) < range || w->Kaboom_spd == 0xFF) {
+                p->Kaboom_flg = 1;
+                if (d.x == 0.0f && d.y == 0.0f && d.z == 0.0f) {
+                    d.y = 1.0f;
+                }
+#line 162 "D:/Bio4/Prog/obj05.cpp"
+                VECNormalize(&d, &p->Kaboom_spd);
+                amp = pow * rnd;
+                PSVECScale(&p->Kaboom_spd, &p->Kaboom_spd, pow);
+                p->Kaboom_spd.x += amp * fRandSeed1_1(&w->Rand_seed);
+                p->Kaboom_spd.y += amp * fRandSeed1_1(&w->Rand_seed);
+                p->Kaboom_spd.z += amp * fRandSeed1_1(&w->Rand_seed);
+                p->Kaboom_ang_spd.x = rotAmp * fRandSeed1_1(&w->Rand_seed);
+                p->Kaboom_ang_spd.y = rotAmp * fRandSeed1_1(&w->Rand_seed);
+                p->Kaboom_ang_spd.z = rotAmp * fRandSeed1_1(&w->Rand_seed);
+            }
+        }
+        if (p->Kaboom_flg == 1) {
+            PSMTXInverse(p->pParent->mat, inv);
+            PSMTXMultVecSR(inv, &p->Kaboom_spd, &v);
+            PSVECAdd(&p->pos, &v, &p->pos);
+            PSVECScale(&p->Kaboom_spd, &p->Kaboom_spd, w->Kaboom_d_spd);
+            p->Kaboom_spd.y += w->Kaboom_gravity;
+            PSVECAdd(&p->ang, &p->Kaboom_ang_spd, &p->ang);
+            p->ang.x = LIMIT_ANGLE(p->ang.x);
+            p->ang.y = LIMIT_ANGLE(p->ang.y);
+            p->ang.z = LIMIT_ANGLE(p->ang.z);
+            old = p->world;
+            PSMTXMultVec(p->pParent->mat, &p->pos, &p->world);
+            hit = 0;
+            if (w->Tool_flg & 2) {
+                if (SatMgr.hitCheck(&old, &p->world, &hitPos, &nrm, 0, 0)) {
+                    p->world = hitPos;
+                    hit = 1;
+                    PSVECAdd(&nrm, &p->world, &p->world);
+                    len = RootSumSquare3(&p->Kaboom_spd);
+                    nrm.x = -nrm.x;
+                    nrm.y = -nrm.y;
+                    nrm.z = -nrm.z;
+                    C_VECReflect(&p->Kaboom_spd, &nrm, &ref);
+                    PSVECScale(&ref, &p->Kaboom_spd, len * w->RefRate.x);
+                    PSVECScale(&p->Kaboom_ang_spd, &p->Kaboom_ang_spd, -0.8f);
+                }
+            } else if (w->Tool_flg & 1) {
+                f32 floor = EatMgr.getFloor(&p->world, &pNorm, 600.0f, 100000.0f, 0);
+                f32 ofs = (f32) w->Pt_hit_size;
+
+                if (DbgFlagChk(pG, DBG_IN_ESP_TOOL) && !DbgFlagChk(pG, DBG_ESPTOOL_ONSCR)) {
+                    floor = 0.0f;
+                }
+                if (p->world.y - ofs < floor) {
+                    p->Kaboom_spd.x = p->Kaboom_spd.x * w->RefRate.x;
+                    p->Kaboom_spd.y = p->Kaboom_spd.y * -w->RefRate.y;
+                    p->Kaboom_spd.z = p->Kaboom_spd.z * w->RefRate.x;
+                    p->world.y = floor + ofs;
+                    hit = 1;
+                    PSVECScale(&p->Kaboom_ang_spd, &p->Kaboom_ang_spd, 0.8f);
+                    if (w->Tool_flg & 8) {
+                        f32 ry;
+
+                        p->ang.x = LIMIT_ANGLE(p->ang.x);
+                        p->ang.y = LIMIT_ANGLE(p->ang.y);
+                        p->ang.z = LIMIT_ANGLE(p->ang.z);
+                        p->ang.x += PI / 2;
+                        PSVECScale(&p->Kaboom_ang_spd, &p->Kaboom_ang_spd, -0.9f);
+                        ry = p->ang.y;
+                        PSVECScale(&p->ang, &p->ang, 0.55f);
+                        p->ang.y = ry;
+                        p->ang.x -= PI / 2;
+                    }
+                }
+            }
+            if (hit) {
+                PSMTXMultVec(inv, &p->world, &p->pos);
+                if (PSVECMag(&p->Kaboom_spd) < 15.0f) {
+                    if ((w->Tool_flg & 8) && fabsf(p->ang.x + PI / 2) > 0.4f) {
+                        f32 ry;
+
+                        p->ang.x = LIMIT_ANGLE(p->ang.x);
+                        p->ang.y = LIMIT_ANGLE(p->ang.y);
+                        p->ang.z = LIMIT_ANGLE(p->ang.z);
+                        p->ang.x += PI / 2;
+                        PSVECScale(&p->Kaboom_ang_spd, &p->Kaboom_ang_spd, -0.7f);
+                        ry = p->ang.y;
+                        PSVECScale(&p->ang, &p->ang, 0.8f);
+                        p->ang.y = ry;
+                        p->ang.x -= PI / 2;
+                    } else {
+                        p->Kaboom_flg = 2;
+                    }
+                }
+            }
+        }
+    }
+    matUpdate();
+}
+
+// Re-orient the model by `m`: the position and the burst centre are transformed, the rotation
+// is composed with it.
+void Efm05RotMatrix(cObj* pObj, Mtx pMat)
+{
+    Mtx tmp;
+
+    PSMTXMultVec(pMat, &pObj->pos, &pObj->pos);
+    RotMatrix(tmp, &pObj->ang);
+    PSMTXConcat(pMat, tmp, tmp);
+    Matrix2AxisAngle(tmp, &pObj->ang);
+    tmp[0][3] = 0.0f;
+    tmp[1][3] = 0.0f;
+    tmp[2][3] = 0.0f;
+    PSMTXMultVec(tmp, &EFM05_WK((cObj05*) pObj)->Kaboom_pos, &EFM05_WK((cObj05*) pObj)->Kaboom_pos);
+}

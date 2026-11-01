@@ -1,0 +1,31 @@
+# Editor defaults for new files. Existing files are not reformatted (CONTRIBUTING.md, "Formatting").
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = false
+
+[*.{c,cpp,h}]
+indent_style = space
+indent_size = 4
+
+# The vendors' sources keep their tab indentation.
+[src/lib/**.{c,cpp,h}]
+indent_style = tab
+indent_size = 4
+
+[*.py]
+indent_style = space
+indent_size = 4
+
+[*.{md,txt}]
+indent_style = space
+
+[*.tsv]
+indent_style = tab
+
+[{build.ninja,*.ninja}]
+indent_style = space
+indent_size = 2

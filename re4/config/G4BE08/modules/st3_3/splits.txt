@@ -1,0 +1,81 @@
+Sections:
+	.text       type:code align:4
+	.ctors      type:rodata align:4
+	.dtors      type:rodata align:4
+	.rodata     type:rodata align:4
+	.data       type:data align:8
+	.bss        type:bss align:4
+
+st3_3/em_wrap.cpp:
+	.text       start:0x00000000 end:0x00000DDC
+	.rodata     start:0x00000000 end:0x00000AE8 align:4
+
+st3_3/cSceObj.cpp:
+	.text       start:0x00000DDC end:0x00002DC4
+	.rodata     start:0x00000AE8 end:0x00000B80 align:4
+
+st3_3/r320.cpp:
+	.text       start:0x00002DC4 end:0x0000B42C
+	.rodata     start:0x00000B80 end:0x000010A8 align:4
+	.data       start:0x00000000 end:0x00000170
+	.bss        start:0x00000000 end:0x00000004 align:4
+	.bss        start:0x000000B0 end:0x000000E4 align:4 common
+
+st3_3/r321.cpp:
+	.text       start:0x0000B42C end:0x0000BEF8
+	.rodata     start:0x000010A8 end:0x000012F0 align:4
+	.bss        start:0x00000004 end:0x00000028 align:4
+
+st3_3/r325.cpp:
+	.text       start:0x0000BEF8 end:0x0000C734
+	.rodata     start:0x000012F0 end:0x0000140C align:4
+	.bss        start:0x00000028 end:0x0000002C align:4
+
+st3_3/r326.cpp:
+	.text       start:0x0000C734 end:0x0000CED4
+	.rodata     start:0x0000140C end:0x000014C8 align:4
+	.bss        start:0x0000002C end:0x00000030 align:4
+
+st3_3/r327.cpp:
+	.text       start:0x0000CED4 end:0x0000FD98
+	.rodata     start:0x000014C8 end:0x000016F8 align:4
+	.data       start:0x00000170 end:0x00000250
+	.bss        start:0x00000030 end:0x00000034 align:4
+
+st3_3/r328.cpp:
+	.text       start:0x0000FD98 end:0x0000FDDC
+	.rodata     start:0x000016F8 end:0x00001738 align:4
+	.bss        start:0x00000034 end:0x00000038 align:4
+
+st3_3/r329.cpp:
+	.text       start:0x0000FDDC end:0x000109E8
+	.rodata     start:0x00001738 end:0x000018A0 align:4
+	.bss        start:0x00000038 end:0x0000003C align:4
+
+st3_3/r330.cpp:
+	.text       start:0x000109E8 end:0x00011F00
+	.rodata     start:0x000018A0 end:0x00001A78 align:4
+	.data       start:0x00000250 end:0x00000260
+	.bss        start:0x0000003C end:0x00000048 align:4
+
+st3_3/r331.cpp:
+	.text       start:0x00011F00 end:0x00012A54
+	.rodata     start:0x00001A78 end:0x00001CA8 align:4
+	.bss        start:0x00000048 end:0x0000004C align:4
+
+st3_3/r332.cpp:
+	.text       start:0x00012A54 end:0x00018754
+	.rodata     start:0x00001CA8 end:0x000021F8 align:4
+	.data       start:0x00000260 end:0x000002F8
+	.bss        start:0x0000004C end:0x00000078 align:4
+
+st3_3/r333.cpp:
+	.text       start:0x00018754 end:0x0001AAC8
+	.rodata     start:0x000021F8 end:0x000024B0 align:4
+	.data       start:0x000002F8 end:0x00000330
+	.bss        start:0x00000078 end:0x000000B0 align:4
+
+st3_3/st3.cpp:
+	.text       start:0x0001AAC8 end:0x0001B6E4
+	.rodata     start:0x000024B0 end:0x0000265C align:4
+	.data       start:0x00000330 end:0x00000334 skip

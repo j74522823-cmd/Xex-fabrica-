@@ -1,0 +1,75 @@
+# Style of the game code (src/game, src/em*, src/pl*, src/wep*, src/st*, src/t_*, src/Sscrn, include/),
+# written down from the existing files. For NEW code only: do not run it over the tree (see
+# CONTRIBUTING.md, "Formatting"). src/lib/ keeps the vendors' tab-indented style and is excluded.
+#
+# Things the formatter must leave alone, and does with these settings: `#line` directives (stay at
+# column 0, IndentPPDirectives: None), `// COMPILER-DIFF:` comments and the long provenance comments
+# (ReflowComments: false), include order (SortIncludes: Never; the order is part of the match), asm
+# statements (formatted as ordinary statements, contents untouched). A trailing `// COMPILER-DIFF:`
+# comment that pushes the line past 110 columns makes the formatter break the statement, not the
+# comment: in new code put the tag on the line above the statement. The offset comments in the
+# existing headers are hand-aligned to one column per struct; the formatter aligns them per run.
+---
+Language: Cpp
+Standard: c++03
+
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 110
+AccessModifierOffset: -4
+IndentCaseLabels: false
+IndentPPDirectives: None
+NamespaceIndentation: None
+ContinuationIndentWidth: 4
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterFunction: true
+  AfterClass: false
+  AfterStruct: false
+  AfterUnion: false
+  AfterEnum: false
+  AfterNamespace: false
+  AfterControlStatement: Never
+  AfterExternBlock: false
+  BeforeElse: false
+  BeforeCatch: false
+  IndentBraces: false
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+
+PointerAlignment: Left
+ReferenceAlignment: Left
+SpaceAfterCStyleCast: true
+SpaceBeforeParens: ControlStatements
+SpaceBeforeAssignmentOperators: true
+SpaceInEmptyParentheses: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpacesBeforeTrailingComments: 1
+
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
+
+AlignTrailingComments: true
+AlignEscapedNewlines: Left
+AlignAfterOpenBracket: Align
+AlignOperands: Align
+AlignConsecutiveAssignments: None
+AlignConsecutiveDeclarations: None
+
+BinPackArguments: true
+BinPackParameters: true
+BreakConstructorInitializers: BeforeColon
+Cpp11BracedListStyle: false
+ReflowComments: false
+SortIncludes: Never
+FixNamespaceComments: false
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1
+CommentPragmas: '^ COMPILER-DIFF:'

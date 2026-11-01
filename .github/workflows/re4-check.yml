@@ -1,0 +1,48 @@
+name: RE4 -> 360 (compilar so, sem linkar)
+
+# Compila cada unidade do RE4 (fora de src/lib) com o compilador PowerPC do xsdk e publica o resumo.
+# Usa o compilador que a "Fabrica de XEX" ja guardou em Releases > toolchain-xsdk (rode aquela primeiro, 1a vez ~1-2 h).
+# Este arquivo vai em .github/workflows/ do repositorio Xex-fabrica-, com a pasta do RE4 em re4/ (sem a pasta orig/).
+on:
+  push:
+    paths: ['re4/**', '.github/workflows/re4-check.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  GH_TOKEN: ${{ github.token }}
+  GH_REPO: ${{ github.repository }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Baixar o compilador do xsdk (ja construido pela Fabrica)
+        run: |
+          set -e
+          gh release download toolchain-xsdk -p toolchain.tar.gz -D "$RUNNER_TEMP" || {
+            echo "ERRO: nao existe a release 'toolchain-xsdk'. Rode primeiro o workflow 'Fabrica de XEX (xsdk)'."; exit 1; }
+          tar -C "$HOME" -xzf "$RUNNER_TEMP/toolchain.tar.gz"
+          "$HOME/xsdk-gcc/bin/powerpc-xsdk-elf-g++" --version | head -1
+
+      - name: Baixar o aurora-xenon (so os headers)
+        run: git clone --depth 1 -b xenon https://github.com/xenosworks/aurora-xenon "$HOME/aurora-xenon"
+
+      - name: Compilar todas as unidades
+        run: |
+          chmod +x re4/tools/xenon/check_compile_ppc.sh
+          re4/tools/xenon/check_compile_ppc.sh "$HOME/xsdk-gcc" "$HOME/aurora-xenon" "$GITHUB_WORKSPACE/build/re4-check"
+        continue-on-error: true
+
+      - name: Publicar resultado
+        run: |
+          cd build/re4-check
+          tar -czf logs.tar.gz *.log _status.txt
+          gh release delete re4-check --cleanup-tag -y 2>/dev/null || true
+          gh release create re4-check summary.txt logs.tar.gz --target "$GITHUB_SHA" --title "re4-check" \
+            --notes "Resultado do teste de compilacao do RE4 com o compilador do xsdk (veja summary.txt)."

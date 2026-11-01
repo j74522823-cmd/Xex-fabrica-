@@ -1,0 +1,317 @@
+// game/esp16.cpp: effect id 0x16, a rope or chain of points simulated with distance constraints.
+// Point 0 follows the effect, and the last point can be pinned to model parts.
+
+#include "atari.h"
+#include "light.h"
+#include "gx.h"
+#include "global.h"
+#include "math_sub.h"
+#include "rnd.h"
+#include "esp.h"
+
+typedef struct tagESP16_WK {
+    u32 Num;        // 0x00 number of chain points (gen->Work8[0] + 2)
+    cEsp3f* pPosBuf;    // 0x04 point positions
+    cEsp3f* pSpdBuf;    // 0x08 point speeds
+    Vec grav;       // 0x0C acceleration added every frame (gen->Vec1)
+    Vec rand_plus;        // 0x18 random jitter amplitude (gen->Vec2)
+    f32 nen;    // 0x24 how much of the constraint correction feeds back into the speed (gen->Vec0.z / 100)
+    f32 del;       // 0x28 speed damping (gen->Vec0.y / 100)
+    f32 max_len;        // 0x2C segment length (gen->Vec0.x)
+    cParts* pParts;  // 0x30 model part the far end is attached to
+} ESP16_WK;
+
+// Rope / chain: a string of points held together by distance constraints, drawn as a textured
+// strip facing the camera. The head follows the effect position, the tail can be attached to
+// a model part.
+class cEsp16 : public cEsp {
+public:
+    ESP16_WK m_Free;  // 0xF8
+
+    virtual void move();
+    virtual int SetFreeWork(cEspSeqTbl* gen, u32* seed);
+    virtual void Destruct();
+};
+
+// EspCreateTbl[0x16] factory.
+cEsp* Esp16_Create()
+{
+    return new cEsp16;
+}
+
+// Base update, then one relaxation pass from the head that pulls each point back to max_len from
+// its predecessor. When the tail is pinned, a second pass runs from the tail toward the head.
+void cEsp16::move()
+{
+    ESP16_WK* w = &m_Free;
+    Vec pos0;
+    Vec d;
+    Vec nrm;
+    Vec* p;
+    Vec* s;
+    u32 i;
+
+    if (!CommonMove()) {
+        return;
+    }
+    if (!AnmMove()) {
+        PushEsp(this);
+        return;
+    }
+    m_Radius = 100000000.0f;
+    if (parent == pEffParentWorld) {
+        pos0 = m_Pos;
+    } else {
+        PSMTXMultVec(parent->mat, &m_Pos, &pos0);
+    }
+    for (i = 1; i < w->Num; i++) {
+        p = Esp3f_GetVecPtr(w->pPosBuf, i);
+        s = Esp3f_GetVecPtr(w->pSpdBuf, i);
+        PSVECAdd(p, s, Esp3f_GetVecPtr(w->pPosBuf, i));
+        PSVECSubtract(Esp3f_GetVecPtr(w->pPosBuf, i - 1), Esp3f_GetVecPtr(w->pPosBuf, i), &d);
+        if (PSVECMag(&d) > w->max_len) {
+            static f32 nen_mul = 1.0f;
+
+#line 63 "D:/Bio4/Prog/esp16.cpp"
+            VECNormalize(&d, &nrm);
+            PSVECScale(&nrm, &d, -w->max_len);
+            PSVECAdd(Esp3f_GetVecPtr(w->pPosBuf, i - 1), &d, Esp3f_GetVecPtr(w->pPosBuf, i));
+            PSVECScale(&nrm, &d, -PSVECDotProduct(&nrm, Esp3f_GetVecPtr(w->pSpdBuf, i)) * nen_mul);
+            PSVECAdd(Esp3f_GetVecPtr(w->pSpdBuf, i), &d, Esp3f_GetVecPtr(w->pSpdBuf, i));
+        }
+        {
+            Vec jit;
+
+            jit.x = w->rand_plus.x * fRand1_1();
+            jit.y = w->rand_plus.y * fRand1_1();
+            jit.z = w->rand_plus.z * fRand1_1();
+            PSVECAdd(Esp3f_GetVecPtr(w->pPosBuf, i), &jit, Esp3f_GetVecPtr(w->pPosBuf, i));
+        }
+        PSVECScale(&d, &d, w->nen);
+        PSVECAdd(Esp3f_GetVecPtr(w->pSpdBuf, i), &d, Esp3f_GetVecPtr(w->pSpdBuf, i));
+        PSVECSubtract(Esp3f_GetVecPtr(w->pSpdBuf, i - 1), &d, Esp3f_GetVecPtr(w->pSpdBuf, i - 1));
+        PSVECAdd(Esp3f_GetVecPtr(w->pSpdBuf, i), &w->grav, Esp3f_GetVecPtr(w->pSpdBuf, i));
+        PSVECScale(Esp3f_GetVecPtr(w->pSpdBuf, i), Esp3f_GetVecPtr(w->pSpdBuf, i), w->del);
+    }
+    *Esp3f_GetVecPtr(w->pPosBuf, 0) = pos0;
+    if (w->pParts != NULL) {
+        Vec v = { 0.0f, 0.01f, 0.0f };
+
+        PSMTXMultVec(w->pParts->mat, &v, &v);
+        *Esp3f_GetVecPtr(w->pPosBuf, w->Num - 1) = v;
+        for (i = w->Num - 2; i > 1; i--) {
+            static f32 nen_mul = 1.0f;
+
+            p = Esp3f_GetVecPtr(w->pPosBuf, i);
+            s = Esp3f_GetVecPtr(w->pSpdBuf, i);
+            PSVECAdd(p, s, Esp3f_GetVecPtr(w->pPosBuf, i));
+            PSVECSubtract(Esp3f_GetVecPtr(w->pPosBuf, i + 1), Esp3f_GetVecPtr(w->pPosBuf, i), &d);
+            if (PSVECMag(&d) > w->max_len) {
+#line 109 "D:/Bio4/Prog/esp16.cpp"
+                VECNormalize(&d, &nrm);
+                PSVECScale(&nrm, &d, -w->max_len);
+                PSVECAdd(Esp3f_GetVecPtr(w->pPosBuf, i + 1), &d, Esp3f_GetVecPtr(w->pPosBuf, i));
+                PSVECScale(&nrm, &d, -PSVECDotProduct(&nrm, Esp3f_GetVecPtr(w->pSpdBuf, i)) * nen_mul);
+                PSVECAdd(Esp3f_GetVecPtr(w->pSpdBuf, i), &d, Esp3f_GetVecPtr(w->pSpdBuf, i));
+            }
+            {
+                Vec jit;
+
+                jit.x = w->rand_plus.x * fRand1_1();
+                jit.y = w->rand_plus.y * fRand1_1();
+                jit.z = w->rand_plus.z * fRand1_1();
+                PSVECAdd(Esp3f_GetVecPtr(w->pPosBuf, i), &jit, Esp3f_GetVecPtr(w->pPosBuf, i));
+            }
+            PSVECScale(&d, &d, w->nen);
+            PSVECAdd(Esp3f_GetVecPtr(w->pSpdBuf, i), &d, Esp3f_GetVecPtr(w->pSpdBuf, i));
+            PSVECSubtract(Esp3f_GetVecPtr(w->pSpdBuf, i + 1), &d, Esp3f_GetVecPtr(w->pSpdBuf, i + 1));
+            PSVECAdd(Esp3f_GetVecPtr(w->pSpdBuf, i), &w->grav, Esp3f_GetVecPtr(w->pSpdBuf, i));
+            PSVECScale(Esp3f_GetVecPtr(w->pSpdBuf, i), Esp3f_GetVecPtr(w->pSpdBuf, i), w->del);
+        }
+    }
+}
+
+// EspTransTbl[0x16]: draws min(Life_time + 1, Num) points as a triangle strip of width
+// interpolated Size_base_x -> Size_base_y, widened perpendicular to segment and view; Tool_flg
+// bit1 flips s, bit2 runs t backwards.
+void Esp16_Trans(cEsp16* esp)
+{
+    ESP16_WK* w = &esp->m_Free;
+    Mtx inv;
+    Vec cam;
+    Vec q0;
+    Vec q1;
+    Vec dir;
+    Vec toCam;
+    Vec nrm;
+    Vec cross;
+    cAnm* anm;
+    Vec* p0;
+    Vec* p1;
+    u32 n;
+    u32 i;
+    f32 t;
+    f32 tw;
+    f32 s0;
+    f32 s1;
+    f32 rate;
+    f32 half;
+    f32 z; // COMPILER-DIFF: #13
+
+    if (esp->m_Life_time < w->Num) {
+        n = esp->m_Life_time + 1;
+    } else {
+        n = w->Num;
+    }
+    if (!EspGetAnmAddr(esp->m_Tex_id, &anm)) {
+        pLog->err(0, 0, "ESP : TexId[%x] no data", esp->m_Tex_id);
+        return;
+    }
+    CameraCurrentProjection();
+    EspTexSet(esp->m_Tex_id, esp->m_Ptn_no);
+    esp->ChannelSet();
+    GXSetBlendMode(esp->m_Blend_mode, esp->m_Src_factor, esp->m_Dst_factor, esp->m_Logic_op);
+    esp->CommonStateSet();
+    // The original sets t through an intermediate copy and ends its block right after the zero load.
+    // The dead test below is that block boundary, and f12 is pinned to the register the original's
+    // zero took. The test's three loads put the high in r10 like the target.
+    z = 0.0f;                   // COMPILER-DIFF: #13
+    // Dead in the original too: only its 0x43300000 constant survives, shared by both `(f32) w->nPt`
+    // conversions below. Which expression it was is unknown. It must stay in the first block so its
+    // constant is hoisted to the top.
+    rate = (f32)(int)n;
+    if (esp->m_Life_time + w->Num + esp->m_Tex_id == 99) { // COMPILER-DIFF: candidate (sched block split)
+        t = z;
+    }
+    t = z;
+    tw = 1.0f;
+    if ((s8)esp->m_Parts_no >= -8 && (s8)esp->m_Parts_no <= -3) {
+        pLog->err(0, 0, "ESP_16 : Parent is screen.");
+        return;
+    }
+    PSMTXIdentity(esp->m_Mat);
+    RotMatrix(esp->m_Mat, &esp->m_Ang);
+    PSMTXConcat(pG->Camera.v_mat, esp->m_Mat, esp->m_Mat);
+    PSMTXInverse(esp->m_Mat, inv);
+    PSMTXTranspose(inv, inv);
+    GXLoadNrmMtxImm(inv, 0);
+    GXLoadPosMtxImm(esp->m_Mat, 0);
+    GXSetCurrentMtx(0);
+    GXClearVtxDesc();
+    GXSetVtxDesc(9, 1);
+    GXSetVtxDesc(0xA, 1);
+    GXSetVtxDesc(0xD, 1);
+    GXSetVtxAttrFmt(0, 9, 1, 4, 0);
+    GXSetVtxAttrFmt(0, 0xA, 0, 1, 0);
+    GXSetVtxAttrFmt(0, 0xD, 1, 4, 0);
+    p1 = NULL;
+    cam = pG->Camera.param.Campos;
+    if (esp->m_Tool_flg & 4) {
+        t = tw;
+        tw = -1.0f / (f32)w->Num;
+    } else {
+        tw = tw / (f32)w->Num;
+    }
+    if (esp->m_Tool_flg & 2) {
+        s0 = 1.0f;
+        s1 = 0.0f;
+    } else {
+        s0 = 0.0f;
+        s1 = 1.0f;
+    }
+    nrm.x = 0.0f;
+    nrm.y = 0.0f;
+    nrm.z = 0.0f;
+    GXBegin(0x98, 0, n * 2);
+    p0 = Esp3f_GetVecPtr(w->pPosBuf, 0);
+    for (i = 0; i < n; i++) {
+        if (i != n - 1) {
+            p1 = Esp3f_GetVecPtr(w->pPosBuf, i + 1);
+            PSVECSubtract(p1, p0, &dir);
+        }
+        PSVECSubtract(p0, &cam, &toCam);
+        PSVECCrossProduct(&dir, &toCam, &cross);
+        if (cross.x == 0.0f && cross.y == 0.0f && cross.z == 0.0f) {
+        } else {
+#line 306 "D:/Bio4/Prog/esp16.cpp"
+            VECNormalize(&cross, &nrm);
+        }
+        rate = (f32)i / (f32)(n - 1);
+        half = (rate * esp->m_Size_base_y + (1.0f - rate) * esp->m_Size_base_x) * esp->m_Size_mul;
+        PSVECScale(&nrm, &q0, half);
+        PSVECScale(&nrm, &q1, -half);
+        PSVECAdd(&q0, p0, &q0);
+        PSVECAdd(&q1, p0, &q1);
+        p0 = p1;
+        GXPosition3f32(q0.x, q0.y, q0.z);
+        GXNormal3s8(0, 1, 0);
+        GXTexCoord2f32(s0, t);
+        t += tw;
+        GXPosition3f32(q1.x, q1.y, q1.z);
+        GXNormal3s8(0, 1, 0);
+        GXTexCoord2f32(s1, t);
+    }
+}
+
+// Releases the position and speed esp3f buffers.
+void cEsp16::Destruct()
+{
+    ESP16_WK* w = &m_Free;
+    cEsp* b;
+
+    b = (cEsp*)w->pPosBuf;
+    if (b != NULL && (b->m_Be_flg & 1)) {
+        PushEsp(b);
+    }
+    b = (cEsp*)w->pSpdBuf;
+    if (b != NULL && (b->m_Be_flg & 1)) {
+        PushEsp(b);
+    }
+}
+
+// Reads the point count, optional tail parts, physics parameters, allocates both buffers (fails
+// when the pool is short) and starts every point at the effect's world position with zero speed.
+int cEsp16::SetFreeWork(cEspSeqTbl* pSeq, u32* pRand_seed)
+{
+    ESP16_WK* w = &m_Free;
+    Vec p;
+    Vec z;
+    int i;
+
+    w->Num = (u8)(pSeq->Work8[0] + 2);
+    if (parent != pEffParentWorld && (m_Release_time == 0xFF || m_Release_time <= m_Life_time)) {
+        s8 no = pSeq->Work8[1];
+
+        if (no != 0) {
+            if ((u32)(no - 1) >= m_pMod->nParts) {
+                pLog->err(0, 0, "ESP16 : Wk1 PartsNo > %d ", m_pMod->nParts);
+                return 0;
+            }
+            w->pParts = m_pMod->getPartsPtr(no - 1);
+        }
+    }
+    w->grav = pSeq->Vec1;
+    w->max_len = pSeq->Vec0.x;
+    w->del = pSeq->Vec0.y * 0.01f;
+    w->nen = pSeq->Vec0.z * 0.01f;
+    w->rand_plus = pSeq->Vec2;
+    if (!Esp3f_Alloc(sizeof(Vec), w->Num, &w->pPosBuf, &info) || !Esp3f_Alloc(sizeof(Vec), w->Num, &w->pSpdBuf, &info)) {
+        pLog->warn(0, 0, "ESP_16 : Buf alloc failed.");
+        return 0;
+    }
+    m_Radius = 100000000.0f;
+    m_Flg |= 2;
+    z.z = 0.0f;
+    z.y = 0.0f;
+    z.x = 0.0f;
+    if (parent == pEffParentWorld) {
+        p = m_Pos;
+    } else {
+        PSMTXMultVec(parent->mat, &m_Pos, &p);
+    }
+    for (i = w->Num - 1; i >= 0; i--) {
+        *Esp3f_GetVecPtr(w->pPosBuf, i) = p;
+        *Esp3f_GetVecPtr(w->pSpdBuf, i) = z;
+    }
+    return 1;
+}

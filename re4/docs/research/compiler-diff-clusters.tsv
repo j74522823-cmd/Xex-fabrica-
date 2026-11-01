@@ -1,0 +1,480 @@
+site	mechanism	target-does	tag-text
+src/st3/r327.cpp:523	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (see above)
+include/dbg_tool.h:101	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 -- the cDbgWindow::Init region-split recipe (db_toolbase.h): the original's
+include/dbg_tool.h:248	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (sched region split)
+include/dbg_tool.h:251	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (asm-emitted zero, reload-placed li)
+include/dbg_tool.h:270	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (sched region split)
+include/dbg_tool.h:382	local-alloc-qty-order	block-local scratch registers (r0/r9/r11, f0/f13) permuted: local-alloc.c block_alloc qty order	candidate (local-alloc qty order)
+include/dbg_tool.h:404	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (sched region split)
+include/dbg_tool.h:410	sched-tie	haifa sched1/sched2 tie-break: two independent insns in the other order, region split, slot filler	codeless sched barrier
+include/dbg_tool.h:417	gcse-table/numbering	gcse PRE pseudo numbering (hash bucket order) or expression-table size decides a callee-saved register tie	dead test (gcse block boundary)
+include/dbg_tool.h:964	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (the last copy's shape)
+src/st3/r317.cpp:100	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	13 shape of R224Main: a two-set pseudo has no REG_EQUIV, so its `li`
+src/st3/r317.cpp:444	loop-insn-count	loop.c move_movables hoists (or not) an invariant depending on the loop's real insn count / register weight	candidate (sched1 loop-note barrier). The target issues `rot += rotAccel`
+src/st3/r317.cpp:449	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12. Ends cse1's extended block: without it the up loop's pPL high is
+src/st3/r310.cpp:192	loop-exit-form	peeled FP loop exit test (source form)	#7/#9).
+src/st3/r310.cpp:268	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12 fallthrough-arm form. A literal 0 here is cse's known-zero `language` register (kept in
+src/st3/r310.cpp:313	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	12 (regmove operand pick, r20d)
+src/st3/r310.cpp:366	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	12 (regmove operand pick, r20d): `pl` must not die at the
+src/st3/r310.cpp:508	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12 fallthrough-arm form. A literal 0 here is cse's known-zero `language` register (kept in
+src/st3/r310.cpp:553	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	12 (regmove operand pick, r20d)
+src/st3/r310.cpp:607	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	12 (regmove operand pick, r20d): `pl` must not die at the
+src/st3/r300.cpp:1434	sched1-tie/hoist	intrablock order or a copy hoisted over a test (stock haifa; source-form lever)	#5 (local-alloc qty order) -- y/z of `p` take f13/f0 in the target: z's lifetime is
+src/st3/r316.cpp:269	gcse-table/numbering	gcse PRE pseudo numbering (hash bucket order) or expression-table size decides a callee-saved register tie	candidate (gcse table size). Five dead insns (folded by cse2, no code) grow the
+src/st3/r329.cpp:99	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	#17 (local-alloc qty order). The three pool constants are block-local
+include/db_toolbase.h:117	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 -- the original stores the REG_EQUIV zero as a constant: the zero's
+src/em2d/em2d.cpp:1761	prologue-copy-death	fmr/mr parameter copy ranked as if the incoming reg did not die (regmove REG_DEAD)	#8 candidate (sched1 compare/store tie)
+src/em2d/em2d.cpp:2751	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12 (fallthrough-arm form) + #8: the target compares the load temp (f0)
+src/em2c/em2c.cpp:547	em2c-asm	em2c asm form	#16 candidate: jump2's "if (c) { x = a; goto l; } x = b" hoist of the arm's `li r0,2` above the `beq` (x = r0 = the switch load below) fires in ours, 
+src/em2c/em2c.cpp:2670	em2c-asm	em2c asm form	#15 candidate: the original keeps the same-base `lwz timer8` below the `stw timer` (r0 for both); ours hoists it (a dead do-while keeps the order but 
+src/em2b/em2b.cpp:173	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 -- the original never allocates the single-use `w->Dog_wait` load (a REG_EQUIV
+src/em2b/em2b.cpp:189	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 -- the original's `ori` result and 900 (REG_EQUIV constants) do not die at
+src/em2b/em2b.cpp:206	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (see em2bAtkEndSet)
+src/em2b/em2b.cpp:218	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 -- the target issues `mr r3,em` before the two stores although `em` is
+src/em2b/em2b.cpp:858	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 -- the 900/0x23/1.0 init constants are reload-materialised in the original
+src/em2b/em2b.cpp:969	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13
+src/em2b/em2b.cpp:973	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13
+src/em2b/em2b.cpp:1186	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12 (cse re-walk): the variant-1 body's `1`s must not fold to `spd`, only to the variant byte
+src/em2b/em2b.cpp:2335	gcse-table/numbering	gcse PRE pseudo numbering (hash bucket order) or expression-table size decides a callee-saved register tie	candidate (gcse cprop): the 2nd/3rd arms pass the `li r30,1` register, the 1st a fresh `li r8,1`
+src/em2b/em2b.cpp:4135	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13); ours must keep every constant alive past the
+src/em2b/em2b.cpp:4178	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13
+src/em2b/em2b.cpp:4179	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13
+src/em2b/em2b.cpp:4519	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	13 -- the original issues the 25-store block in pure source order (no store carries a
+src/em2b/em2b.cpp:4581	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	13
+src/em2b/em2b.cpp:4582	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	13
+src/em2b/em2b.cpp:4583	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	13
+src/em2b/em2b.cpp:5488	jump2-crossjump	shared tail duplicated or merged differently (RTL at jump2 entry)	#6 mechanism, no tag needed).
+src/em18/em18.cpp:374	sched1-tie/hoist	intrablock order or a copy hoisted over a test (stock haifa; source-form lever)	#5. The original has one `fabsf(lp.y) > 700` check after the type if/else and its
+src/pl14/pl14.cpp:151	argmove-order	FP arg moves interleaved with trailing int constants at a mixed int/float call (calls.c load_register_parameters)	#1 (FPR argument moves before the int `li`s)
+src/pl14/pl14.cpp:1234	loop-insn-count	loop.c move_movables hoists (or not) an invariant depending on the loop's real insn count / register weight	register tie (global-alloc priority): the loop notes count em's refs double, so em
+src/em2a/em2a.cpp:181	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12 (cse related-value): `cam = &em2a_rescue_cam` after the `&em2a_rescue_cam.param.pos/at`
+src/em2a/em2a.cpp:647	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12
+src/em2a/em2a.cpp:1016	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (single-use constant re-materialised at the store: `li r0,2` next to `stb`)
+src/em29/em29.cpp:397	argmove-order	FP arg moves interleaved with trailing int constants at a mixed int/float call (calls.c load_register_parameters)	#1
+src/em3b/em3b.cpp:427	argmove-order	FP arg moves interleaved with trailing int constants at a mixed int/float call (calls.c load_register_parameters)	#1
+src/em3b/em3b.cpp:431	argmove-order	FP arg moves interleaved with trailing int constants at a mixed int/float call (calls.c load_register_parameters)	#1
+src/t_esp/db_port.cpp:152	argmove-order	FP arg moves interleaved with trailing int constants at a mixed int/float call (calls.c load_register_parameters)	#1 (the original moves the cModel* argument before the f32 one: `mr r4; fmr f1`)
+src/t_esp/db_port.cpp:179	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 -- the j loop's `&EvtDebug` is a fresh `lis/addi` in the target (a REG_EQUIV lo_sum pseudo that the
+src/t_esp/db_port.cpp:450	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (int shape, em27DmCk): the EstSet stack zero is a function-scope constant with
+src/t_esp/db_port.cpp:752	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 -- the target issues the five stores fcv, fog, emArray, cinesco, workPushed although `one`'s
+src/t_esp/db_port.cpp:848	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12 (AROUND form) -- the target's parent/else arms recompute `pModel + i*0x644` from
+src/t_esp/db_port.cpp:871	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 -- the pScr block's `&EvtDebug` is a REG_EQUIV symbol pseudo the original never allocated
+src/t_esp/db_port.cpp:1472	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (the original never allocates the REG_EQUIV `high` pseudo, so the table address
+src/t_esp/db_port.cpp:2071	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12 (cse skip-block knowledge: the original reloads 0.2 from the pool)
+src/pl0f/pl0f.cpp:2568	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 -- single-use constant set in another block: update_equiv_regs moves the
+src/wep/pl_shotgun.cpp:438	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13: the original never allocates the REG_EQUIV 0.0 pseudo; reload
+src/wep/pl_shotgun.cpp:442	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13
+src/t_esp/t_esp.cpp:288	other		the target's window pointers have no alias base (their `pa = p; win = NULL` stores chain before the
+src/t_esp/t_esp.cpp:297	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate (cse1 hash-table flush position): cse.c cse_basic_block empties its table every 1001 insns of
+src/t_esp/t_esp.cpp:5342	gcse-table/numbering	gcse PRE pseudo numbering (hash bucket order) or expression-table size decides a callee-saved register tie	candidate (gcse table size): 118 dead sets, deleted by flow1 but counted by gcse.
+src/t_esp/db_widget.cpp:56	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 -- the target issues base.x/id last (source order) although fz/iz die there; the keep-alive is
+src/t_esp/db_widget.cpp:700	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 (the original allocates `ret` to the return register first and copies
+src/t_esp/db_widget.cpp:890	local-alloc-qty-order	block-local scratch registers (r0/r9/r11, f0/f13) permuted: local-alloc.c block_alloc qty order	candidate (local-alloc qty order): four sched1-only anchors. Each is a
+src/t_esp/db_widget.cpp:1016	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 -- the original stores its REG_EQUIV constants as constants: the block
+src/t_esp/db_widget.cpp:1780	jump2-crossjump	shared tail duplicated or merged differently (RTL at jump2 entry)	#6 resolved)
+src/em27/em27.cpp:93	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (int shape): the EstSet stack zero is a function-scope constant with one
+src/em21/em21.cpp:95	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13
+src/em21/em21.cpp:170	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12 (cse related-value): `cam = &em21_trap_cam` after the `&em21_trap_cam.param.pos/at`
+src/em21/em21.cpp:990	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12
+src/em21/em21.cpp:1107	other		tagged tie lever): the refs inside count twice, so tp
+src/em25/em25.cpp:191	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12 (AROUND form; r104 execEvent00 family) -- the original's cse forgets
+src/em10/em10.cpp:18908	fpr-pin	FPR choice	candidate #14 (sched1 rank of `lwz bin` vs the byte compare)
+src/em26/em26.cpp:299	argmove-order	FP arg moves interleaved with trailing int constants at a mixed int/float call (calls.c load_register_parameters)	#1
+src/st2/r207.cpp:450	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 -- the `pSUB = NULL` zero is a reload-rematerialised constant in the original
+src/st2/r207.cpp:544	jump2-crossjump	shared tail duplicated or merged differently (RTL at jump2 entry)	#6
+src/st2/r207.cpp:554	jump2-crossjump	shared tail duplicated or merged differently (RTL at jump2 entry)	#6 (see case 0)
+src/st2/r22c.cpp:666	jump2-crossjump	shared tail duplicated or merged differently (RTL at jump2 entry)	6 shape): the jump reproduces it.
+src/st2/r22c.cpp:1723	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 (see below)
+src/st2/r22c.cpp:1733	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 -- the original allocates `score` to r28 although r31 is free,
+src/st2/r200.cpp:270	temp-slot-merge	frame temp slots merged/not merged	11 -- a 16-byte `ang` makes the merged free slot of the first block (12 + 16 = 28)
+src/tools/db_light.cpp:304	aggregate-view	struct-return-like address / by-value aggregate view	candidate #18 (by-value aggregate view): under the V4 ABI a by-value GXColor is passed
+src/tools/db_light.cpp:678	narrow-truncate	no int->u16/u8 truncation at a call or narrow return; masks a u8-returning call assigned to u16	#4 (reverse): the original stores `i + 6` into a narrow local as a plain `mr r30, r0` (no
+src/tools/db_light.cpp:689	narrow-truncate	no int->u16/u8 truncation at a call or narrow return; masks a u8-returning call assigned to u16	4 (unmasked narrow store, see `line`)
+src/tools/db_light.cpp:1664	narrow-extend	zero/sign-extends a narrow value (clrlwi/extsh) at a call, entry or join where ours treats it as promoted	#2 -- the original zero-extends the u8 `col` once before this arm's two
+src/tools/db_light.cpp:3075	narrow-extend	zero/sign-extends a narrow value (clrlwi/extsh) at a call, entry or join where ours treats it as promoted	2 + #17: the original's colour lives in r5 (a copy preference ours never gets)
+src/tools/db_light.cpp:4828	aggregate-view	struct-return-like address / by-value aggregate view	candidate #18 (by-value aggregate view): the swatch's 4-byte temp at frame \
+src/tools/db_light.cpp:4887	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12 (gcse cprop): the target keeps `li r30,10` and `li r3,80`
+src/tools/db_light.cpp:5544	sched1-tie/hoist	intrablock order or a copy hoisted over a test (stock haifa; source-form lever)	5 (the original's interblock scheduler hoists Draw_corn2's `mr r3/r4` above
+src/em39/em39.cpp:671	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 -- the original never allocates its REG_EQUIV constants: the shared literal
+src/em39/em39.cpp:856	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13
+src/em39/em39.cpp:2577	narrow-extend	zero/sign-extends a narrow value (clrlwi/extsh) at a call, entry or join where ours treats it as promoted	#2 -- the target's `fmuls f12,f0,f12` ties the product to the constant's
+src/em39/em39.cpp:2656	narrow-extend	zero/sign-extends a narrow value (clrlwi/extsh) at a call, entry or join where ours treats it as promoted	#2 -- both arms: the product is tied to the constant's register
+src/em39/em39.cpp:2681	narrow-extend	zero/sign-extends a narrow value (clrlwi/extsh) at a call, entry or join where ours treats it as promoted	#2 (see the other arm)
+src/em39/em39.cpp:2696	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	13 -- the `li r0,1` precedes the four stores: with the values kept alive
+src/em39/em39.cpp:2703	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	13
+src/em39/em39.cpp:2723	argmove-order	FP arg moves interleaved with trailing int constants at a mixed int/float call (calls.c load_register_parameters)	#1 -- the limit constant reaches the call as a dying pseudo (the original's
+src/em39/em39.cpp:3020	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12 (cse2 canonical register)
+src/em39/em39.cpp:4367	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (dying stores issued in source order)
+src/em39/em39.cpp:6435	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 (global-alloc priority order) -- the target allocates the four
+src/em39/em39.cpp:6444	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17
+src/em39/em39.cpp:6453	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17
+src/em39/em39.cpp:6474	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17
+src/em39/em39.cpp:6481	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 -- two refs for the PRE'd &em->pos
+src/em39/em39.cpp:6543	rodata-copies	duplicated .rodata entries	candidate #10 (unreferenced constant-pool entries kept).
+src/em39/em39.cpp:7287	narrow-extend	zero/sign-extends a narrow value (clrlwi/extsh) at a call, entry or join where ours treats it as promoted	#2 (u16 argument masked at the calls)
+src/em39/em39.cpp:7288	narrow-extend	zero/sign-extends a narrow value (clrlwi/extsh) at a call, entry or join where ours treats it as promoted	#2
+src/em39/em39.cpp:8390	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 -- w kept live past its last store (see the asm below)
+src/em39/em39.cpp:8406	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 -- neither the zero nor w dies at its last store in the original (pure source order)
+src/st2/r204.cpp:391	other		the `const f32` locals are declared after the flag write / inside the loop body and the
+src/st2/r204.cpp:788	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 (`mdl` r30 pin): global-alloc excludes r30 for `mdl` (target r30,
+src/st2/r204.cpp:790	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	12 (regmove operand pick, `rp` below): `addi r4,mdl,0xa0` must be computed from
+src/st2/r204.cpp:796	gcse-table/numbering	gcse PRE pseudo numbering (hash bucket order) or expression-table size decides a callee-saved register tie	candidate (gcse PRE pseudo numbering) -- the 21 dead `f32 lcN` locals at the top of
+src/st2/r204.cpp:818	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 */                                        \
+src/st2/r204.cpp:889	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	12 (codeless, see above) */                            \
+src/st2/r204.cpp:924	gcse-table/numbering	gcse PRE pseudo numbering (hash bucket order) or expression-table size decides a callee-saved register tie	candidate (gcse PRE pseudo numbering): 21 dead pool labels, see CHANDELIER */
+src/st2/r202.cpp:795	gcse-frame-high-PRE	no hoisted &local / high(sym) pseudo (gcse PRE placement), fresh addi/lis per use	#3 (dead test as a gcse block boundary). The after-loop `lwz work` x9 read the PRE
+src/st2/r202.cpp:1028	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 (local-alloc qty order): the original's sched1 issued the
+src/st2/r202.cpp:1079	loop-exit-form	peeled FP loop exit test (source form)	#7/#9, both closed as source forms): the exit store on
+src/tools/t_sce_at.cpp:748	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12 (cse path / PRE copy)
+src/tools/t_sce_at.cpp:749	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12 (cse path / PRE copy)
+src/tools/t_sce_at.cpp:750	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12 (cse path / PRE copy)
+src/tools/t_sce_at.cpp:751	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12 (cse path / PRE copy)
+src/tools/t_sce_at.cpp:752	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12 (cse path / PRE copy)
+src/tools/t_sce_at.cpp:753	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12 (cse path / PRE copy)
+src/tools/t_sce_at.cpp:754	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12 (cse path / PRE copy)
+src/tools/t_sce_at.cpp:755	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12 (cse path / PRE copy)
+src/tools/t_sce_at.cpp:756	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12 (cse path / PRE copy)
+src/tools/t_sce_at.cpp:774	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12 (ends the cse1 path from bb0; sched region split)
+src/st2/r203.cpp:278	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17
+src/st2/r203.cpp:279	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17
+src/t_camera/t_camera.cpp:1059	other		tie -- the phony do-while doubles the body's REG_N_REFS (the pt pointer giv then takes
+src/t_camera/t_camera.cpp:2012	sched1-tie/hoist	intrablock order or a copy hoisted over a test (stock haifa; source-form lever)	5 (sched2 tie: call-result copy vs compare)
+src/t_camera/t_camera.cpp:2693	aggregate-view	struct-return-like address / by-value aggregate view	candidate #18 (struct-return-like address in r3 before a no-argument call)
+src/t_camera/t_camera.cpp:2714	aggregate-view	struct-return-like address / by-value aggregate view	candidate #18 (struct-return-like address in r3 before a no-argument call)
+src/st2/r226.cpp:142	argmove-order	FP arg moves interleaved with trailing int constants at a mixed int/float call (calls.c load_register_parameters)	1 -- the original's prologue copies `fmr f31,f1` before `mr r28,r6` (FP parameter copy
+src/st2/r226.cpp:480	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12 -- the LOOP_END note ends cse1's AROUND path so the 0.0 below is
+src/st2/r226.cpp:604	narrow-extend	zero/sign-extends a narrow value (clrlwi/extsh) at a call, entry or join where ours treats it as promoted	2 -- the original sign-/zero-extends the narrow locals here (`extsb`, `clrlwi 24`)
+src/Tools/t_mv.cpp:112	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12 (fallthrough-arm form). The original's then arm has its own `li r10,0`
+src/st1/r11d.cpp:419	loop-entry-rotation	rotated loop entry (source form)	candidate #9
+src/st2/r201.cpp:1081	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 -- loop.c hoists the invariant `on != 1` compare into a CC pseudo (mfcr/mtcrf
+src/tools/db_sctrl.cpp:197	gcse-table/numbering	gcse PRE pseudo numbering (hash bucket order) or expression-table size decides a callee-saved register tie	candidate (gcse PRE pseudo numbering)
+src/tools/db_sctrl.cpp:381	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 (FLOAT_EXTEND argument preference)
+src/tools/db_sctrl.cpp:390	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (region split)
+src/tools/db_sctrl.cpp:501	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (free sched slot filler)
+src/tools/db_sctrl.cpp:518	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (REG_EQUIV live-length doubling of a hoisted high)
+src/st2/r213.cpp:859	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12 (the 1.5707964 store below is reloaded, not the loop's hoisted register)
+src/st2/r213.cpp:899	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 -- dead test (o41 is not read again; jump2 deletes the
+src/st2/r225.cpp:194	sched-tie	haifa sched1/sched2 tie-break: two independent insns in the other order, region split, slot filler	candidate (sched2 issue-slot filler). The target's block 0 leaves the second
+src/st2/r225.cpp:247	gcse-table/numbering	gcse PRE pseudo numbering (hash bucket order) or expression-table size decides a callee-saved register tie	candidate (gcse table size / global-alloc tie window). Three dead tests
+src/st2/r225.cpp:300	loop-insn-count	loop.c move_movables hoists (or not) an invariant depending on the loop's real insn count / register weight	candidate (loop.c pass-2 threshold). The 2^52 conversion magic must
+src/st2/r225.cpp:562	loop-insn-count	loop.c move_movables hoists (or not) an invariant depending on the loop's real insn count / register weight	candidate (sched1 loop-note barrier). The target issues `spd += accel`
+src/st2/r225.cpp:567	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12 (reverse). The target's pPL load of the second SetPosXYZ
+src/st2/r225.cpp:588	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12 (fallthrough-arm form). Our cse carries the
+src/t_camera/t_camera_data.cpp:513	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (global-alloc order, dead test)
+src/st1/r11b.cpp:86	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (single use: update_equiv_regs moves the li next to the store)
+src/st1/r11b.cpp:95	sched-tie	haifa sched1/sched2 tie-break: two independent insns in the other order, region split, slot filler	candidate (sched1 issue-slot filler): the codeless asm depends on the flags
+src/Tools/t_motseq.cpp:729	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (free sched slot filler): the original's sched1 has one insn between
+src/Tools/t_esp_area.cpp:260	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	#17 (global.c refs, the r18/r17 pair)
+src/st2/r20d.cpp:847	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	12 (regmove operand pick): `pl` must not die at the
+src/st2/r20d.cpp:946	gcse-frame-high-PRE	no hoisted &local / high(sym) pseudo (gcse PRE placement), fresh addi/lis per use	3 (frame-address PRE): the r31 clobber kills gcse's transparency for
+src/st2/r20d.cpp:1125	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12 (user variable constant not folded)
+src/st2/r20d.cpp:1127	narrow-extend	zero/sign-extends a narrow value (clrlwi/extsh) at a call, entry or join where ours treats it as promoted	#2 (value-carrying FPR pin): the 0.0 pseudo is f30 and its `turn` copy f31 in the
+src/st2/r20d.cpp:1133	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12
+src/st2/r20d.cpp:1134	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12 (companion of the `st` launder): the launder gives `li r29,0` one priority level
+src/st2/r224.cpp:180	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	13 (the stack-argument zero reuses `v`: a two-set pseudo has no REG_EQUIV,
+src/st2/r224.cpp:354	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	12: the target loads `spd = 0.0f` before SndCall and RE-LOADS the same pool 0.0
+src/st2/r224.cpp:420	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	12 (dead test, see above)
+src/st2/r224.cpp:539	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	13 -- the target issues `li r3,5; li r4,0` after the store; ours issues
+src/st1/r118.cpp:273	loop-insn-count	loop.c move_movables hoists (or not) an invariant depending on the loop's real insn count / register weight	dead test; its 0x88888889 constant is loop.c's FIRST movable, so the
+src/st1/r118.cpp:278	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12 (fallthrough-arm form): a plain zero here is folded by cse1 into
+src/Tools/t_flr_at.cpp:921	narrow-extend	zero/sign-extends a narrow value (clrlwi/extsh) at a call, entry or join where ours treats it as promoted	2 (the original masks the first footer colour once after its arms, `clrlwi r5,r5,24`)
+src/tools/db_mod.cpp:1279	loop-insn-count	loop.c move_movables hoists (or not) an invariant depending on the loop's real insn count / register weight	candidate (loop.c insn_count): two dead sets, deleted by flow, keep
+src/tools/db_mod.cpp:2217	register-pin	register pin (which hard register a value takes)	the target passes the switch-head `color` register (`li r5,0` before the
+src/tools/db_mod.cpp:2574	other		two codeless insns make the loop 66 real insns at loop pass 1, so the folded
+src/tools/db_mod.cpp:2692	other		the p-info zero colour (see the j-loop below)
+src/tools/db_mod.cpp:2795	gcse-table/numbering	gcse PRE pseudo numbering (hash bucket order) or expression-table size decides a callee-saved register tie	the colour of both calls is ONE zero-valued pseudo that gcse PREs into the j-loop
+src/st2/r20c.cpp:448	sched1-tie/hoist	intrablock order or a copy hoisted over a test (stock haifa; source-form lever)	#5 — the original's `li r8,0` of the two `hp = 0` stores is one constant
+src/st2/r223.cpp:57	prologue-copy-death	fmr/mr parameter copy ranked as if the incoming reg did not die (regmove REG_DEAD)	#8 -- the original's prologue copies `fmr f28,f1; fmr f29,f2` before `mr r29,r5` (mode);
+src/st2/r223.cpp:214	prologue-copy-death	fmr/mr parameter copy ranked as if the incoming reg did not die (regmove REG_DEAD)	#8 -- the original copies f1/f2 to f28/f29 before `mode` to r29: FP parameters
+src/em36/em36.cpp:4222	narrow-extend	zero/sign-extends a narrow value (clrlwi/extsh) at a call, entry or join where ours treats it as promoted	#2
+src/Sscrn/ss_term.cpp:17	prologue-copy-death	fmr/mr parameter copy ranked as if the incoming reg did not die (regmove REG_DEAD)	candidate #8 (end-of-file order: the round of Widget<SUB_SCREEN>::~Widget). The
+src/Sscrn/ss_term.cpp:34	prologue-copy-death	fmr/mr parameter copy ranked as if the incoming reg did not die (regmove REG_DEAD)	candidate #8
+src/Sscrn/ss_term.cpp:770	prologue-copy-death	fmr/mr parameter copy ranked as if the incoming reg did not die (regmove REG_DEAD)	candidate #8
+src/st1/r103.cpp:141	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 (local-alloc qty order of the two pool highs). The
+src/st1/r103.cpp:267	loop-exit-form	peeled FP loop exit test (source form)	#7/#9).
+src/st1/r113.cpp:153	loop-entry-rotation	rotated loop entry (source form)	candidate #9
+src/st2/r222.cpp:246	other		note in r222_BoxMove).
+src/st2/r222.cpp:261	gcse-frame-high-PRE	no hoisted &local / high(sym) pseudo (gcse PRE placement), fresh addi/lis per use	#3 (the original's gcse shares one `high` of the 2.12 constant between the two arms
+src/st2/r20e.cpp:238	sched1-tie/hoist	intrablock order or a copy hoisted over a test (stock haifa; source-form lever)	#5 (codeless sched1 slot): local-alloc marks a qty's FAKE lifetime
+src/st2/r20e.cpp:1097	loop-insn-count	loop.c move_movables hoists (or not) an invariant depending on the loop's real insn count / register weight	candidate (loop.c pass-2 insn_count). Two dead sets of `key` (flow deletes
+src/Sscrn/ss_shop.cpp:1116	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17. The target allocates `val` (17 refs / 270 insns) above `this`
+src/Sscrn/ss_shop.cpp:1131	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13. `zero` is set once at the top of the k loop and stored once after it
+src/Sscrn/ss_shop.cpp:1151	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (see above)
+src/Sscrn/ss_shop.cpp:1239	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (see above)
+src/Sscrn/ss_shop.cpp:2053	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	13. `cur` is the digit block's `val[]` index: a single constant set whose
+src/Sscrn/ss_shop.cpp:2069	gcse-frame-high-PRE	no hoisted &local / high(sym) pseudo (gcse PRE placement), fresh addi/lis per use	3
+src/Sscrn/ss_shop.cpp:2208	gcse-frame-high-PRE	no hoisted &local / high(sym) pseudo (gcse PRE placement), fresh addi/lis per use	3
+src/Sscrn/ss_shop.cpp:2552	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	12 (combine). The target keeps `extsb` before `addi -1; clrlwi 24; slwi 12`; our
+src/st1/r101.cpp:474	other		frame layout -- codeless use that keeps the 8-byte slot allocated
+src/st2/r218.cpp:36	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12 (loop-exit form). After a `do { ..; if (c) break; SceSleep(1); } while (1)`
+src/st2/r218.cpp:193	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12 (loop-exit form)
+src/st2/r218.cpp:233	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12 (loop-exit form)
+src/st2/r218.cpp:323	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12 (loop-exit form)
+src/st2/r218.cpp:343	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12 (loop-exit form)
+src/st2/r209.cpp:1277	sched-tie	haifa sched1/sched2 tie-break: two independent insns in the other order, region split, slot filler	candidate (sched1 order of the pool/work highs): the seId store through the
+src/st2/r209.cpp:1362	sched-tie	haifa sched1/sched2 tie-break: two independent insns in the other order, region split, slot filler	candidate (sched1 order of the pool/work highs), see r209_SwitchAppearCheck
+src/st1/r10f.cpp:113	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 (value-carrying pin): the pG temp of the setSubMotion block is
+src/st2/r221.cpp:1246	narrow-extend	zero/sign-extends a narrow value (clrlwi/extsh) at a call, entry or join where ours treats it as promoted	2 (pin): the original keeps both `clrlwi r8,r16,24` for `(u8) eff0`; our combine
+src/st2/r221.cpp:1263	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 (global-alloc priority tie eff2 vs the pG high). `evNo` is set
+src/st2/r221.cpp:1276	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 (see the declaration)
+src/st2/r221.cpp:1348	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 (always 0, see the declaration)
+src/Sscrn/ss_item.cpp:822	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17
+src/Sscrn/ss_item.cpp:1271	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	12. The target keeps both arm `li`s in place and masks `& 0xFF`; with a plain
+src/Sscrn/ss_item.cpp:1278	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	12
+src/Sscrn/ss_item.cpp:1281	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	12 (dead set, see above)
+src/Sscrn/ss_item.cpp:1284	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	12 (dead set, see above)
+src/Sscrn/ss_item.cpp:1322	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17
+src/Sscrn/ss_item.cpp:1323	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17
+src/st1/r100.cpp:381	argmove-order	FP arg moves interleaved with trailing int constants at a mixed int/float call (calls.c load_register_parameters)	the plain `vol` argument schedules differently across the three calls;
+src/Sscrn/ss_pzzl.cpp:334	sched1-tie/hoist	intrablock order or a copy hoisted over a test (stock haifa; source-form lever)	5 (sched1 tie). Case 1 of the target issues the `col` copy before the
+src/Sscrn/ss_pzzl.cpp:667	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	13.
+src/Sscrn/ss_pzzl.cpp:683	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	13.
+src/Sscrn/ss_pzzl.cpp:891	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	candidate #13 (gcse expression-table size). Six dead stores (flow1 deletes
+src/Sscrn/ss_pzzl.cpp:983	gcse-frame-high-PRE	no hoisted &local / high(sym) pseudo (gcse PRE placement), fresh addi/lis per use	3).
+src/Sscrn/ss_pzzl.cpp:1611	narrow-truncate	no int->u16/u8 truncation at a call or narrow return; masks a u8-returning call assigned to u16	4 (the u8 results assigned to u16 locals are masked with `clrlwi 16`)
+src/Sscrn/ss_pzzl.cpp:1663	jump2-crossjump	shared tail duplicated or merged differently (RTL at jump2 entry)	6)
+src/Sscrn/ss_pzzl.cpp:2025	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12 (cse2 qty order). Dead store (flow1 deletes it)
+src/Sscrn/ss_pzzl.cpp:2054	global-alloc-order	callee-saved register names permuted: global.c priority / pass-0 regs_used_so_far	candidate (global-alloc priority, dead test). Extends `st`'s live
+src/st1/r10c.cpp:661	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 -- the last EstSet's two stack-argument zeros come from one
+src/st1/r10c.cpp:681	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 (both 0, see `z`)
+src/st1/r10c.cpp:923	gcse-frame-high-PRE	no hoisted &local / high(sym) pseudo (gcse PRE placement), fresh addi/lis per use	3 -- the original's `high(0.0)` for the `angX = 0.0f` loads below is a
+src/st4/r404.cpp:671	loop-entry-rotation	rotated loop entry (source form)	9: the original enters the rotated loop through `b test` without duplicating the test.
+src/st1/r106.cpp:293	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 (local-alloc qty order of the two pool highs), the
+src/st1/r106.cpp:418	loop-exit-form	peeled FP loop exit test (source form)	#7/#9 (not a diff).
+src/em35/em35.cpp:3652	jump2-crossjump	shared tail duplicated or merged differently (RTL at jump2 entry)	#6 shape: ours cross-jumps them).
+src/st1/r108.cpp:168	gcse-frame-high-PRE	no hoisted &local / high(sym) pseudo (gcse PRE placement), fresh addi/lis per use	3 -- the original forms the end pointer from the array pseudo (`addi r29,r31,40`),
+src/st1/r108.cpp:361	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12 (loop-exit form). The dead loop's notes end cse1's AROUND path over the
+src/st1/r105.cpp:829	loop-exit-form	peeled FP loop exit test (source form)	#7/#9).
+src/Sscrn/ss_map.cpp:12	prologue-copy-death	fmr/mr parameter copy ranked as if the incoming reg did not die (regmove REG_DEAD)	candidate #8; ours queues it when atari.h's class is finished). Both
+src/Sscrn/ss_map.cpp:1281	sched1-tie/hoist	intrablock order or a copy hoisted over a test (stock haifa; source-form lever)	5 (sched1 tie): the original issues the `&zero` argument copy before the
+src/st4/r402.cpp:390	gcse-frame-high-PRE	no hoisted &local / high(sym) pseudo (gcse PRE placement), fresh addi/lis per use	3
+src/t_sce/t_block.cpp:893	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 (global-alloc order of n vs the rep2 load)
+src/t_sce/t_block.cpp:1051	gcse-frame-high-PRE	no hoisted &local / high(sym) pseudo (gcse PRE placement), fresh addi/lis per use	3 (loop.c pass-1 insn_count, dead sets)
+src/t_sce/t_sce_item.cpp:774	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12 (cse path / PRE copy)
+src/t_sce/t_sce_item.cpp:775	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12 (cse path / PRE copy)
+src/t_sce/t_sce_item.cpp:776	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12 (cse path / PRE copy)
+src/t_sce/t_sce_item.cpp:777	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12 (cse path / PRE copy)
+src/t_sce/t_sce_item.cpp:795	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (region split, dead test)
+src/t_sce/t_sce_item.cpp:1702	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17
+src/t_event/t_event.cpp:437	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12 (fallthrough-arm form): the original stores a fresh `li r0,0`; a
+src/t_event/t_event.cpp:1221	gcse-table/numbering	gcse PRE pseudo numbering (hash bucket order) or expression-table size decides a callee-saved register tie	candidate (gcse table size): the edit-window ctor anchor (dbg_tool.h) is one
+src/t_event/t_event.cpp:1240	sched1-tie/hoist	intrablock order or a copy hoisted over a test (stock haifa; source-form lever)	candidate #5 (sched1 tie): the original issues `loadArg = t` before `pLoadFunc =
+src/t_event/t_event.cpp:1271	other		frame-only T local (24 bytes) of the original
+src/t_event/t_event.cpp:1632	gcse-table/numbering	gcse PRE pseudo numbering (hash bucket order) or expression-table size decides a callee-saved register tie	candidate (gcse PRE pseudo numbering): 13 dead pseudos before the inlined
+src/t_movie/snd_test.cpp:1377	rodata-copies	duplicated .rodata entries	candidate #10 - the original build keeps separate .rodata copies of 1-char string
+src/t_movie/t_snd_vol.cpp:128	sched1-tie/hoist	intrablock order or a copy hoisted over a test (stock haifa; source-form lever)	5 (interblock region size: the original does not hoist the giv increments of this loop)
+src/t_movie/t_snd_vol.cpp:651	local-alloc-qty-order	block-local scratch registers (r0/r9/r11, f0/f13) permuted: local-alloc.c block_alloc qty order	register pin (local-alloc gives ne r10 / editMode r8; the target has r8 / r7)
+src/t_movie/t_snd_vol.cpp:1031	local-alloc-qty-order	block-local scratch registers (r0/r9/r11, f0/f13) permuted: local-alloc.c block_alloc qty order	candidate (local-alloc qty order)
+src/t_movie/t_snd_vol.cpp:1032	local-alloc-qty-order	block-local scratch registers (r0/r9/r11, f0/f13) permuted: local-alloc.c block_alloc qty order	candidate (local-alloc qty order)
+src/t_movie/t_snd_vol.cpp:1046	gcse-frame-high-PRE	no hoisted &local / high(sym) pseudo (gcse PRE placement), fresh addi/lis per use	3 -- the original computes `base - 4` and `base + rows * 0x14 + 4` here from a copy of
+src/t_movie/t_snd_vol.cpp:1051	local-alloc-qty-order	block-local scratch registers (r0/r9/r11, f0/f13) permuted: local-alloc.c block_alloc qty order	candidate (local-alloc qty order)
+src/t_movie/t_snd_vol.cpp:1052	local-alloc-qty-order	block-local scratch registers (r0/r9/r11, f0/f13) permuted: local-alloc.c block_alloc qty order	candidate (local-alloc qty order)
+src/t_movie/t_snd_vol.cpp:1172	global-alloc-order	callee-saved register names permuted: global.c priority / pass-0 regs_used_so_far	pin (global-alloc order: the target allocates work before p: work r11, p r10, Joy r10)
+src/t_movie/t_snd_vol.cpp:1175	register-pin	register pin (which hard register a value takes)	pin
+src/t_movie/t_snd_vol.cpp:1180	register-pin	register pin (which hard register a value takes)	pin
+src/t_movie/t_snd_vol.cpp:1183	register-pin	register pin (which hard register a value takes)	pin
+src/t_movie/t_snd_vol.cpp:1221	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	launder (cse/cprop fold y = 0x80 into the first row and y += 0x10; the target keeps the y chain)
+src/t_movie/t_snd_vol.cpp:1268	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	launder (cse/cprop fold y = 0x80 into the first row and y += 0x10; the target keeps the y chain)
+src/t_id/t_id.cpp:45	narrow-truncate	no int->u16/u8 truncation at a call or narrow return; masks a u8-returning call assigned to u16	#4: the original passes the (u32) converted height without the u16 truncation.
+src/t_id/t_id.cpp:99	other		candidate (the target keeps a 1 in r30 from the prologue for the two lang = 1 arms)
+src/t_id/t_id.cpp:227	sched-tie	haifa sched1/sched2 tie-break: two independent insns in the other order, region split, slot filler	dead test (haifa MAX_RGN_BLOCKS: the body has 9 blocks and forms an interblock
+src/t_id/t_id.cpp:712	local-alloc-qty-order	block-local scratch registers (r0/r9/r11, f0/f13) permuted: local-alloc.c block_alloc qty order	candidate (local-alloc qty order: with exactly 3 block-local
+src/t_id/t_id.cpp:755	gcse-frame-high-PRE	no hoisted &local / high(sym) pseudo (gcse PRE placement), fresh addi/lis per use	3 (loop.c insn_count, dead sets)
+src/t_id/t_id.cpp:976	other		anchor
+src/t_id/t_id.cpp:1002	gcse-frame-high-PRE	no hoisted &local / high(sym) pseudo (gcse PRE placement), fresh addi/lis per use	3 (loop.c pass-1 insn_count, dead sets)
+src/t_id/t_id.cpp:1294	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	#17 (col r5 vs r30, local ext pref)
+src/t_id/t_id.cpp:2012	gcse-frame-high-PRE	no hoisted &local / high(sym) pseudo (gcse PRE placement), fresh addi/lis per use	3 (loop.c pass-2 insn_count)
+src/t_id/t_id.cpp:2014	gcse-frame-high-PRE	no hoisted &local / high(sym) pseudo (gcse PRE placement), fresh addi/lis per use	3 (loop.c pass-2 insn_count, dead sets)
+src/t_id/t_id.cpp:2197	global-alloc-order	callee-saved register names permuted: global.c priority / pass-0 regs_used_so_far	pin (global-alloc order: the target allocates step (r11) before joy (r10))
+src/t_id/t_id.cpp:2347	gcse-frame-high-PRE	no hoisted &local / high(sym) pseudo (gcse PRE placement), fresh addi/lis per use	3 (loop.c pass-1 insn_count, dead sets)
+src/t_id/t_id.cpp:2410	sched-tie	haifa sched1/sched2 tie-break: two independent insns in the other order, region split, slot filler	candidate (sched tie: the target's `li r24,0xc` sits between cmpwi and bne,
+src/t_id/t_id.cpp:2422	sched-tie	haifa sched1/sched2 tie-break: two independent insns in the other order, region split, slot filler	candidate (sched1 tie `li r3,0x128` vs `addi r7,fmt@l` at the CLIPBOARD eprintf
+src/t_light/t_scroll.cpp:317	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (keep-alive: the `addi p` outranks the exit compare in the original)
+src/t_light/t_scroll.cpp:519	gcse-frame-high-PRE	no hoisted &local / high(sym) pseudo (gcse PRE placement), fresh addi/lis per use	3 (gcse PRE of high(sym)) -- the original keeps ONE high(scrollWorkPtr) register (r10)
+src/t_light/t_scroll.cpp:1795	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	#17 -- the tail column base pinned to r27 (x for 4/8 lives in r3 and never crosses a
+src/t_light/t_scroll.cpp:1805	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 -- a volatile asm at the function top is a sched1 barrier: the PRE'd
+src/t_light/t_scroll.cpp:1870	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 (global.c live length) -- the high of this load is the PRE'd
+src/t_light/t_scroll.cpp:1882	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 / candidate #12 -- the two `li r27,0x11` are gcse PRE insertions at the arm ends
+src/t_light/t_scroll.cpp:1904	argmove-order	FP arg moves interleaved with trailing int constants at a mixed int/float call (calls.c load_register_parameters)	candidate #1 (arg copy): the target issues `addi r3,x2,3` before `lwz r8,x54`;
+src/em2f/em2f.cpp:314	argmove-order	FP arg moves interleaved with trailing int constants at a mixed int/float call (calls.c load_register_parameters)	#1
+src/t_movie/t_se_at.cpp:177	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (memory anchor)
+src/t_movie/t_se_at.cpp:179	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (memory anchor)
+src/t_movie/t_se_at.cpp:871	narrow-extend	zero/sign-extends a narrow value (clrlwi/extsh) at a call, entry or join where ours treats it as promoted	2 (the original masks the u8 colour at the join; the draw_light_graph form)
+src/em32/em32.cpp:120	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12 (cse path knowledge): in a `case` arm reached through the switch's once-used label
+src/em32/em32.cpp:706	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13
+src/em32/em32.cpp:707	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13
+src/em32/em32.cpp:733	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13
+src/em32/em32.cpp:734	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13
+src/em32/em32.cpp:735	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13
+src/em32/em32.cpp:749	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (codeless anchor)
+src/em32/em32.cpp:2050	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12
+src/em32/em32.cpp:2783	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12
+src/em32/em32.cpp:3357	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	#12
+src/em3c/em3c.cpp:1573	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (int shape): the EstSet stack zero of the then-arm is a function-scope
+src/game/em_cloth.cpp:209	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	13 (local-alloc qty order): a codeless prio-4 filler issued before the
+src/game/emBar.cpp:406	other		tie (see above)
+src/game/act_btn.cpp:112	local-alloc-qty-order	block-local scratch registers (r0/r9/r11, f0/f13) permuted: local-alloc.c block_alloc qty order	candidate (local-alloc order): `fontH / 2` is computed in the MesSet argument
+src/game/act_btn.cpp:164	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	13 (value pin): `key` is assigned in several leaves, so it is a global-alloc pseudo
+src/game/act_btn.cpp:299	jump2-crossjump	shared tail duplicated or merged differently (RTL at jump2 entry)	6 (cross-jump): codeless real insn, see the header comment
+src/game/merchant.cpp:1639	loop-insn-count	loop.c move_movables hoists (or not) an invariant depending on the loop's real insn count / register weight	candidate (loop.c pass-2 insn_count). The original's outer loop had
+src/game/at_mod.cpp:759	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	12 (cse AROUND path): the target's `&p0` argument is a fresh `addi r4,r1,8` (the
+src/game/at_mod.cpp:781	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	13 (FPR naming): den is settled in f0 before the t numerator is formed. The
+src/game/Espgen43.cpp:18	other		note there); everything else is plain C.
+src/game/lightPath.cpp:71	loop-insn-count	loop.c move_movables hoists (or not) an invariant depending on the loop's real insn count / register weight	tie. The loop notes double this store's `this` ref weight (9 refs > pCur's
+src/game/obj00.cpp:233	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 (global.c pass 0 regs_used_so_far): a codeless call-crossing
+src/game/EtcModel.cpp:3060	jump2-crossjump	shared tail duplicated or merged differently (RTL at jump2 entry)	6 (cross-jump survivor). The original lays the 0x404..0x411 `return 1` block out
+src/game/option.cpp:684	global-alloc-order	callee-saved register names permuted: global.c priority / pass-0 regs_used_so_far	candidate (global.c allocno order: sel 29/338 must outrank o 42/600 for r31)
+src/game/option.cpp:764	global-alloc-order	callee-saved register names permuted: global.c priority / pass-0 regs_used_so_far	candidate (global alloc order): pSys must be allocated after DEFAULT
+src/game/option.cpp:769	local-alloc-qty-order	block-local scratch registers (r0/r9/r11, f0/f13) permuted: local-alloc.c block_alloc qty order	candidate (local-alloc qty order): the byte-narrowed DEFAULT must take
+src/game/puzzle.cpp:328	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	#17 (value pin)
+src/game/puzzle.cpp:391	other		px as a one-byte struct. A RECORD_TYPE local is not PROMOTE_MODEd, so `w` is
+src/game/puzzle.cpp:1100	loop-entry-rotation	rotated loop entry (source form)	#9, closed: a source form, not a compiler difference).
+src/game/puzzle.cpp:1508	loop-insn-count	loop.c move_movables hoists (or not) an invariant depending on the loop's real insn count / register weight	the target re-extends edge after the size_y call (extsb r30,r30; addi r30,r30,1); ours proves it sign-extended and, edge crossing calls, would hoist t
+src/game/puzzle.cpp:1656	other		lines below
+src/game/puzzle.cpp:1747	global-alloc-order	callee-saved register names permuted: global.c priority / pass-0 regs_used_so_far	codeless copy of the dead r31 value: `last` then crosses the get() call and takes the first callee-saved reg, r31
+src/game/puzzle.cpp:1748	gcse-table/numbering	gcse PRE pseudo numbering (hash bucket order) or expression-table size decides a callee-saved register tie	makes the copy unavailable to gcse's copy propagation; flow deletes it (p is dead)
+src/game/puzzle.cpp:1765	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	keeps the copy live across the call (an output-less asm is volatile and flushes cse's ItemMgr high)
+src/game/motion.cpp:348	other		dead use makes the zero global (r11), w->flags takes r0
+src/game/motion.cpp:410	other		anchor, the type load stays after the frame store
+src/game/motion.cpp:959	launder	asm launder hides a value from cse/combine/gcse	launder, the extra insn on the r4 path ranks both addi r4 above mr r3
+src/game/motion.cpp:1078	other		pp must outrank w for r31
+src/game/motion.cpp:1322	gcse-table/numbering	gcse PRE pseudo numbering (hash bucket order) or expression-table size decides a callee-saved register tie	gcse copy kept).
+src/game/motion.cpp:1325	other		last must outrank n for r30
+src/game/motion.cpp:1327	keep-alive	codeless asm keeps a value live / adds a dependence	keep-alive for the r0 temp
+src/game/motion.cpp:1334	other		the table lis is issued before the fp init
+src/game/t_flag.cpp:275	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	#17. The original keeps `cur & 0xF` in scratch r11, untied from x's
+src/game/espgen10.cpp:25	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 block: the original never allocates `list` (REG_EQUIV symbol_ref) and
+src/game/texture.cpp:98	local-alloc-qty-order	block-local scratch registers (r0/r9/r11, f0/f13) permuted: local-alloc.c block_alloc qty order	candidate (local-alloc qty order). The target names the three offset
+src/game/esp45.cpp:228	loop-insn-count	loop.c move_movables hoists (or not) an invariant depending on the loop's real insn count / register weight	candidate (loop.c pass-1 insn_count). Dead test (+3 real insns: the store
+src/game/esp18.cpp:233	loop-insn-count	loop.c move_movables hoists (or not) an invariant depending on the loop's real insn count / register weight	candidate (loop.c insn_count)
+src/game/esp0e.cpp:310	loop-insn-count	loop.c move_movables hoists (or not) an invariant depending on the loop's real insn count / register weight	candidate (loop.c pass-1 insn_count). Dead test (+3 real insns at loop
+src/game/esp09.cpp:319	global-alloc-order	callee-saved register names permuted: global.c priority / pass-0 regs_used_so_far	candidate (global-alloc priority): +1 insn in esp's range only
+src/game/esp09.cpp:325	global-alloc-order	callee-saved register names permuted: global.c priority / pass-0 regs_used_so_far	candidate (global-alloc priority)
+src/game/esp09.cpp:328	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate (cse canonical register): tied copy, regmove emits the mr
+src/game/esp09.cpp:357	global-alloc-order	callee-saved register names permuted: global.c priority / pass-0 regs_used_so_far	candidate (global-alloc priority)
+src/game/cam_extra.cpp:755	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (keep-alive)
+src/game/espgen02.cpp:137	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	#17. colR pinned to f24 (global-alloc order of the three 0.0f copies); no
+src/game/objRobo.cpp:539	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	#17 (FPR value pin): a hard-register `to` keeps the for-init copy `range = to` out of gcse's copy propagation
+src/game/objRobo.cpp:591	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	#17 (FPR value pin): a hard-register `to` keeps the for-init copy `range = to` out of gcse's copy propagation
+src/game/cam_qfps.cpp:1178	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (value pin)
+src/game/cam_qfps.cpp:1179	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (value pin)
+src/game/cam_qfps.cpp:1197	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (keep-alive)
+src/game/esp12.cpp:89	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13
+src/game/esp12.cpp:90	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (hoisted conversion constant)
+src/game/esp12.cpp:110	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (hoisted conversion constant)
+src/game/esp12.cpp:114	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13
+src/game/esp12.cpp:115	sched-tie	haifa sched1/sched2 tie-break: two independent insns in the other order, region split, slot filler	candidate (sched block split)
+src/game/esp12.cpp:145	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (keep-alive)
+src/game/esp04.cpp:109	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	#17 (FPR value pin)
+src/game/esp04.cpp:116	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (keep-alive)
+src/game/shadow.cpp:370	sched1-tie/hoist	intrablock order or a copy hoisted over a test (stock haifa; source-form lever)	5 (interblock hoist of the `mr r3, em` argument copy above the flag test)
+src/game/shadow.cpp:700	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	13 (local-alloc qty order): r11 pinned after the 1.0 load and before the
+src/game/shadow.cpp:776	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	13 (local-alloc qty order): see make_comn_fit_light.
+src/game/shadow.cpp:1307	sched1-tie/hoist	intrablock order or a copy hoisted over a test (stock haifa; source-form lever)	5 (interblock hoist of the `mr r3, obj` argument copy above the flag test)
+src/game/em_sub.cpp:3023	other		candidate (jump2 cross-jump order vs the
+src/game/card.cpp:1943	dead-test	a dead test/statement shifts an insn count (gcse table, loop.c, sched region)	dead statement (second use of t)
+src/game/debug.cpp:146	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	cse class head of the zero. Tile 1's `z0 = 0` stays a single-use pseudo
+src/game/debug.cpp:282	loop-insn-count	loop.c move_movables hoists (or not) an invariant depending on the loop's real insn count / register weight	loop.c insn_count stand-in. The "%5.0f %s" format high is the loop's last
+src/game/db_menu.cpp:281	other		candidate (jump2-only deleted arm). The target keeps a dead
+src/game/item.cpp:7	jump2-crossjump	shared tail duplicated or merged differently (RTL at jump2 entry)	#6, 11 call tails), get /
+src/game/item.cpp:1227	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (the flag-table size as a reload-materialised constant, weight 0 like the
+src/game/item.cpp:1990	jump2-crossjump	shared tail duplicated or merged differently (RTL at jump2 entry)	6 (layout: keeps the healing arms apart at jump2)
+src/game/item.cpp:1997	jump2-crossjump	shared tail duplicated or merged differently (RTL at jump2 entry)	6 (layout: keeps the healing arms apart at jump2)
+src/game/item.cpp:2003	jump2-crossjump	shared tail duplicated or merged differently (RTL at jump2 entry)	6 (layout: keeps the healing arms apart at jump2)
+src/game/item.cpp:2009	jump2-crossjump	shared tail duplicated or merged differently (RTL at jump2 entry)	6 (layout: keeps the healing arms apart at jump2)
+src/game/item.cpp:2015	jump2-crossjump	shared tail duplicated or merged differently (RTL at jump2 entry)	6 (layout: keeps the healing arms apart at jump2)
+src/game/item.cpp:2021	jump2-crossjump	shared tail duplicated or merged differently (RTL at jump2 entry)	6 (layout: keeps the healing arms apart at jump2)
+src/game/item.cpp:2027	jump2-crossjump	shared tail duplicated or merged differently (RTL at jump2 entry)	6 (layout: keeps the healing arms apart at jump2)
+src/game/item.cpp:2033	jump2-crossjump	shared tail duplicated or merged differently (RTL at jump2 entry)	6 (layout: keeps the healing arms apart at jump2)
+src/game/item.cpp:2039	jump2-crossjump	shared tail duplicated or merged differently (RTL at jump2 entry)	6 (layout: keeps the healing arms apart at jump2)
+src/game/item.cpp:2045	jump2-crossjump	shared tail duplicated or merged differently (RTL at jump2 entry)	6 (layout: keeps the healing arms apart at jump2)
+src/game/item.cpp:2051	jump2-crossjump	shared tail duplicated or merged differently (RTL at jump2 entry)	6 (layout: keeps the healing arms apart at jump2)
+src/game/item.cpp:2282	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	17 (local-alloc fake-lifetime parity: the pArm load reuses r0 right after the x8 store's value dies)
+src/game/item.cpp:2322	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	17 (local-alloc fake-lifetime parity: the pArm load reuses r0 right after the x8 store's value dies)
+src/game/item.cpp:2637	narrow-extend	zero/sign-extends a narrow value (clrlwi/extsh) at a call, entry or join where ours treats it as promoted	#2 (the original masks the u16 member before the call)
+src/game/item.cpp:2857	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (the 0xFFFF re-materialised at the store)
+src/game/sce_sys.cpp:563	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	12 (AROUND form): the loop notes end cse1's path from the skipped `if` block, so
+src/game/sce_sys.cpp:571	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 (global.c pass 0 regs_used_so_far): r30 used-so-far makes `on`
+src/game/cam_ctrl.cpp:383	other		codeless anchor. The empty loop leaves NOTE_INSN_LOOP_BEG/END here, which ends
+src/game/cam_ctrl.cpp:421	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	register pin (r29) plus launder. The pin keeps `at` out of cse's canonical class
+src/game/cam_ctrl.cpp:1552	gcse-frame-high-PRE	no hoisted &local / high(sym) pseudo (gcse PRE placement), fresh addi/lis per use	#3 there).
+src/game/cam_ctrl.cpp:1808	gcse-frame-high-PRE	no hoisted &local / high(sym) pseudo (gcse PRE placement), fresh addi/lis per use	#3 fresh-addi arguments. The target recomputes the three pointer arguments of
+src/game/cam_ctrl.cpp:1946	narrow-extend	zero/sign-extends a narrow value (clrlwi/extsh) at a call, entry or join where ours treats it as promoted	2: the int copy + (u8) re-extend the loaded byte as the original does
+src/game/emBarred.cpp:9	argmove-order	FP arg moves interleaved with trailing int constants at a mixed int/float call (calls.c load_register_parameters)	#1 (atari_init.h AtariInit).
+src/game/model.cpp:334	gcse-frame-high-PRE	no hoisted &local / high(sym) pseudo (gcse PRE placement), fresh addi/lis per use	3 (address-copy shape). The original computes `&p->worldMat` into a temp
+src/game/model.cpp:344	gcse-frame-high-PRE	no hoisted &local / high(sym) pseudo (gcse PRE placement), fresh addi/lis per use	3 (keep-alive for the r0 temp)
+src/game/model.cpp:553	gcse-table/numbering	gcse PRE pseudo numbering (hash bucket order) or expression-table size decides a callee-saved register tie	candidate (gcse PRE pseudo numbering). Four dead pool constants (labels consumed
+src/game/filter06.cpp:137	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	#17. The alphaBase load/product live in r11 in the original (the fast-cast
+src/game/event.cpp:14	gcse-frame-high-PRE	no hoisted &local / high(sym) pseudo (gcse PRE placement), fresh addi/lis per use	candidate #3: the original's gcse copies the strcpy argument pseudo right after
+src/game/event.cpp:23	jump2-crossjump	shared tail duplicated or merged differently (RTL at jump2 entry)	6 shape).
+src/game/event.cpp:314	other		candidate (the mes `mr.` family). The original keeps `mr r9,r0; cmpwi r9,0`
+src/game/event.cpp:2084	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	#17
+src/game/event.cpp:2092	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	#17. r27 was used-so-far in the original's global-alloc pass 0 and
+src/game/event.cpp:2102	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	#17 (companion). A codeless memory-operand asm = one more real insn inside the
+src/game/event.cpp:2709	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (single-use zero set in another block: update_equiv_regs moves the li to the store, r0)
+src/game/emrock.cpp:137	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (dying-store shape): the original's zero pseudo (REG_EQUIV 0, never
+src/game/emrock.cpp:185	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13
+src/game/sce_at.cpp:1079	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	13 (global-alloc rotation it/ItemMgr/money): money pinned to the
+src/game/sce_at.cpp:1197	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12 (r0 pin): cse1 follows the `bne` into the else arm and would
+src/game/sce_at.cpp:1302	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	codeless def: a mention of sel before the result block so cse1 makes sel the
+src/game/sce_at.cpp:1437	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12 (r0 pin): cse1 follows the `bne` into the else arm and would
+src/game/sce_at.cpp:2046	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13. The original's 0.0 is a reload-materialised constant (f13, the FPR after
+src/game/sce_at.cpp:2839	gcse-table/numbering	gcse PRE pseudo numbering (hash bucket order) or expression-table size decides a callee-saved register tie	gcse PRE pseudo numbering. One extra pseudo before the matrix copies: without it the
+src/game/exception.cpp:523	gcse-table/numbering	gcse PRE pseudo numbering (hash bucket order) or expression-table size decides a callee-saved register tie	candidate (gcse PRE pseudo numbering): 15 dead pool constants shift the string
+src/game/mercenaries.cpp:149	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (int shape): the original never allocates the single-use REG_EQUIV zero;
+src/game/mercenaries.cpp:152	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13
+src/game/mercenaries.cpp:252	global-alloc-order	callee-saved register names permuted: global.c priority / pass-0 regs_used_so_far	tie (global-alloc live length)
+src/game/mes.cpp:776	combine	combine fuses/keeps insns differently (mr. vs mr+cmpwi)	candidate (combine: the original keeps the call-result copy and `cmpwi` apart, ours fuses them into `mr.`)
+src/game/mes.cpp:862	combine	combine fuses/keeps insns differently (mr. vs mr+cmpwi)	candidate (combine: the original keeps the call-result copy and `cmpwi` apart, ours fuses them into `mr.`)
+src/game/esp16.cpp:165	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13
+src/game/esp16.cpp:190	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13
+src/game/esp16.cpp:197	sched-tie	haifa sched1/sched2 tie-break: two independent insns in the other order, region split, slot filler	candidate (sched block split)
+src/game/esp_app.cpp:356	sched-tie	haifa sched1/sched2 tie-break: two independent insns in the other order, region split, slot filler	candidate (sched2 issue-slot filler)
+src/game/esp_app.cpp:484	local-alloc-qty-order	block-local scratch registers (r0/r9/r11, f0/f13) permuted: local-alloc.c block_alloc qty order	candidate (local-alloc qty order)
+src/game/route_ck.cpp:435	reload	reload_cse register table / reload spill register choice	candidate (reload_cse register table): the original keeps `mr r3,r31; mr r4,r29`
+src/game/pad.cpp:76	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	#17
+src/game/pad.cpp:79	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (sched barrier, no code)
+src/game/db_cam.cpp:511	sched-tie	haifa sched1/sched2 tie-break: two independent insns in the other order, region split, slot filler	candidate (sched2 tie: the target issues `lwz r0,4(r9)` before
+src/game/pl_wep.cpp:1046	other		candidate (sched LUID): the target issues the 0.0 pool load before the m3r[2]
+src/game/pl_wep.cpp:1121	prologue-copy-death	fmr/mr parameter copy ranked as if the incoming reg did not die (regmove REG_DEAD)	#8
+src/game/pl_wep.cpp:1123	prologue-copy-death	fmr/mr parameter copy ranked as if the incoming reg did not die (regmove REG_DEAD)	#8 -- the original ranks `mr r29,r4` (mode) after `fmr f31,f1`, i.e. as if r4
+src/game/pl_wep.cpp:1232	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	13 (value pin): the target's 2/PI high sits in r11 and pWep in r9 -- the
+src/game/pl_wep.cpp:1240	sched-tie	haifa sched1/sched2 tie-break: two independent insns in the other order, region split, slot filler	candidate (sched barrier): the first insn after LOOP_BEG is the sched1
+src/game/room_jmp.cpp:138	local-alloc-qty-order	block-local scratch registers (r0/r9/r11, f0/f13) permuted: local-alloc.c block_alloc qty order	tie. The loop notes double the weight of this `ofs` set, so local-alloc
+src/game/pl_class.cpp:1730	narrow-extend	zero/sign-extends a narrow value (clrlwi/extsh) at a call, entry or join where ours treats it as promoted	2 (narrow-argument extension at entry). The original zero-extends the u8
+src/game/emmine.cpp:990	gcse-table/numbering	gcse PRE pseudo numbering (hash bucket order) or expression-table size decides a callee-saved register tie	candidate (gcse PRE pseudo numbering): two dead sets (deleted by flow) take the
+src/game/emmine.cpp:1188	cse-path	cse hash table not carried into a block along the AROUND/taken path; fresh lis/li where ours reuses a register	candidate #12 (cse wider-mode zero fold): the original stores the known-zero
+src/game/pendulum.cpp:53	other		codeless anchors (see docs/research/ "DOL pendulum closer pass 2"). The final loop's
+src/game/pendulum.cpp:320	register-pin	register pin (which hard register a value takes)	register pins + address copy (see docs/research/ "DOL pendulum closer
+src/game/pendulum.cpp:340	launder	asm launder hides a value from cse/combine/gcse	launder (see docs/research/ "DOL pendulum closer pass 2"). Hides ang == 1.0
+src/game/pendulum.cpp:566	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	#17 (register pin): pp above i in global-alloc
+src/game/t_bugcheck.cpp:133	sched-tie	haifa sched1/sched2 tie-break: two independent insns in the other order, region split, slot filler	candidate (combine): the `&pl->rot` pseudo must reach sched1 uncombined
+src/game/t_bugcheck.cpp:143	gcse-table/numbering	gcse PRE pseudo numbering (hash bucket order) or expression-table size decides a callee-saved register tie	candidate (gcse hash bucket of the .LC label name): one more constant
+src/game/t_bugcheck.cpp:178	gcse-table/numbering	gcse PRE pseudo numbering (hash bucket order) or expression-table size decides a callee-saved register tie	candidate (gcse hash bucket of the .LC label name): the nine hoisted string
+src/game/t_bugcheck.cpp:297	global-alloc-order	callee-saved register names permuted: global.c priority / pass-0 regs_used_so_far	tie (global-alloc live length): two more insns in the loop at global-alloc
+src/game/t_option.cpp:264	argmove-order	FP arg moves interleaved with trailing int constants at a mixed int/float call (calls.c load_register_parameters)	candidate #1 (arg-move order): the original issues the `addi r3,r30,ItemMgr@l`
+src/game/objWep.cpp:343	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	#17. `esp` is address-taken, so each store reloads it; the original's first
+src/game/sscrn.cpp:878	global-alloc-order	callee-saved register names permuted: global.c priority / pass-0 regs_used_so_far	tie (global-alloc live length): x (4 refs / 216 insns) and z (2 / 54) both truncate
+src/game/espgen45.cpp:317	loop-insn-count	loop.c move_movables hoists (or not) an invariant depending on the loop's real insn count / register weight	loop.c move_movables. The target hoists one more invariant out of the inner loop before the
+src/game/espgen45.cpp:362	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 (r0 occupant): `j / 8` pinned to r0 = a hard-register conflict of the i
+src/game/espgen45.cpp:368	sched-tie	haifa sched1/sched2 tie-break: two independent insns in the other order, region split, slot filler	candidate (sched1 slot fillers). Three codeless frame stores of `v` (dead after the
+src/game/espgen45.cpp:385	other		use of the moved asm set (see above); emits nothing
+src/game/sce_com.cpp:583	combine	combine fuses/keeps insns differently (mr. vs mr+cmpwi)	`li j,0` spelled as a mask combine folds to 0. A C `j = 0` gets cse's
+src/game/sce_com.cpp:1284	register-pin	register pin (which hard register a value takes)	register pin (see the comment above the function)
+src/game/sce_com.cpp:1330	loop-insn-count	loop.c move_movables hoists (or not) an invariant depending on the loop's real insn count / register weight	candidate (sched1 loop-note barrier). The target issues `spd += accel`
+src/game/esp08.cpp:98	other		first-tile copy canon).
+src/game/esp08.cpp:104	sched-tie	sched2 divider blockage	candidate (first-tile divider blockage)).
+src/game/esp08.cpp:127	other		candidate (first-tile copy canon) */  \
+src/game/esp08.cpp:140	loop-insn-count	loop.c move_movables hoists (or not) an invariant depending on the loop's real insn count / register weight	candidate (first-tile divider blockage): the loop notes */ \
+src/game/esp08.cpp:145	global-alloc-order	callee-saved register names permuted: global.c priority / pass-0 regs_used_so_far	candidate (keep-alive, global-alloc order) */ \
+src/game/Espgen42.cpp:206	other		store through a pointer cast (a plain store schedules differently)
+src/game/Espgen42.cpp:571	loop-insn-count	loop.c move_movables hoists (or not) an invariant depending on the loop's real insn count / register weight	candidate (loop.c insn_count): dead test, +4 real insns at loop time (lwz/cmpwi/bne/li;
+src/game/Espgen42.cpp:627	loop-insn-count	loop.c move_movables hoists (or not) an invariant depending on the loop's real insn count / register weight	loop.c move_movables. The target hoists one more invariant out of the inner loop before the
+src/game/Espgen42.cpp:672	global-alloc-order	callee-saved register names permuted: global.c pass-0 regs_used_so_far / priority order / local-alloc fake lifetime	candidate #17 (r0 occupant): `j / 8` pinned to r0 = a hard-register conflict of the i
+src/game/Espgen42.cpp:678	sched-tie	haifa sched1/sched2 tie-break: two independent insns in the other order, region split, slot filler	candidate (sched1 slot fillers). Three codeless frame stores of `v` (dead after the
+src/game/Espgen42.cpp:695	other		use of the moved asm set (see above); emits nothing
+src/game/title.cpp:179	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (REG_EQUIV zero reloaded into r11)
+src/game/title.cpp:772	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (single-use zero set in another block: update_equiv_regs moves the `li` next to the store, it takes r0 after the x3 temp)
+src/game/title.cpp:1290	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (constant spelled as a combine-folded mask)
+src/game/emwep.cpp:1123	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (keep-alive)
+src/game/emwep.cpp:1141	reg-equiv-const	a single-set constant pseudo is rematerialised by reload (li/lis/lfs at the use, never allocated) instead of held in a callee-saved register; store issue order follows	#13 (keep-alive)

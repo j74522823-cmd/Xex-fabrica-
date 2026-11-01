@@ -1,0 +1,367 @@
+// game/em_set.cpp: enemy creation from the room enemy list (ESL) in pG->Em_list. Killed list enemies
+// are recorded in the pG->Em_flg bit tables so they stay dead when the room is re-entered.
+
+#include "atari.h"
+#include "light.h"
+#include "em_set.h"
+#include "global.h"
+#include "db_log.h"
+#include "em.h"
+#include "player.h"
+
+
+cEm* errEm = 0;
+static int emSetDummy = 0;
+
+// Death bit of list entry `no` in the current enemy list (0 when no list is loaded).
+// Death bit of list entry `no` in the current list (pG->em_list_no); 0 when no list is loaded.
+static inline u32 EmSetDieCk(u32 no)
+{
+    u32 v;
+
+    if (pG->em_list_no >= 0) {
+        u32* tbl = EM_FLG_ROW(pG->em_list_no);
+
+        v = tbl[no >> 5] & (0x80000000 >> (no & 31));
+    } else {
+        v = 0;
+    }
+    return v;
+}
+
+// Sets the death bit of list entry `no` in the current list.
+static inline void EmSetDieOn(u32 no)
+{
+    if (pG->em_list_no >= 0) {
+        u32* tbl = EM_FLG_ROW(pG->em_list_no);
+
+        tbl[no >> 5] |= 0x80000000 >> (no & 31);
+    }
+}
+
+
+// While flags_68 bit21 is set only the enemies 3 and 4 may be created.
+#define EM_SET_ID_NG(id) (DbgFlagChk(pG, DBG_NO_ENEMY) && ((id) != 3 && (id) != 4))
+
+// Pulls an enemy work for `id`: the partner (0xF) and the parasite (0x25) are created at the back
+// of the pool so they move after the others.
+static inline cEm* EmCreate(u8 id)
+{
+    if (id == 0xF || id == 0x25) {
+        return EmMgr.createBack(id);
+    }
+    return EmMgr.create(id);
+}
+
+// Copy the list entry into the fresh enemy work.
+static inline void EmSetWork(cEm* em, EM_LIST* d, u8 no)
+{
+    f32 kx = 1000.0f;
+    f32 kr = 3.1415927f / 16384.0f;
+    f32 kp = 10.0f;
+
+    em->type = d->type;
+    em->set = d->set;
+    em->flag = d->flag;
+    em->Character = d->Character;
+    em->Guard_r = (f32) d->Guard_r * kx;
+    em->hp_max = em->hp = d->hp;
+    em->ang.x = (f32) d->rot[0] * kr;
+    em->ang.y = (f32) d->rot[1] * kr;
+    em->ang.z = (f32) d->rot[2] * kr;
+    em->pos.x = (f32) d->pos[0] * kp;
+    em->pos.y = (f32) d->pos[1] * kp;
+    em->pos.z = (f32) d->pos[2] * kp;
+    em->pos_old = em->pos;
+    em->emset_no = no;
+}
+
+// The same body as a macro for the two straight-line creators (EmSetFromList2, EmSetEvent): its pool
+// loads keep RTX_UNCHANGING_P, which integrate.c drops for an inlined body, and schedule like the
+// original. The loop in EmSetFromList keeps the inline.
+#define EM_SET_WORK(em, d, no)                                                            \
+    do {                                                                                  \
+        f32 kx = 1000.0f;                                                                 \
+        f32 kr = 3.1415927f / 16384.0f;                                                   \
+        f32 kp = 10.0f;                                                                   \
+        (em)->type = (d)->type;                                                           \
+        (em)->set = (d)->set;                                                             \
+        (em)->flag = (d)->flag;                                                    \
+        (em)->Character = (d)->Character;                                                             \
+        (em)->Guard_r = (f32) (d)->Guard_r * kx;                                                 \
+        (em)->hp_max = (em)->hp = (d)->hp;                                                 \
+        (em)->ang.x = (f32) (d)->rot[0] * kr;                                             \
+        (em)->ang.y = (f32) (d)->rot[1] * kr;                                             \
+        (em)->ang.z = (f32) (d)->rot[2] * kr;                                             \
+        (em)->pos.x = (f32) (d)->pos[0] * kp;                                             \
+        (em)->pos.y = (f32) (d)->pos[1] * kp;                                             \
+        (em)->pos.z = (f32) (d)->pos[2] * kp;                                             \
+        (em)->pos_old = (em)->pos;                                                         \
+        (em)->emset_no = (no);                                                             \
+    } while (0)
+
+// Squared XZ distance to the player. The `x374 = 1e16` reset is a caller statement after this call
+// because inside the inline its pool load loses RTX_UNCHANGING_P (see above), is scheduled one insn
+// too early and does not get f12.
+static inline void EmSetDist(cEm* em)
+{
+    f32 dz = pPL->pos.z - em->pos.z;
+    f32 dx = pPL->pos.x - em->pos.x;
+
+    em->l_pl = dx * dx + dz * dz;
+}
+
+
+// 1 when no live enemy already carries list entry `no` (0xFF: always 1).
+int checkListId(int no)
+{
+    u32 i;
+
+    if (no == 0xFF) {
+        return 1;
+    }
+    for (i = 0; i < EmMgr.getArrayNum(); i++) {
+        cEm* em = EmMgr.at(i);
+
+        if (em->isAlive() && em->emset_no == (u8) no) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+// Room start: creates every list entry that is alive (be_flag bit0), not yet set (bit1), not
+// recorded dead, belongs to the current stage / room, has an id and is not blocked by the debug
+// filter; copies the entry into the work, marks it set (bit1, toggling bits 2/3), computes the
+// player distance and runs the first move.
+void EmSetFromList()
+{
+    u32 i;
+
+    for (i = 0; i < 256; i++) {
+        EM_LIST* d = &pG->Em_list[i];
+        cEm* em;
+
+        if (!(d->be_flag & 1)) {
+            continue;
+        }
+        if (d->be_flag & 2) {
+            continue;
+        }
+        if (EmSetDieCk(i)) {
+            continue;
+        }
+        if (pG->stage_no != d->room >> 8) {
+            continue;
+        }
+        if (pG->room_no != (d->room & 0xFF)) {
+            continue;
+        }
+        if (checkListId(i) == 0) {
+            continue;
+        }
+        // d->id read directly: the range fold of EM_SET_ID_NG keeps the QImode load and the int
+        // uses share one PRE'd `clrlwi`; a `u8 id` local is promoted and never masked.
+        if (d->id == 0) {
+            continue;
+        }
+        if (EM_SET_ID_NG(d->id)) {
+            continue;
+        }
+        em = EmCreate(d->id);
+        if (em == 0) {
+            pLog->err(0, 0, "EmSetFromList() Em set failed, Id = %x", d->id);
+            continue;
+        }
+        EmSetWork(em, d, i);
+        d->be_flag |= 2;
+        if (d->be_flag & 4) {
+            d->be_flag |= 8;
+            d->be_flag &= ~4;
+        } else if (!(d->be_flag & 8)) {
+            d->be_flag |= 4;
+        }
+        EmSetDist(em);
+        em->l_sub = 1.0e16f;
+        em->move();
+    }
+}
+
+// Creates list entry `no` on demand (room event scripts): same checks as EmSetFromList, the
+// death bit only with chkDead. Returns the enemy, or errEm when nothing was created.
+cEm* EmSetFromList2(int no, int flag)
+{
+    EM_LIST* d = &pG->Em_list[no];
+    cEm* em;
+
+    if (EM_SET_ID_NG(d->id)) {
+        return errEm;
+    }
+    if (pG->stage_no != d->room >> 8) {
+        return errEm;
+    }
+    if (pG->room_no != (d->room & 0xFF)) {
+        return errEm;
+    }
+    if (d->be_flag & 2) {
+        return errEm;
+    }
+    if (d->id == 0) {
+        return errEm;
+    }
+    if (flag) {
+        if (EmSetDieCk(no)) {
+            return errEm;
+        }
+    }
+    if (checkListId(no) == 0) {
+        return errEm;
+    }
+    em = EmCreate(d->id);
+    if (em == 0) {
+        pLog->err(0, 0, "EmSetFromList2() Em set failed, Id = %x", d->id);
+        return errEm;
+    }
+    EM_SET_WORK(em, d, no);
+    d->be_flag |= 2;
+    if (d->be_flag & 4) {
+        d->be_flag |= 8;
+        d->be_flag &= ~4;
+    } else if (!(d->be_flag & 8)) {
+        d->be_flag |= 4;
+    }
+    EmSetDist(em);
+    em->l_sub = 1.0e16f;
+    em->move();
+    return em;
+}
+
+// Event enemy from a list entry outside the room list (never called in the DOL).
+cEm* EmSetEvent(EM_LIST* d)
+{
+    cEm* em;
+
+    if (EM_SET_ID_NG(d->id)) {
+        return errEm;
+    }
+    em = EmCreate(d->id);
+    if (em == 0) {
+        pLog->err(0, 0, "EmSetEvent() Em set failed, Id = %x", d->id);
+        return errEm;
+    }
+    EM_SET_WORK(em, d, 0xFF);
+    d->be_flag = 7;
+    EmSetDist(em);
+    em->l_sub = 1.0e16f;
+    em->move();
+    return em;
+}
+
+// The live enemy created from list entry `no`; NULL when none (or no == 0xFF).
+cEm* GetEmPtrFromList(int no)
+{
+    u32 i;
+
+    if (no == 0xFF) {
+        return 0;
+    }
+    for (i = 0; i < EmMgr.getArrayNum(); i++) {
+        cEm* em = EmMgr.at(i);
+
+        if (em->isAlive() && em->emset_no == (u8) no) {
+            return em;
+        }
+    }
+    return 0;
+}
+
+// The list entry an enemy was created from; NULL for enemies not from the list (emset_no 0xFF).
+EM_LIST* GetListPtrFromEm(cEm* em)
+{
+    if (em->emset_no == 0xFF) {
+        return 0;
+    }
+    return &pG->Em_list[em->emset_no];
+}
+
+// Enemy id of list entry `no` (0xFF for an invalid index).
+u32 GetEmIdFromList(u32 no)
+{
+    EM_LIST* list;
+
+    if (no >= 0xFF) {
+        return 0xFF;
+    }
+    list = pG->Em_list;
+    return list[no].id;
+}
+
+// Sets / clears the alive bit (be_flag bit0) of list entry `no`, only for entries of the current
+// stage / room.
+void EmListSetAlive(int no, int on_off)
+{
+    EM_LIST* d = &pG->Em_list[no];
+
+    if (pG->stage_no != d->room >> 8) {
+        return;
+    }
+    if (pG->room_no != (d->room & 0xFF)) {
+        return;
+    }
+    if (on_off == 1) {
+        d->be_flag |= 1;
+    } else {
+        d->be_flag &= ~1;
+    }
+}
+
+// Records the death of a list enemy in the current death bit table (so it is not re-created),
+// except in stage 4 rooms and under the debug flags that keep enemies respawning.
+void EmSetDie(cEm* em)
+{
+    if (DbgFlagChk(pG, DBG_NO_SCE_EXE)) {
+        return;
+    }
+    if (pG->stage_no == 0 && pG->room_no == 4) {
+        return;
+    }
+    if (DbgFlagChk(pG, DBG_EM_NO_DIE_FLAG)) {
+        return;
+    }
+    if (EmSetDieCk(em->emset_no)) {
+        return;
+    }
+    EmSetDieOn(em->emset_no);
+}
+
+// Counts a kill in the chapter and game kill counters (results screen).
+void EmSetDieCnt(cEm* pEm)
+{
+    pG->c_kill_cnt++;
+    pG->g_kill_cnt++;
+}
+
+// Room change: clears the "set" bit of every list entry so the new room can create its enemies.
+void EmSetRoomInit()
+{
+    int i;
+
+    for (i = 0; i < 256; i++) {
+        EM_LIST* d = &pG->Em_list[i];
+
+        d->be_flag &= ~2;
+    }
+}
+
+// Every 30 frames: intended to delete waiting list enemies; the loop body is empty in the
+// shipped game.
+void EmListWaitDelete()
+{
+    int i;
+
+    if (pG->Frame_cnt % 30 != 0) {
+        return;
+    }
+    for (i = 0; i < 256; i++) {
+    }
+}

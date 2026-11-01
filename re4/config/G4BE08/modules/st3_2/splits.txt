@@ -1,0 +1,66 @@
+Sections:
+	.text       type:code align:4
+	.ctors      type:rodata align:4
+	.dtors      type:rodata align:4
+	.rodata     type:rodata align:4
+	.data       type:data align:8
+	.bss        type:bss align:4
+
+st3_2/em_wrap.cpp:
+	.text       start:0x00000000 end:0x0000044C
+	.rodata     start:0x00000000 end:0x00000AE8 align:4
+
+st3_2/cSceObj.cpp:
+	.text       start:0x0000044C end:0x00002148
+	.rodata     start:0x00000AE8 end:0x00000B80 align:4
+
+st3_2/r315.cpp:
+	.text       start:0x00002148 end:0x0000285C
+	.rodata     start:0x00000B80 end:0x00000C2C align:4
+	.bss        start:0x00000000 end:0x00000004 align:4
+
+st3_2/r316.cpp:
+	.text       start:0x0000285C end:0x00003650
+	.rodata     start:0x00000C2C end:0x00000E28 align:4
+	.bss        start:0x00000004 end:0x00000008 align:4
+	.bss        start:0x00000028 end:0x0000005C align:4 common
+
+st3_2/r317.cpp:
+	.text       start:0x00003650 end:0x000074B0
+	.rodata     start:0x00000E28 end:0x000012F8 align:4
+	.data       start:0x00000000 end:0x000000E0
+	.bss        start:0x00000008 end:0x0000000C align:4
+
+st3_2/r318.cpp:
+	.text       start:0x000074B0 end:0x0000B2E4
+	.rodata     start:0x000012F8 end:0x00001488 align:4
+	.data       start:0x000000E0 end:0x00000188
+	.bss        start:0x0000000C end:0x00000010 align:4
+
+st3_2/r31a.cpp:
+	.text       start:0x0000B2E4 end:0x0000B760
+	.rodata     start:0x00001488 end:0x000015E8 align:4
+	.data       start:0x00000188 end:0x00000230
+	.bss        start:0x00000010 end:0x00000014 align:4
+
+st3_2/r31b.cpp:
+	.text       start:0x0000B760 end:0x00012504
+	.rodata     start:0x000015E8 end:0x00001B28 align:4
+	.data       start:0x00000230 end:0x00000650
+	.bss        start:0x00000014 end:0x0000001C align:4
+
+st3_2/r31c.cpp:
+	.text       start:0x00012504 end:0x00019564
+	.rodata     start:0x00001B28 end:0x00001F18 align:4
+	.data       start:0x00000650 end:0x00000768
+	.bss        start:0x0000001C end:0x00000024 align:4
+
+st3_2/r31d.cpp:
+	.text       start:0x00019564 end:0x00019644
+	.rodata     start:0x00001F18 end:0x00001F58 align:4
+	.bss        start:0x00000024 end:0x00000028 align:4
+
+st3_2/st3.cpp:
+	.text       start:0x00019644 end:0x00019EE4
+	.rodata     start:0x00001F58 end:0x00002104 align:4
+	.data       start:0x00000768 end:0x0000076C skip

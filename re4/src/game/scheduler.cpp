@@ -1,0 +1,395 @@
+// game/scheduler: the cooperative task scheduler (D:/Bio4/Prog/scheduler.cpp). The main thread runs
+// each task's OS thread in turn every frame until it calls TaskSleep or TaskExit.
+#include "types.h"
+#include "global.h"
+#include "main_mem.h"
+#include "db_log.h"
+#include "eprintf.h"
+#include "os_vi.h"
+#include "scheduler.h"
+#include <dolphin/gx/GXFifo.h>
+#include <dolphin/os.h>
+
+void DbMenuRestoreStopFlag();
+
+TASK Task[TASK_NUM];
+static OSSemaphore Sema;
+TASK* CTASK_MAIN = (TASK*) -1;
+TASK* pCTask = CTASK_MAIN;
+OSThread* pParentThread;
+static int iTask_exec_flg = 0;
+
+void TaskKill(TASK* t);
+
+// Boot: gives every task slot its stack (one allocation, filled with 0xB3 for the usage check),
+// number and thread queue; the scheduler semaphore starts at 0.
+void TaskSchedulerInit()
+{
+    u32 total = 0;
+    u8* stack;
+    u32 i;
+
+    for (i = 0; i < TASK_NUM; i++) {
+        Task[i].StackSize = GetStackSize(i);
+        total += Task[i].StackSize;
+    }
+#line 48 "D:/Bio4/Prog/scheduler.cpp"
+    stack = (u8*) MEM_ALLOC(total, 1, 13);
+    memset_asm(stack, 0xB3, total);
+    for (i = 0; i < TASK_NUM; i++) {
+        Task[i].Task_no = i;
+        Task[i].Status = 0;
+        Task[i].pStack = stack + Task[i].StackSize;
+        Task[i].suspend_cnt = 0;
+        OSInitThreadQueue(&Task[i].Queue);
+        stack = Task[i].pStack;
+    }
+    OSInitSemaphore(&Sema, 0);
+    iTask_exec_flg = 0;
+}
+
+// Kills every task (game reset).
+void TaskAllClear()
+{
+    u32 i;
+
+    for (i = 0; i < TASK_NUM; i++) {
+        TaskKill(i);
+    }
+    iTask_exec_flg = 0;
+}
+
+// Stack bytes for slot `no`: 0x3000 for slot 2 (the main game task), 0x2000 for 0..4, 0x1800 above.
+u32 GetStackSize(int level)
+{
+    if (level == 2) {
+        return 0x3000;
+    }
+    if ((u32) level > 4) {
+        return 0x1800;
+    }
+    return 0x2000;
+}
+
+// Once per frame from the main thread: runs every slot except the ISR one in order (slot 2 first
+// restores the debug menu's stop flag); debug_mode 6 prints the stack usage.
+void TaskScheduler()
+{
+    u32 i;
+    TASK* t;
+
+    pParentThread = OSGetCurrentThread();
+    for (i = 0, t = Task; i <= TASK_ISR; i++, t++) {
+        if (i == TASK_ISR) {
+            continue;
+        }
+        if (i == 2) {
+            DbMenuRestoreStopFlag();
+        }
+        pCTask = t;
+        TaskSchedulerMain(t);
+    }
+    pCTask = CTASK_MAIN;
+    if (pG->debug_mode == 6) {
+        stackUsedCheck();
+    }
+}
+
+// Runs one task for this frame: skipped while an event holds non-event tasks (Status_flg[1]
+// 0x10000000 vs flag bit1) or the sub screen holds (Status_flg[0] 0x100000 vs bit2); TASK_EXEC
+// creates and starts its thread, TASK_SLEEP counts down and wakes it, TASK_RUN resumes it; the
+// main thread then waits (semaphore for priority > 0xF tasks) until the task sleeps / exits.
+void TaskSchedulerMain(TASK* pT)
+{
+    if (StaFlagChk(pG, STA_SUSPEND) && !pT->isNoSuspend()) {
+        return;
+    }
+    if (StaFlagChk(pG, STA_DIEDEMO) && !pT->isDiedemoMove()) {
+        return;
+    }
+    switch (pT->Status) {
+    case TASK_EXEC:
+        OSCreateThread(&pT->Thread, pT->hook, (void*) pT->arg, pT->pStack, pT->StackSize, pT->Priority, 1);
+        pT->Status = TASK_RUN;
+        OSResumeThread(&pT->Thread);
+        GXSetCurrentGXThread();
+        break;
+    case TASK_SLEEP:
+        pT->SleepCtr--;
+        if (pT->SleepCtr != 0) {
+            return;
+        }
+        pT->Status = TASK_RUN;
+        OSWakeupThread(&pT->Queue);
+        GXSetCurrentGXThread();
+        break;
+    case TASK_RUN:
+        OSResumeThread(&pT->Thread);
+        GXSetCurrentGXThread();
+        break;
+    default:
+        return;
+    }
+    if (pCTask->Priority > 0xF) {
+        OSWaitSemaphore(&Sema);
+        GXSetCurrentGXThread();
+    }
+    StackOverflowCheck(pT);
+}
+
+// Debug: prints how much of each task stack has been touched (bytes no longer 0xB3).
+void stackUsedCheck()
+{
+    u32 i;
+    int y = 0x24;
+
+    eprintf2(9, 0x10, 0x22, 0x24, 0, 6, "   SIZE REST");
+    for (i = 0; i < TASK_NUM; i++) {
+        u32* p = (u32*) (Task[i].pStack - Task[i].StackSize);
+        u32 n = 1;
+        p++;
+        while (n < (u32) (Task[i].StackSize >> 2) && *p == 0xB3B3B3B3) {
+            n++;
+            p++;
+        }
+        y += 0x10;
+        eprintf(0x10, y, 0, 6, "%02d %4x %4x %08x", i, Task[i].StackSize, n * 4, Task[i].pStack - Task[i].StackSize);
+    }
+}
+
+// Panics when the guard word at the bottom of the task's stack was overwritten.
+void StackOverflowCheck(TASK* pTask)
+{
+    if (*(u32*) (pTask->pStack - pTask->StackSize) != 0xDEADBABE) {
+        OSReport("***************************************\n");
+        OSReport("Stack overflow in Thread %d !!\n", pTask->Task_no);
+        OSReport("***************************************\n");
+        OSPanic("D:/Bio4/Prog/scheduler.cpp", 217, "End of biohazard4");
+    }
+}
+
+// Thread entry of every task: suspends the scheduler thread, sets the GQR registers for the
+// paired-single loads, and calls the task function with its argument.
+void* TaskExec_hook(void* value)
+{
+    if (pParentThread != NULL) {
+        OSSuspendThread(pParentThread);
+    }
+    /* GQR2-5 (paired-single quantisation) setup removed: no paired singles on the 360 */
+    GXSetCurrentGXThread();
+    pCTask->pFunc((int) value);
+    return NULL;
+}
+
+// Starts `func(arg)` in slot `prio` (fails with an error when the slot is busy): the thread is
+// created on the next scheduler pass; flag 6 (skipped by events and the sub screen), priority 0xF.
+TASK* TaskExec(int prio, TaskFunc func, void* arg)
+{
+    TASK* t;
+
+    if (TaskStatus(prio) != 0) {
+        pLog->err(0, 0, "TASK DON'T EXEC : level %d", prio);
+        return NULL;
+    }
+    t = &Task[prio];
+    t->hook = TaskExec_hook;
+    t->pFunc = (void (*)(int)) func;
+    t->Status = TASK_EXEC;
+    t->arg = arg;
+    t->setKind(6);
+    t->Priority = 0xF;
+    return t;
+}
+
+// Called from a task: yields for `frames` frames — the scheduler thread resumes, the task thread
+// sleeps on its queue until TaskSchedulerMain wakes it.
+void TaskSleep(int ctr)
+{
+    if (ctr == 0) {
+        return;
+    }
+    pCTask->SleepCtr = ctr;
+    pCTask->Status = (pCTask->Status & TASK_SUSPEND) | TASK_SLEEP;
+    if (pParentThread != NULL) {
+        OSResumeThread(pParentThread);
+    }
+    if (pCTask->Priority > 0xF) {
+        OSSignalSemaphore(&Sema);
+    }
+    OSSleepThread(&pCTask->Queue);
+    if (pParentThread != NULL) {
+        OSSuspendThread(pParentThread);
+    }
+    GXSetCurrentGXThread();
+}
+
+// Called from a task: replaces itself with `func(arg)` in the same slot (started next frame) and
+// ends the current thread.
+void TaskChain(TaskFunc func, void* arg)
+{
+    pCTask->hook = TaskExec_hook;
+    pCTask->pFunc = (void (*)(int)) func;
+    pCTask->Status = TASK_EXEC;
+    pCTask->arg = arg;
+    if (pParentThread != NULL) {
+        OSResumeThread(pParentThread);
+    }
+    if (pCTask->Priority > 0xF) {
+        OSSignalSemaphore(&Sema);
+    }
+    OSExitThread(&pCTask->Thread);
+}
+
+// Called from a task: frees the slot and ends the thread (the scheduler thread resumes).
+void TaskExit()
+{
+    TASK* t = pCTask;
+
+    t->Status = TASK_NONE;
+    t->suspend_cnt = 0;
+    if (pParentThread != NULL) {
+        OSResumeThread(pParentThread);
+    }
+    if (pCTask->Priority > 0xF) {
+        OSSignalSemaphore(&Sema);
+    }
+    OSExitThread(&pCTask->Thread);
+}
+
+// Kills the task in slot `prio`.
+void TaskKill(int prio)
+{
+    TaskKill(&Task[prio]);
+}
+
+// Kills a task: a sleeping / suspended thread is cancelled; a running one (the caller itself)
+// exits; slot freed.
+void TaskKill(TASK* t)
+{
+    if (t->Status == 0) {
+        return;
+    }
+    switch (t->Status & ~TASK_SUSPEND) {
+    case TASK_NONE:
+    case TASK_EXEC:
+        break;
+    case TASK_SLEEP:
+        OSCancelThread(&t->Thread);
+        break;
+    case TASK_RUN:
+        if (t->Status & TASK_SUSPEND) {
+            OSCancelThread(&t->Thread);
+        } else {
+            TaskExit();
+        }
+        break;
+    }
+    t->Status = TASK_NONE;
+    t->suspend_cnt = 0;
+}
+
+// Suspends slot `task` (counted; TASK_SUSPEND bit).
+void TaskSuspend(int level)
+{
+    TASK* t = &Task[level];
+
+    t->suspend_cnt++;
+    t->Status |= TASK_SUSPEND;
+}
+
+// Undoes one TaskSuspend; the task runs again when the count reaches 0.
+void TaskSignal(int level)
+{
+    TASK* t = &Task[level];
+
+    if (t->suspend_cnt == 0) {
+        return;
+    }
+    t->suspend_cnt--;
+    if (t->suspend_cnt != 0) {
+        return;
+    }
+    t->Status &= ~TASK_SUSPEND;
+}
+
+// Status of slot `prio` (0 = free).
+u8 TaskStatus(int level)
+{
+    return Task[level].Status;
+}
+
+// The model a task works on (the current task when t is NULL) — read by the scenario / camera.
+void SetTaskModelPtr(void* model, TASK* t)
+{
+    if (t == NULL) {
+        pCTask->pModel = model;
+    } else {
+        t->pModel = model;
+    }
+}
+
+// From the main loop after the CPU work of the frame (main.cpp): lets the background task slot
+// (TASK_ISR) run in the time left before the vsync, when one is active.
+void iTaskScheduler()
+{
+    BOOL lv = OSDisableInterrupts();
+
+    if (iTask_exec_flg == 1) {
+        TASK* t = &Task[TASK_ISR];
+        pParentThread = NULL;
+        pCTask = t;
+        t->Status &= ~TASK_SUSPEND;
+        TaskSchedulerMain(t);
+        pCTask = CTASK_MAIN;
+    }
+    OSRestoreInterrupts(lv);
+}
+
+// Starts `func` in the interrupt-driven slot (decompression / loading in the background); only
+// one at a time. Returns NULL when busy.
+TASK* iTaskExec(TaskFunc func)
+{
+    TASK* t;
+    int flg = iTask_exec_flg;
+
+    if (flg == 0) {
+        iTask_exec_flg = 1;
+        t = TaskExec(TASK_ISR, func, 0);
+        t->Priority = flg;
+        return t;
+    }
+    return NULL;
+}
+
+// Kills the ISR task.
+void iTaskKill()
+{
+    iTask_exec_flg = 0;
+    TaskKill(&Task[TASK_ISR]);
+}
+
+// Called from the ISR task: ends it.
+void iTaskExit()
+{
+    iTask_exec_flg = 0;
+    TaskExit();
+}
+
+// From the VI retrace callback: suspends the background task's thread if it is still running so
+// the main thread gets the CPU back for the next frame.
+void iTaskSuspend()
+{
+    if (iTask_exec_flg == 1) {
+        TASK* t = &Task[TASK_ISR];
+        if (t->Thread.state == 2) {
+            t->Status |= TASK_SUSPEND;
+            OSSuspendThread(&t->Thread);
+        }
+    }
+}
+
+// 1 while an ISR task runs.
+int iTaskStatus()
+{
+    return iTask_exec_flg;
+}

@@ -1,0 +1,362 @@
+// game/roomdata: cRoomData, the per-stage room tables, the room save buffer that is copied into the
+// save game, and the room REL handling.
+#include "types.h"
+#include "atari.h"
+#include "global.h"
+#include "room_data.h"
+#include "main_mem.h"
+#include "main_sub.h"
+#include "scheduler.h"
+#include "dvd.h"
+#include "db_log.h"
+#include <string.h>
+
+#line 40 "D:/Bio4/Prog/roomdata.cpp"
+
+ROOM_DATA St0_data_tbl[67] = {
+    {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0},
+    {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0},
+    {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0},
+    {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0},
+    {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0},
+    {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0},
+    {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0},
+    {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0},
+    {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0},
+    {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0},
+    {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0}, {0, 0, 66, 0, 0},
+    {0, 0, 66, 0, 0},
+};
+
+ROOM_DATA St1_data_tbl[33] = {
+    {1, 0, 146, 0, 0}, {1, 0, 149, 0, 0}, {1, 0, 149, 0, 0}, {1, 0, 149, 0, 0}, {1, 0, 149, 0, 0}, {1, 0, 149, 0, 0},
+    {1, 0, 149, 0, 0}, {1, 0, 149, 0, 0}, {1, 0, 149, 0, 0}, {1, 0, 149, 0, 0}, {1, 0, 149, 0, 0}, {1, 0, 149, 0, 0},
+    {1, 0, 152, 0, 0}, {1, 0, 152, 0, 0}, {1, 0, 152, 0, 0}, {1, 0, 165, 0, 0}, {0, 0, 0, 0, 0}, {1, 0, 165, 0, 0},
+    {1, 0, 165, 0, 0}, {1, 0, 165, 0, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {1, 0, 165, 0, 0},
+    {1, 0, 165, 0, 0}, {1, 0, 152, 0, 0}, {1, 0, 152, 0, 0}, {1, 0, 152, 0, 0}, {1, 0, 165, 0, 0}, {1, 0, 165, 0, 0},
+    {1, 0, 165, 0, 0}, {1, 0, 165, 0, 0}, {0, 0, 146, 0, 0},
+};
+
+ROOM_DATA St2_data_tbl[46] = {
+    {1, 0, 147, 0, 0}, {1, 0, 147, 0, 0}, {1, 0, 147, 0, 0}, {1, 0, 147, 0, 0}, {1, 0, 159, 0, 0}, {1, 0, 159, 0, 0},
+    {1, 0, 159, 0, 0}, {1, 0, 147, 0, 0}, {1, 0, 147, 0, 0}, {1, 0, 159, 0, 0}, {1, 0, 159, 0, 0}, {1, 0, 159, 0, 0},
+    {1, 0, 159, 0, 0}, {1, 0, 159, 0, 0}, {1, 0, 159, 0, 0}, {1, 0, 159, 0, 0}, {1, 0, 147, 0, 0}, {1, 0, 160, 0, 0},
+    {1, 0, 160, 0, 0}, {1, 0, 160, 0, 0}, {1, 0, 160, 0, 0}, {1, 0, 160, 0, 0}, {1, 0, 160, 0, 0}, {1, 0, 160, 0, 0},
+    {1, 0, 160, 0, 0}, {1, 0, 160, 0, 0}, {1, 0, 187, 0, 0}, {1, 0, 187, 0, 0}, {0, 0, 0, 0, 0}, {1, 0, 187, 0, 0},
+    {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {1, 0, 187, 0, 0}, {1, 0, 187, 0, 0}, {1, 0, 147, 0, 0}, {1, 0, 187, 0, 0},
+    {1, 0, 187, 0, 0}, {1, 0, 187, 0, 0}, {1, 0, 187, 0, 0}, {1, 0, 187, 0, 0}, {1, 0, 187, 0, 0}, {1, 0, 187, 0, 0},
+    {1, 0, 187, 0, 0}, {1, 0, 187, 0, 0}, {1, 0, 243, 0, 0}, {0, 0, 0, 0, 0},
+};
+
+ROOM_DATA St3_data_tbl[52] = {
+    {1, 0, 148, 0, 0}, {1, 0, 148, 0, 0}, {0, 0, 0, 0, 0}, {1, 0, 148, 0, 0}, {1, 0, 148, 0, 0}, {1, 0, 148, 0, 0},
+    {1, 0, 148, 0, 0}, {1, 0, 148, 0, 0}, {1, 0, 148, 0, 0}, {1, 0, 148, 0, 0}, {1, 0, 148, 0, 0}, {1, 0, 148, 0, 0},
+    {1, 0, 148, 0, 0}, {1, 0, 201, 0, 0}, {1, 0, 148, 0, 0}, {1, 0, 201, 0, 0}, {1, 0, 201, 0, 0}, {1, 0, 201, 0, 0},
+    {1, 0, 201, 0, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {1, 0, 202, 0, 0}, {1, 0, 202, 0, 0}, {1, 0, 202, 0, 0},
+    {1, 0, 202, 0, 0}, {0, 0, 0, 0, 0}, {1, 0, 202, 0, 0}, {1, 0, 202, 0, 0}, {1, 0, 202, 0, 0}, {1, 0, 202, 0, 0},
+    {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {1, 0, 203, 0, 0}, {1, 0, 203, 0, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0}, {1, 0, 203, 0, 0}, {1, 0, 203, 0, 0}, {1, 0, 203, 0, 0}, {1, 0, 203, 0, 0}, {1, 0, 203, 0, 0},
+    {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0},
+    {1, 0, 203, 0, 0}, {1, 0, 203, 0, 0}, {1, 0, 203, 0, 0}, {1, 0, 203, 0, 0},
+};
+
+ROOM_DATA St4_data_tbl[18] = {
+    {1, 0, 186, 0, 0}, {0, 0, 186, 0, 0}, {1, 0, 186, 0, 0}, {1, 0, 186, 0, 0}, {1, 0, 186, 0, 0}, {1, 0, 186, 0, 0},
+    {1, 0, 186, 0, 0}, {0, 0, 186, 0, 0}, {0, 0, 186, 0, 0}, {0, 0, 186, 0, 0}, {1, 0, 186, 0, 0}, {1, 0, 186, 0, 0},
+    {1, 0, 186, 0, 0}, {1, 0, 186, 0, 0}, {1, 0, 186, 0, 0}, {1, 0, 186, 0, 0}, {1, 0, 186, 0, 0}, {1, 0, 186, 0, 0},
+};
+
+static StageTbl Room_data_tbl[10] = {
+    {St0_data_tbl, 67, 0}, {St1_data_tbl, 33, 0}, {St2_data_tbl, 46, 0}, {St3_data_tbl, 52, 0}, {St4_data_tbl, 18, 0},
+    {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0},
+};
+
+
+cRoomData RoomData;
+
+// Boot: counts the rooms of the five stage tables (m_RoomNum) and those with a save record (stat 1,
+// m_SaveNum), allocates the save buffer (header + one 0xD8-byte ROOM_SAVE_DATA per room) and stamps each
+// record with its stage / room id.
+void cRoomData::init()
+{
+    u32 stage;
+    int i;
+    u32 ofs;
+    u8* rec;
+
+    m_pModule = 0;
+    m_pModule_bss = 0;
+    m_RelNo = 0;
+    m_RoomNum = 0;
+    for (stage = 0; stage <= 9; stage++) {
+        if (Room_data_tbl[stage].tbl != 0) {
+            m_RoomNum += Room_data_tbl[stage].num;
+        }
+    }
+    m_SaveNum = 0;
+    for (stage = 0; stage <= 9; stage++) {
+        for (i = 0; checkRoomRange(stage, i) == 1; i++) {
+            if (Room_data_tbl[stage].tbl[i].save_flg == 1) {
+                m_SaveNum++;
+            }
+        }
+    }
+#line 306
+    m_pRoomSaveHead = (RoomSaveHdr*) MEM_CALLOC(m_SaveNum * sizeof(ROOM_SAVE_DATA) + sizeof(RoomSaveHdr), 1, 13);
+    m_pRoomSaveHead->size = m_SaveNum * sizeof(ROOM_SAVE_DATA) + sizeof(RoomSaveHdr);
+    // A local widens `m_SaveNum` (u16) to u32 before the store: written directly, the load of `m_SaveNum` and
+    // the reload of `pSaveBuf` (after the `size` store above) swap order against the target.
+    u32 n = m_SaveNum;
+    m_pRoomSaveHead->num = n;
+    m_pRoomSaveData = (u8*) m_pRoomSaveHead + sizeof(RoomSaveHdr);
+    stage = 0;
+    ofs = 0;
+    for (; stage <= 9; stage++) {
+        for (i = 0; checkRoomRange(stage, i) == 1; i++) {
+            if (Room_data_tbl[stage].tbl[i].save_flg == 1) {
+                *(u8*) (ofs + (u32) m_pRoomSaveData) = stage;
+                rec = (u8*) (ofs + (u32) m_pRoomSaveData);
+                rec[1] = i;
+                ofs += sizeof(ROOM_SAVE_DATA);
+            }
+        }
+    }
+}
+
+// Nothing (room-set hook).
+void cRoomData::initRoomSet()
+{
+}
+
+// Copies the whole room save buffer into the save game image.
+void cRoomData::save(void* p)
+{
+    RoomSaveHdr* h = (RoomSaveHdr*) p;
+
+    memcpy(h, m_pRoomSaveHead, m_SaveNum * sizeof(ROOM_SAVE_DATA) + sizeof(RoomSaveHdr));
+}
+
+// Restores the room records from a save game image, matched by id (records of rooms the build no
+// longer has are dropped).
+void cRoomData::load(void* p)
+{
+    RoomSaveHdr* h = (RoomSaveHdr*) p;
+    ROOM_SAVE_DATA* rec = (ROOM_SAVE_DATA*) ((u8*) p + sizeof(RoomSaveHdr));
+    ROOM_SAVE_DATA* dst;
+    u32 j;
+    int i;
+
+    for (j = 0; j < h->num; j++, rec++) {
+        for (i = 0; i < m_SaveNum; i++) {
+            dst = (ROOM_SAVE_DATA*) (i * sizeof(ROOM_SAVE_DATA) + (u32) m_pRoomSaveData);
+            if (rec->RoomNo == dst->RoomNo) {
+                *dst = *rec;
+                break;
+            }
+        }
+    }
+}
+
+// Zeroes the records named in the image (keeping their ids) — the "new game from this data" case.
+void cRoomData::clear(void* p)
+{
+    RoomSaveHdr* h = (RoomSaveHdr*) p;
+    ROOM_SAVE_DATA* rec = (ROOM_SAVE_DATA*) ((u8*) p + sizeof(RoomSaveHdr));
+    ROOM_SAVE_DATA* dst;
+    u32 j;
+    int i;
+    u16 id;
+
+    for (j = 0; j < h->num; j++, rec++) {
+        // The loop with the call in its body is only rotated (entry test + bottom test) when written
+        // as an explicitly guarded do/while; a `for` keeps the initial jump to the test.
+        i = 0;
+        if (i < m_SaveNum) {
+            do {
+                dst = (ROOM_SAVE_DATA*) (i * sizeof(ROOM_SAVE_DATA) + (u32) m_pRoomSaveData);
+                id = rec->RoomNo;
+                if (id == dst->RoomNo) {
+                    memclr_asm(dst, sizeof(ROOM_SAVE_DATA));
+                    ((ROOM_SAVE_DATA*) (i * sizeof(ROOM_SAVE_DATA) + (u32) m_pRoomSaveData))->RoomNo = id;
+                    break;
+                }
+                i++;
+            } while (i < m_SaveNum);
+        }
+    }
+}
+
+// The ROOM_SAVE_DATA record of room `room` (stage << 8 | no); 0 when the room is out of range or has no
+// record.
+u8* cRoomData::getRoomSavePtr(u16 room_no)
+{
+    u32 stage = room_no >> 8;
+    u8 no = room_no;
+    u32 s;
+    int i;
+    int k;
+    StageTbl* p;
+
+    if (!checkRoomRange(stage, no)) {
+        return 0;
+    }
+    if (Room_data_tbl[stage].tbl[no].save_flg == 0) {
+        return 0;
+    }
+    k = 0;
+    p = Room_data_tbl;
+    for (s = 0; s <= 9; s++, p++) {
+        for (i = 0; checkRoomRange(s, i) == 1; i++) {
+            if (p->tbl[i].save_flg == 1) {
+                if (stage == s && no == i) {
+                    return m_pRoomSaveData + k * sizeof(ROOM_SAVE_DATA);
+                }
+                k++;
+            }
+        }
+    }
+    return 0;
+}
+
+// Runs the room's init function from its stage table entry, if any (room entry).
+void cRoomData::execInitFunc(u16 room_no)
+{
+    u8 no = room_no;
+    u32 stage = room_no >> 8;
+    void (*func)();
+
+    if (checkRoomRange(stage, no) == 1) {
+        func = Room_data_tbl[stage].tbl[no].pInit;
+        if (func != 0) {
+            func();
+        }
+    }
+}
+
+// Runs the room's per-frame main function, if any.
+void cRoomData::execMainFunc(u16 room_no)
+{
+    u8 no = room_no;
+    u32 stage = room_no >> 8;
+    void (*func)();
+
+    if (checkRoomRange(stage, no) == 1) {
+        func = Room_data_tbl[stage].tbl[no].pMain;
+        if (func != 0) {
+            func();
+        }
+    }
+}
+
+// 1 when stage / room index exists in the stage tables.
+int cRoomData::checkRoomRange(u8 stage, u8 room)
+{
+    if (stage <= 9 && room < Room_data_tbl[stage].num && Room_data_tbl[stage].tbl != 0) {
+        return 1;
+    }
+    return 0;
+}
+
+// 1 when the room uses a room REL (rel_no) other than the one currently linked (m_RelNo): the
+// stage loader must fetch it.
+int cRoomData::checkRelRead(u16 room_no)
+{
+    u8 no = room_no;
+    u32 stage = room_no >> 8;
+    u16 rel;
+
+    if (checkRoomRange(stage, no) == 1) {
+        rel = Room_data_tbl[stage].tbl[no].rel_file;
+        if (rel != 0 && rel != m_RelNo) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+// Loads the room's REL (FileTbl[rel_no]) from disc, allocates its bss (plus a backup copy for
+// stop/restart), links it and runs its prolog. m_RelNo remembers which is linked.
+void cRoomData::linkRelData(u16 room_no)
+{
+    u8 no = room_no;
+    u32 stage = room_no >> 8;
+    int id;
+    int ret;
+
+    if (checkRoomRange(stage, no) != 1) {
+        return;
+    }
+    // The target stores x1C only after the zero test (`sth` behind the `beq`). Left: the promoted
+    // value reaches the compare and the DvdRead argument as `clrlwi r3,r0,16` in the target, ours
+    // folds the extension (`mr`) and compares the halfword register (#2 family).
+    if (Room_data_tbl[stage].tbl[no].rel_file == 0) {
+        return;
+    }
+    m_RelNo = Room_data_tbl[stage].tbl[no].rel_file;
+#line 484
+    id = DvdRead(m_RelNo, 0, 0, 0, 0, 0x104, __FILE__, __LINE__);
+    while ((ret = Dvd.ReadCheck(id, 0, 0, (void**) &m_pModule)) != 1) {
+        if (ret < 0) {
+            pLog->err(0, 0, "cRoomData::readRelData(): RelDataReadError! %s", FileTbl[m_RelNo]);
+            m_RelNo = 0;
+            m_pModule = 0;
+            return;
+        }
+        TaskSleep(1);
+    }
+    m_CtrlFlag.off(CTRL_STOP);
+    if (m_pModule->bssSize == 0) {
+        m_pModule_bss = 0;
+    } else {
+#line 503
+        m_pModule_bss = MEM_ALLOC(m_pModule->bssSize, 1, 13);
+        m_pModule_bss_bak = MEM_ALLOC(m_pModule->bssSize, 1, 13);
+    }
+    DLL_Link(m_pModule, m_pModule_bss);
+    DLL_PROLOG(m_pModule)();
+}
+
+// Temporarily unlinks the room REL (CTRL_STOP), saving its bss to the backup.
+void cRoomData::stopRelData()
+{
+    if (!m_CtrlFlag.check(CTRL_STOP) && m_pModule != 0) {
+        m_CtrlFlag.on(CTRL_STOP);
+        if (m_pModule_bss != 0) {
+            memcpy(m_pModule_bss_bak, m_pModule_bss, m_pModule->bssSize);
+        }
+        DLL_Unlink(m_pModule);
+    }
+}
+
+// Re-links a stopped room REL and restores its bss from the backup.
+void cRoomData::restartRelData()
+{
+    if (m_CtrlFlag.check(CTRL_STOP) && m_pModule != 0) {
+        m_CtrlFlag.off(CTRL_STOP);
+        DLL_Link(m_pModule, m_pModule_bss);
+        if (m_pModule_bss != 0) {
+            memcpy(m_pModule_bss, m_pModule_bss_bak, m_pModule->bssSize);
+        }
+    }
+}
+
+// "Passed" bit `bit` (0..7, from the top) of the room's save record; 0 without a record.
+int cRoomData::checkPassed(u16 room_no, int part_no)
+{
+    u8* p = getRoomSavePtr(room_no);
+
+    if (p == 0) {
+        return 0;
+    }
+    return p[2] & (0x80 >> part_no);
+}
+
+// Sets "passed" bit `bit` of the room's save record.
+void cRoomData::setPassed(u16 room_no, int part_no)
+{
+    u8* p = getRoomSavePtr(room_no);
+
+    if (p != 0) {
+        p[2] |= 0x80 >> part_no;
+    }
+}
