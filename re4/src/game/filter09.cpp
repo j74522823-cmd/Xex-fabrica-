@@ -193,5 +193,3 @@ int Filter09GetbUse()
     return g_bUse;
 }
 
-asm(".section .sdata,\"aw\"\n\t.balign 32\n\t.text");
-asm(".section .sbss,\"aw\",@nobits\n\t.balign 8\n\t.text");

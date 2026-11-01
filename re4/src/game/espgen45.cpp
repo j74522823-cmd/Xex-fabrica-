@@ -1135,4 +1135,3 @@ void Estgen45SetParam(ESP4C_WK* pFree)
     StaFlagOn(pG, STA_ESPGEN45_SET);
 }
 
-asm(".section .sdata; .balign 8");

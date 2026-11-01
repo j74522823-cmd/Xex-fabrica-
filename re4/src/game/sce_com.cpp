@@ -1431,4 +1431,3 @@ void cManager<T>::endEvent(int mode)
     }
 }
 
-asm(".section .sdata,\"aw\"\n\t.balign 8\n\t.text");

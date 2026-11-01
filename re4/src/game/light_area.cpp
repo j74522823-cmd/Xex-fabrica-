@@ -189,4 +189,3 @@ void LightAreaUpdateSub(cEm* em, int type)
     }
 }
 
-asm(".section .sdata; .balign 8");

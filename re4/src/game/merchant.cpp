@@ -1866,4 +1866,3 @@ int Merchant::levelupPrice(cItem* item, int type, int lv)
     return levelupPrice(item->id, type, lv);
 }
 
-asm(".section .sdata,\"aw\"\n\t.balign 8\n\t.text");

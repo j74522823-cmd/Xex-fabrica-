@@ -248,4 +248,3 @@ void cLogWork::clear()
     m_Str[0] = 0;
 }
 
-asm(".section .sdata,\"aw\"\n\t.balign 8\n\t.text");

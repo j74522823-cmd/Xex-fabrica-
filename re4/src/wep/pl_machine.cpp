@@ -440,4 +440,3 @@ static void wep11_r2_reload(cPlayer* pl)
 }
 
 // The module's .data section is 8-aligned (the original linker's placement; the tables start at 4).
-asm(".section .data\n\t.balign 8\n\t.text");

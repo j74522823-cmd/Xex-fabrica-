@@ -484,4 +484,3 @@ void Filter02DrawBuffer2()
     GXSetAlphaUpdate(1);
 }
 
-asm(".section .sdata,\"aw\"\n\t.balign 32\n\t.text");

@@ -5,7 +5,6 @@
 extern int __mod2i(int, int);
 
 /* the original object's .data is 8-byte aligned */
-asm(".section .data\n\t.balign 8\n\t.section .text");
 
 /* two 32-byte strings in one block (the debug symbol covers both) */
 struct SnMessages {

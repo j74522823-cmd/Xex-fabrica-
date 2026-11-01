@@ -1510,4 +1510,3 @@ void tBlock_DebugCamera()
     }
 }
 
-asm(".section .data; .balign 8");

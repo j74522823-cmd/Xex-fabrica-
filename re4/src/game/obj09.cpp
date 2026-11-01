@@ -669,4 +669,3 @@ void cObj09::move()
     partsWorldCalc();
 }
 
-asm(".section .sdata; .balign 8");

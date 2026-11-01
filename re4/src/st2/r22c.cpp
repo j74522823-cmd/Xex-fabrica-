@@ -1994,4 +1994,3 @@ static void r22c_checkShootingScore()
     SceEventEnd(0);
 }
 
-asm(".section .data\n\t.balign 8\n\t.text");

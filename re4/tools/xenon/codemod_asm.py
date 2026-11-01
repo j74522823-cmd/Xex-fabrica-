@@ -28,3 +28,21 @@ for p in list((root / 'src').rglob('*.cpp')) + list((root / 'src').rglob('*.c'))
         if not dry:
             p.write_text(s, errors='surrogateescape')
 print(stats)
+
+
+# --- second pass: top-level section-switching asm used only for byte-matching (".section .data; .balign 8" ...) ---
+def strip_section_asm(root='src'):
+    import os, re
+    pat = re.compile(r'^[ \t]*asm[ \t]*\("\.(?:section|data|text|rodata|balign|align)[^;\n]*?"\);[ \t]*\n', re.M)
+    n = 0
+    for d, _, fs in os.walk(root):
+        for f in fs:
+            if f.endswith(('.c', '.cpp')):
+                p = os.path.join(d, f); s = open(p, errors='surrogateescape').read()
+                s2, k = pat.subn('', s)
+                if k:
+                    open(p, 'w', errors='surrogateescape').write(s2); n += k
+    print('section asm lines removed:', n)
+
+if __name__ == '__main__' and len(__import__('sys').argv) > 1 and __import__('sys').argv[1] == 'sections':
+    strip_section_asm()

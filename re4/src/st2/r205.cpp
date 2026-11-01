@@ -1,5 +1,4 @@
 // The split .rodata is 8-aligned (0x250) while the unit has no double constant.
-asm(".section .rodata\n\t.balign 8\n\t.text");
 #include "types.h"
 #include "main_mem.h"
 #include "st_room.h"

@@ -25,7 +25,6 @@ extern void *__OSSetExceptionHandler(int exc, void *handler);
 extern int PCreadAsyncInit(int fd, u32 addr, u32 len, void (*cb)(int), u32 ofs, int flag);
 
 /* the original object's .data is 8-byte aligned (one 4-byte pad word after g_hDVD) */
-asm(".section .data\n\t.balign 8\n\t.section .text");
 
 /* DI (disc interface) registers */
 #define DI_REG(n) (*(volatile u32 *)(0xCC006000 + (n) * 4))

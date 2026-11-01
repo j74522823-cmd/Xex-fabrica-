@@ -860,4 +860,3 @@ static void memSetCheck()
 }
 
 // main_sub's .bss starts 8-aligned; the split object carries the 4-byte pad.
-asm(".section .bss; .balign 8");

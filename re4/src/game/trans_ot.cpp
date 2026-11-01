@@ -28,7 +28,6 @@ static int Ot_max_tbl[OT_MAX] = {
 OtWork g_OtWork[OT_MAX];
 OtMirrorWork g_OtMirrirWk[2];
 f32 OT_MUL = 0.05f;
-asm(".section .sdata; .balign 8");
 int g_NowExecOtType;
 
 // Boot: allocates each table's bucket array (Ot_max_tbl sizes) and clears them.

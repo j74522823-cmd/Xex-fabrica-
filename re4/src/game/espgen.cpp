@@ -588,4 +588,3 @@ int EspgenSeqSet(cEspSeqHead* pSeqHed, int seq_ptr, cEffectCore* pCore, cModel* 
 }
 
 // the split object pads .rodata to 8 bytes
-asm(".section .rodata; .balign 8");

@@ -322,4 +322,3 @@ int CkBit(u32* pDat, u32 bit)
 }
 
 // The split object carries the 8-byte .sdata alignment of the following unit.
-asm(".section .sdata; .balign 8");

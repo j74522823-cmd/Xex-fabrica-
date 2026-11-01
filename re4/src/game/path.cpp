@@ -468,4 +468,3 @@ void FuncPathClear(void* pPath)
 }
 
 // The split object's .sdata is 8-aligned.
-asm(".section .sdata; .balign 8");

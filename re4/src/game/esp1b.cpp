@@ -70,4 +70,3 @@ int cEsp1b::SetFreeWork(cEspSeqTbl* pSeq, u32* pRand_seed)
 }
 
 // The split object's .sdata is padded to 8 bytes (the following unit is 8-aligned).
-asm(".section .sdata,\"aw\"\n\t.balign 8\n\t.text");

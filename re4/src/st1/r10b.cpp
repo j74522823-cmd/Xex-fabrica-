@@ -906,4 +906,3 @@ static void r10b_setEm()
 }
 
 // the split object's .data is 8-aligned
-asm(".section .data; .balign 8");

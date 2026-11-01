@@ -3669,4 +3669,3 @@ void setMsgBG(int a, int flag)
     }
 }
 
-asm(".section .sdata; .balign 32");

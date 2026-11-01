@@ -466,4 +466,3 @@ void Pad_test()
 }
 
 // The split object's .rodata is 8-aligned and 4 bytes longer (padding after the last string).
-asm(".section .rodata; .balign 8");

@@ -53,7 +53,6 @@ typedef struct _SHELF_SMD {
 static R113Work* r113_work;
 
 // The original's .data is 8-aligned (r105 has the same).
-asm(".section .data; .balign 8");
 static DATA_WORK r113_cesspit = {0x52, 0x53, 0x81, 0x9F, 6, 5, 7};
 static SHELF_SMD r113_shelf0 = {{0x57, 0x58}};
 static SHELF_SMD r113_shelf1 = {{0x59, 0x5A}};

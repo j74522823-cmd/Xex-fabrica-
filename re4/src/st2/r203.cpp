@@ -353,4 +353,3 @@ void Evt_R203S00_Func(Event* e, u32)
 }
 
 // The module's .data continues 8-aligned.
-asm(".section .data; .balign 8");

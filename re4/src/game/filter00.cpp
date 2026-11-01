@@ -363,4 +363,3 @@ void Filter00RenderContrast()
     GXTexCoord2f32(0.0f, 1.0f);
 }
 
-asm(".section .sdata,\"aw\"\n\t.balign 32\n\t.text");

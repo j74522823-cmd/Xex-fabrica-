@@ -473,4 +473,3 @@ void EstSetEm10WaterFall(cModel* pMod)
     }
 }
 
-asm(".section .rodata; .balign 8");

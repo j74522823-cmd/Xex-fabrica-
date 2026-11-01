@@ -659,4 +659,3 @@ static void Em30ClothStop(cModel* m, CLOTH_INFO* c)
     c->WindSin = 0.0f;
 }
 
-asm(".section .sdata; .balign 8");

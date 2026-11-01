@@ -536,4 +536,3 @@ void EvtTexRenderCamTrans(Event* e, int cut)
 }
 
 // The split object's .data is 8-aligned (0x1A -> 0x20 bytes).
-asm(".section .data\n\t.balign 8\n\t.text");

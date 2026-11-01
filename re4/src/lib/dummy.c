@@ -9,7 +9,6 @@ extern int PClseek(int fd, int ofs, int whence);
 extern int PCread(int fd, void *buf, unsigned int len);
 
 /* the original object's .data is 8-byte aligned (the DOL places it at ...9D0 after a 4-aligned end) */
-asm(".section .data\n\t.balign 8\n\t.section .text");
 
 struct stat_min {
 	int st_dev;

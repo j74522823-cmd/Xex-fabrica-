@@ -1015,4 +1015,3 @@ void* GetDataExt(void* pData, const char* pName, int no)
     return NULL;
 }
 
-asm(".section .bss; .balign 32");

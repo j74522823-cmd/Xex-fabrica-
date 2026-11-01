@@ -898,4 +898,3 @@ void ItemExamine::reset()
     m_pModel->matUpdate();
 }
 
-asm(".section .sdata,\"aw\"\n\t.balign 32\n\t.text");

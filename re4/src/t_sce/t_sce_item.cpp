@@ -1754,4 +1754,3 @@ char* getItemIdStr(u32 id)
     return pW->idName2[id - 0x1000];
 }
 
-asm(".section .data; .balign 8");

@@ -392,7 +392,6 @@ Vec em3c_bomb_pt[5][5] = {
     { { 0.0f, 0.0f, 2000.0f }, { 0.0f, 0.0f, -500.0f }, { 200.0f, 0.0f, 0.0f }, { -200.0f, 0.0f, 0.0f }, { 0.0f, 300.0f, 0.0f } },
 };
 // The original link 8-aligns the end of .data (the ngcld BSS tag follows): the 4 pad bytes after the table.
-asm(".section .data\n\t.balign 8\n\t.text");
 
 // Per-frame update from the enemy manager. HoseiCnt counts the frames in which the collision cut
 // the movement in half, and em3cDoorOpenCk keys on it.

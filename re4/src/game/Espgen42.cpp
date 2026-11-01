@@ -1200,4 +1200,3 @@ int Espgen42_SetFreeWork(cEspgen* pGen, cEspSeqTbl* pSeq, cEspSeqHead* pSeqHed, 
     return 0;
 }
 
-asm(".section .sdata; .balign 8");

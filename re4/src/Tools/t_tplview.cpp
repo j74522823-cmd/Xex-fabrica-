@@ -334,4 +334,3 @@ void TplViewer()
     }
 }
 
-asm(".section .data; .balign 8");

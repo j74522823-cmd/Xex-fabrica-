@@ -293,4 +293,3 @@ void Filter0aDrawBuffer()
     GXSetAlphaUpdate(1);
 }
 
-asm(".section .sdata,\"aw\"\n\t.balign 32\n\t.text");

@@ -339,4 +339,3 @@ void EprintfInit()
     }
 }
 
-asm(".section .sdata,\"aw\"\n\t.balign 8\n\t.text");

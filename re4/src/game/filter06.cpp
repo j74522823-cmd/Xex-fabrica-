@@ -294,4 +294,3 @@ void Filter06Render()
     }
     GXEnableTexOffsets(0, 0, 0);
 }
-asm(".section .sdata; .balign 32");

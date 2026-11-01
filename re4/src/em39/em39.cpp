@@ -6449,7 +6449,6 @@ void em39WaistMove(cEm39* em)
 // The original keeps the three constant-pool words (0.9, 0.020000001, 1.0) of em39WaistMove's
 // dead-stripped body; ours drops unreferenced pool entries (mark_constant_pool).
 // COMPILER-DIFF: candidate #10 (unreferenced constant-pool entries kept).
-asm(".section .rodata\n\t.long 0x3f666666, 0x3ca3d70b, 0x3f800000\n\t.text");
 
 // Laser marker: from the machine gun muzzle (x8B4 == 3) or the bow (x8B4 == 4) to the target.
 void em39MarkerMove(cEm39* em)
@@ -8827,4 +8826,3 @@ int cEm39::ckBombCutEnable()
 }
 
 // The split object's .data is 8-aligned (4 pad bytes before the ngcld BSS tag).
-asm(".section .data\n\t.balign 8\n\t.text");
