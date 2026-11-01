@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 env:
-  XSDK_SHA: 49307c7b5fe6cc0e262da7b31af58e4e309aa18e
+  XSDK_SHA: 8c58c7a3fb37bb261c5a11a8a1f4fa8a8bfd0d28
   VULKAN4XENON_SHA: df25dc50e6296d89822626b433f4080db05bccc8
   SDL_SHA: adb87a744ae056f1849718770cf198fa6c4899f9
   GLSLANG_SHA: d2f00185cf5feaa449f6e15c1894fb232b2b6bcd
@@ -82,7 +82,7 @@ jobs:
       - name: Resumo
         if: always()
         run: |
-          cd out
+          mkdir -p out; cd out
           {
             echo "RE4 -> Xbox 360: compilar e linkar"
             ls *.xex 2>/dev/null && echo "XEX GERADO" || echo "sem .xex"
