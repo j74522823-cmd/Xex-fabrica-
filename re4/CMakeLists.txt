@@ -63,6 +63,8 @@ list(FILTER RE4_SOURCES EXCLUDE REGEX "src/t_esp/(db_port|t_esp)\\.cpp$")
 # First link: the game's own `int main()` (src/game/main.cpp) is the entry; platforms/xenon/main_xenon.cpp comes later.
 add_executable(re4 ${RE4_SOURCES} platforms/xenon/gc_compat.cpp)
 target_include_directories(re4 PRIVATE include src)
+# Aurora's <dolphin/...> headers must win over RE4's own include/dolphin/*.h (the GameCube SDK headers), as in tools/xenon/check_compile.sh.
+target_include_directories(re4 BEFORE PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/extern/aurora/include")
 target_compile_definitions(re4 PRIVATE
     TARGET_PC AURORA                 # Aurora's software GX command stream (GXWGFifo is not a memory address here)
     BUILD_VERSION=1 VERSION_G4BE08 NDEBUG=1)
