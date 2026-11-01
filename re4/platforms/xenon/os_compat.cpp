@@ -473,7 +473,9 @@ static u32 g_field;
 u32 VIGetDTVStatus(void) { return 1; }
 u32 VIGetNextField(void) { return g_field; }
 void VISetBlack(BOOL) {}
-void VISetNextFrameBuffer(void*) {}
+// The game calls this once per presented frame (Render_swap): close the Aurora frame and open the next one.
+extern "C++" void re4_frame_boundary();
+void VISetNextFrameBuffer(void*) { re4_frame_boundary(); }
 VIRetraceCallback VISetPostRetraceCallback(VIRetraceCallback cb)
 {
     VIRetraceCallback old = g_postRetrace;
@@ -483,8 +485,8 @@ VIRetraceCallback VISetPostRetraceCallback(VIRetraceCallback cb)
 
 void VIWaitForRetrace(void)
 {
-    // 60 Hz pacing until the frame is tied to Aurora's present; the post-retrace callback runs here, in the game's own thread.
-    struct timespec ts = {0, 16666667};
+    // Aurora's present (vsync) paces the real frames; this short sleep only keeps boot-time waits from spinning.
+    struct timespec ts = {0, 2000000};
     nanosleep(&ts, NULL);
     g_field ^= 1;
     if (g_postRetrace) {
