@@ -1,0 +1,9 @@
+# Symbols one REL module imports from another (the GameCube's OSLink resolved them between loaded RELs). They stay global
+# (weak, so a source built into two modules does not clash) when a module is partially linked; see CMakeLists.txt.
+_Z11R22cHitMarkiiP3Vecii
+_Z13R22cHitEffecti
+_Z14ObjMauser_initP4cObj
+_ZN5cEm2714setWaterHeightEf
+_ZN7cEmMark4initEP10EmMarkData
+_ZN7cEmMark4initEhP10EmMarkInstfff
+_ZN7cEmMark7setDownEv

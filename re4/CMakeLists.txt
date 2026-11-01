@@ -96,6 +96,13 @@ function(re4_settings tgt)
   set_target_properties(${tgt} PROPERTIES C_STANDARD 11 C_EXTENSIONS ON CXX_STANDARD 17 CXX_EXTENSIONS ON)
 endfunction()
 
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/tools/xenon/rel_exports.txt" RE4_REL_EXPORTS REGEX "^[^#]")
+set(RE4_KEEP_EXPORTS)
+set(RE4_WEAKEN_EXPORTS)
+foreach (X ${RE4_REL_EXPORTS})
+  list(APPEND RE4_KEEP_EXPORTS --keep-global-symbol=${X})
+  list(APPEND RE4_WEAKEN_EXPORTS --weaken-symbol=${X})
+endforeach ()
 set(RE4_MODULE_OBJECTS)
 foreach (M ${RE4_MODULES})
   add_library(rel_${M} OBJECT ${RE4_MOD_${M}_SRCS})
@@ -109,14 +116,14 @@ foreach (M ${RE4_MODULES})
       COMMAND ${XSDK_PREFIX}objcopy --redefine-sym _prolog=${M}__prolog --redefine-sym _epilog=${M}__epilog
               --redefine-sym _unresolved=${M}__unresolved "${OBJ}.1" "${OBJ}.2"
       COMMAND ${XSDK_PREFIX}objcopy --keep-global-symbol=${M}__prolog --keep-global-symbol=${M}__epilog
-              --keep-global-symbol=${M}__unresolved "${OBJ}.2" "${OBJ}"
+              --keep-global-symbol=${M}__unresolved ${RE4_KEEP_EXPORTS} ${RE4_WEAKEN_EXPORTS} "${OBJ}.2" "${OBJ}"
       DEPENDS $<TARGET_OBJECTS:rel_${M}> COMMAND_EXPAND_LISTS VERBATIM)
   set_source_files_properties("${OBJ}" PROPERTIES EXTERNAL_OBJECT TRUE GENERATED TRUE)
   list(APPEND RE4_MODULE_OBJECTS "${OBJ}")
 endforeach ()
 
 # First link: the game's own `int main()` (src/game/main.cpp) is the entry; platforms/xenon/main_xenon.cpp comes later.
-add_executable(re4 ${RE4_SOURCES} ${RE4_MODULE_OBJECTS} "${RE4_GEN}/rel_table.cpp"
+add_executable(re4 ${RE4_SOURCES} ${RE4_MODULE_OBJECTS} "${RE4_GEN}/rel_table.cpp" "${RE4_GEN}/rel_unresolved.cpp"
     platforms/xenon/gc_compat.cpp platforms/xenon/os_compat.cpp platforms/xenon/audio_stubs.cpp platforms/xenon/legacy_syms.cpp)
 re4_settings(re4)
 target_link_libraries(re4 PRIVATE ${RE4_AURORA_LIBS})

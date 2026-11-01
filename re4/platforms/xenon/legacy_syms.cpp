@@ -31,3 +31,12 @@ void __builtin_vec_delete(void* p) { ::operator delete[](p); }
 void (*_ctors[1])(void) = {0};
 void (*_dtors[1])(void) = {0};
 }
+
+// A room function that this REL's stage module does not contain was an unresolved relocation on the GameCube: calling it
+// reached the module's _unresolved (HALT).
+extern "C" void re4_unresolved(const char* name)
+{
+    OSReport("HALT: unresolved REL call %s\n", name);
+    for (;;) {
+    }
+}
