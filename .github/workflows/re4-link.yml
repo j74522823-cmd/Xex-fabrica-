@@ -1,0 +1,109 @@
+name: RE4 -> 360 (compilar e linkar)
+
+# Constroi xsdk + vulkan4xenon + SDL-xenon, junta com aurora-xenon e o RE4 e tenta linkar o .xex.
+# Resultado: Releases > "re4-link" (link.log, summary.txt, e o .xex se der certo).
+# Precisa do compilador pronto em Releases > toolchain-xsdk (a "Fabrica de XEX" ja gerou).
+on:
+  push:
+    paths: ['re4/**', '.github/workflows/re4-link.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  XSDK_SHA: 49307c7b5fe6cc0e262da7b31af58e4e309aa18e
+  VULKAN4XENON_SHA: df25dc50e6296d89822626b433f4080db05bccc8
+  SDL_SHA: adb87a744ae056f1849718770cf198fa6c4899f9
+  GLSLANG_SHA: d2f00185cf5feaa449f6e15c1894fb232b2b6bcd
+  AURORA_SHA: a526001c2f7a20b9e8a5c8ab427f9b48af68e099
+  GH_TOKEN: ${{ github.token }}
+  GH_REPO: ${{ github.repository }}
+
+jobs:
+  link:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Baixar repositorios (versoes fixas)
+        run: |
+          fetch() { # nome url sha destino
+            mkdir -p "$4"; cd "$4"; git init -q; git remote add origin "$2"
+            git fetch -q --depth 1 origin "$3"; git checkout -q FETCH_HEAD; cd - >/dev/null
+          }
+          fetch xsdk   https://github.com/xenosworks/xsdk.git           "$XSDK_SHA"         "$HOME/xsdk"
+          fetch v4x    https://github.com/xenosworks/vulkan4xenon.git   "$VULKAN4XENON_SHA" "$GITHUB_WORKSPACE/vulkan4xenon"
+          fetch sdl    https://github.com/xenosworks/SDL-xenon.git      "$SDL_SHA"          "$GITHUB_WORKSPACE/SDL-xenon"
+          fetch glsl   https://github.com/xenosworks/glslang-xenon.git  "$GLSLANG_SHA"      "$GITHUB_WORKSPACE/glslang-xenon"
+          fetch aurora https://github.com/xenosworks/aurora-xenon.git   "$AURORA_SHA"       "$GITHUB_WORKSPACE/re4/extern/aurora"
+
+      - name: Instalar ferramentas do sistema
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q build-essential bison flex texinfo libgmp-dev libmpfr-dev libmpc-dev \
+            curl xz-utils patch python3 cmake ninja-build git
+
+      - name: Compilador pronto (toolchain-xsdk)
+        run: |
+          set -e
+          gh release download toolchain-xsdk -p toolchain.tar.gz -D "$RUNNER_TEMP"
+          tar -C "$HOME" -xzf "$RUNNER_TEMP/toolchain.tar.gz"
+          "$HOME/xsdk-gcc/bin/powerpc-xsdk-elf-gcc" --version | head -1
+
+      - name: Construir libxsdk, vulkan4xenon e SDL
+        run: |
+          set -e
+          TC="$HOME/xsdk-gcc/bin/powerpc-xsdk-elf-"
+          cd "$HOME/xsdk"
+          make -j"$(nproc)" TOOLCHAIN="$TC" build/libxsdk.a build/host/libxsc.so
+          cd "$GITHUB_WORKSPACE/vulkan4xenon"
+          make -j"$(nproc)" XSDK="$HOME/xsdk" TOOLCHAIN="$TC" build/libvulkan4xenon.a
+          ls -la build/libvulkan4xenon.a
+          cd "$GITHUB_WORKSPACE/SDL-xenon"
+          cmake -S . -B build-xsdk -G Ninja -DCMAKE_TOOLCHAIN_FILE="$HOME/xsdk/cmake/xsdk.cmake" \
+            -DXSDK_TOOLCHAIN="$HOME/xsdk-gcc" -DCMAKE_BUILD_TYPE=Release
+          cmake --build build-xsdk
+
+      - name: Configurar e compilar o RE4 (continua depois de erros)
+        run: |
+          mkdir -p out
+          cd re4
+          cmake -S . -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE="$HOME/xsdk/cmake/xsdk.cmake" \
+            -DXSDK_TOOLCHAIN="$HOME/xsdk-gcc" -DCMAKE_BUILD_TYPE=Release -DXSDK=ON \
+            -DSDL3_DIR="$GITHUB_WORKSPACE/SDL-xenon/build-xsdk" > "$GITHUB_WORKSPACE/out/configure.log" 2>&1 \
+            || { echo "configure falhou"; tail -40 "$GITHUB_WORKSPACE/out/configure.log"; touch "$GITHUB_WORKSPACE/out/CONFIGURE_FAILED"; }
+          if [ ! -f "$GITHUB_WORKSPACE/out/CONFIGURE_FAILED" ]; then
+            cmake --build build -- -k 0 > "$GITHUB_WORKSPACE/out/link.log" 2>&1 || true
+            find build -name '*.xex' -exec cp {} "$GITHUB_WORKSPACE/out/" \;
+          fi
+
+      - name: Resumo
+        if: always()
+        run: |
+          cd out
+          {
+            echo "RE4 -> Xbox 360: compilar e linkar"
+            ls *.xex 2>/dev/null && echo "XEX GERADO" || echo "sem .xex"
+            [ -f CONFIGURE_FAILED ] && { echo; echo "== configure falhou =="; tail -40 configure.log; }
+            if [ -f link.log ]; then
+              echo; echo "erros de compilacao: $(grep -c ' error: ' link.log)"
+              echo; echo "== erros de compilacao mais comuns =="
+              grep ' error: ' link.log | sed 's/^[^ ]* //' | sort | uniq -c | sort -rn | head -25
+              echo; echo "simbolos indefinidos distintos: $(grep -o "undefined reference to [^ ]*" link.log | sort -u | wc -l)"
+              echo; echo "== simbolos indefinidos (mais usados primeiro) =="
+              grep -o "undefined reference to .*" link.log | sed "s/undefined reference to //; s/[\`']//g" | sort | uniq -c | sort -rn | head -300
+              echo; echo "== definicoes multiplas =="
+              grep -o "multiple definition of .*" link.log | sort -u | head -50
+            fi
+          } > summary.txt
+          head -60 summary.txt
+
+      - name: Publicar (Releases > re4-link)
+        if: always()
+        run: |
+          gh release delete re4-link --cleanup-tag -y 2>/dev/null || true
+          files=$(ls out/summary.txt out/link.log out/configure.log out/*.xex 2>/dev/null | tr '\n' ' ')
+          gh release create re4-link $files --target "$GITHUB_SHA" --title "re4-link" \
+            --notes "Resultado do ultimo link do RE4 para o 360 (summary.txt resume)."

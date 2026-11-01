@@ -60,7 +60,8 @@ list(FILTER RE4_SOURCES EXCLUDE REGEX "src/t_esp/(db_port|t_esp)\\.cpp$")
 # Direct GameCube-debugger I/O (PCinit/PCopen...), the HIO/PC host link of the debug build.
 # list(FILTER ... ) of the files that need it goes here once they are identified.
 
-add_executable(re4 ${RE4_SOURCES} platforms/xenon/main_xenon.cpp)
+# First link: the game's own `int main()` (src/game/main.cpp) is the entry; platforms/xenon/main_xenon.cpp comes later.
+add_executable(re4 ${RE4_SOURCES} platforms/xenon/gc_compat.cpp)
 target_include_directories(re4 PRIVATE include src)
 target_compile_definitions(re4 PRIVATE
     TARGET_PC AURORA                 # Aurora's software GX command stream (GXWGFifo is not a memory address here)
