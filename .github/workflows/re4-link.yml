@@ -66,17 +66,34 @@ jobs:
             -DXSDK_TOOLCHAIN="$HOME/xsdk-gcc" -DCMAKE_BUILD_TYPE=Release
           cmake --build build-xsdk
 
-      - name: Configurar e compilar o RE4 (continua depois de erros)
+      - name: Configurar e compilar o RE4
         run: |
+          set +e
           mkdir -p out
           cd re4
           cmake -S . -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE="$HOME/xsdk/cmake/xsdk.cmake" \
             -DXSDK_TOOLCHAIN="$HOME/xsdk-gcc" -DCMAKE_BUILD_TYPE=Release -DXSDK=ON \
-            -DSDL3_DIR="$GITHUB_WORKSPACE/SDL-xenon/build-xsdk" > "$GITHUB_WORKSPACE/out/configure.log" 2>&1 \
-            || { echo "configure falhou"; tail -40 "$GITHUB_WORKSPACE/out/configure.log"; touch "$GITHUB_WORKSPACE/out/CONFIGURE_FAILED"; }
-          if [ ! -f "$GITHUB_WORKSPACE/out/CONFIGURE_FAILED" ]; then
-            cmake --build build -- -k 0 > "$GITHUB_WORKSPACE/out/link.log" 2>&1 || true
-            find build -name '*.xex' -exec cp {} "$GITHUB_WORKSPACE/out/" \;
+            -DSDL3_DIR="$GITHUB_WORKSPACE/SDL-xenon/build-xsdk" > "$GITHUB_WORKSPACE/out/configure.log" 2>&1
+          configure_rc=$?
+          if [ "$configure_rc" -ne 0 ]; then
+            echo "$configure_rc" > "$GITHUB_WORKSPACE/out/CONFIGURE_EXIT_CODE"
+            touch "$GITHUB_WORKSPACE/out/CONFIGURE_FAILED"
+          else
+            cmake --build build -- -k 0 > "$GITHUB_WORKSPACE/out/link.log" 2>&1
+            build_rc=$?
+            echo "$build_rc" > "$GITHUB_WORKSPACE/out/LINK_EXIT_CODE"
+            if [ "$build_rc" -ne 0 ]; then touch "$GITHUB_WORKSPACE/out/LINK_FAILED"; fi
+            find build -type f -name '*.xex' -exec cp {} "$GITHUB_WORKSPACE/out/" \;
+            valid_xex=0
+            for xex in "$GITHUB_WORKSPACE"/out/*.xex; do
+              [ -f "$xex" ] || continue
+              [ -s "$xex" ] || continue
+              if [ "$(head -c 4 "$xex")" = "XEX2" ]; then valid_xex=1; fi
+            done
+            if [ "$valid_xex" -ne 1 ]; then touch "$GITHUB_WORKSPACE/out/NO_VALID_XEX"; fi
+          fi
+          if [ "$configure_rc" -ne 0 ] || [ -f "$GITHUB_WORKSPACE/out/LINK_FAILED" ] || [ -f "$GITHUB_WORKSPACE/out/NO_VALID_XEX" ]; then
+            exit 1
           fi
 
       - name: Resumo
@@ -85,8 +102,16 @@ jobs:
           mkdir -p out; cd out
           {
             echo "RE4 -> Xbox 360: compilar e linkar"
-            ls *.xex 2>/dev/null && echo "XEX GERADO" || echo "sem .xex"
-            [ -f CONFIGURE_FAILED ] && { echo; echo "== configure falhou =="; tail -40 configure.log; }
+            if ls *.xex >/dev/null 2>&1; then
+              for xex in *.xex; do
+                [ -s "$xex" ] && [ "$(head -c 4 "$xex")" = "XEX2" ] && echo "XEX2 valido estruturalmente: $xex" || echo "XEX ausente, vazio ou cabecalho invalido: $xex"
+              done
+            else
+              echo "sem .xex"
+            fi
+            [ -f CONFIGURE_FAILED ] && { echo; echo "== configure falhou (codigo $(cat CONFIGURE_EXIT_CODE)) =="; tail -40 configure.log; }
+            [ -f LINK_FAILED ] && { echo; echo "== link falhou (codigo $(cat LINK_EXIT_CODE)) =="; }
+            [ -f NO_VALID_XEX ] && { echo; echo "== nenhum XEX2 valido foi produzido =="; }
             if [ -f link.log ]; then
               echo; echo "erros de compilacao: $(grep -c ' error: ' link.log)"
               echo; echo "== erros de compilacao mais comuns =="
