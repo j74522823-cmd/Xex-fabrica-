@@ -17,6 +17,7 @@
 #include <time.h>
 #include <setjmp.h>
 #include <xsdk/log.h>
+extern "C" void re4_diag_write(const char* message);
 
 namespace {
 
@@ -389,6 +390,7 @@ void OSReport(const char* msg, ...)
     va_start(va, msg);
     vsnprintf(buffer, sizeof(buffer), msg, va);
     va_end(va);
+    re4_diag_write(buffer);
     xsdk_log_write("re4 OSReport: %s", buffer);
     fputs(buffer, stderr);
 }
@@ -396,6 +398,7 @@ void OSReport(const char* msg, ...)
 // Explicit boot checkpoints use the same persistent log as the Xenon entry point.
 void re4_boot_log(const char* message)
 {
+    re4_diag_write(message ? message : "(null)");
     xsdk_log_write("re4 boot: %s", message ? message : "(null)");
 }
 
@@ -406,6 +409,7 @@ void OSPanic(const char* file, int line, const char* msg, ...)
     va_start(va, msg);
     vsnprintf(buffer, sizeof(buffer), msg, va);
     va_end(va);
+    re4_diag_write(buffer);
     xsdk_log_write("re4 PANIC %s:%d: %s", file, line, buffer);
     fprintf(stderr, "\nPANIC %s:%d: %s\n", file, line, buffer);
     abort();
