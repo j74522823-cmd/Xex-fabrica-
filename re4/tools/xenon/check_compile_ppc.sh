@@ -2,8 +2,20 @@
 # Compile-only check of every RE4 unit outside src/lib with xsdk's real PowerPC compiler.
 # Usage: tools/xenon/check_compile_ppc.sh <toolchain dir (~/xsdk-gcc)> <aurora-xenon checkout> <out dir>
 # Env: CC / CXX override the compilers (e.g. for a smoke test on the host); LIMIT=N checks only the first N units.
-set -u
+set -uo pipefail
+if [ "$#" -ne 3 ]; then
+  echo "Uso: $0 <xsdk-gcc dir> <aurora-xenon checkout> <out dir>" >&2
+  exit 2
+fi
 TC="$1"; A="$(realpath "$2")"; OUT="$(realpath -m "$3")"; mkdir -p "$OUT"
+if [ ! -x "$TC/bin/powerpc-xsdk-elf-gcc" ] || [ ! -x "$TC/bin/powerpc-xsdk-elf-g++" ]; then
+  echo "ERRO: compiladores do xsdk nao encontrados em $TC/bin" >&2
+  exit 2
+fi
+if [ ! -d "$A/include" ]; then
+  echo "ERRO: headers do aurora-xenon nao encontrados em $A/include" >&2
+  exit 2
+fi
 cd "$(dirname "$0")/../.."
 export CC="${CC:-$TC/bin/powerpc-xsdk-elf-gcc}" CXX="${CXX:-$TC/bin/powerpc-xsdk-elf-g++}" A OUT
 one() { src="$1"; b=$(echo "$src" | tr '/' '_')
@@ -38,4 +50,8 @@ for l in open(out+'/_status.txt'):
     if rc!='0': print(f)
 PY
 } > "$OUT/summary.txt"
-cat "$OUT/summary.txt" | head -40
+head -40 "$OUT/summary.txt"
+if [ "$fail" -gt 0 ]; then
+  echo "ERRO: $fail unidade(s) falharam; veja os logs em $OUT." >&2
+  exit 1
+fi
