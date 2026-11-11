@@ -222,6 +222,12 @@ static void render_frame(const XsdkShader *vs, const XsdkShader *ps, uint32_t ad
         draw_text((int)(x + key_w / 2 - 15), (int)(y + key_h / 2 - 21), 6, label_color, label);
     }
 
+    memcpy(upload_words, cpu_vertices, vertex_count * sizeof(Vertex));
+    const uint32_t words = vertex_count * VERTEX_FLOATS;
+    for (uint32_t i = 0; i < words; ++i)
+        gpu_vertices[i] = upload_words[i];
+    xsdk_gpu_invalidate(xsdk_gpu_address(gpu_vertices), vertex_count * VERTEX_BYTES);
+
     xsdk_gpu_set_target(screen_width, screen_height);
     xsdk_gpu_set_shaders(vs, ps);
     xsdk_gpu_set_vertices(0, xsdk_gpu_address(gpu_vertices), vertex_count * VERTEX_BYTES);
@@ -240,11 +246,11 @@ int main(void)
 
     XsdkShader vertex_shader = { .microcode = NULL };
     XsdkShader pixel_shader = { .microcode = NULL };
-    NTSTATUS status = xsdk_shader_load(&vertex_shader, calculadora_calc_vert.container,
-                                       calculadora_calc_vert.container_bytes);
+    NTSTATUS status = xsdk_shader_load(&vertex_shader, calc_vert.container,
+                                       calc_vert.container_bytes);
     if (NT_SUCCESS(status))
-        status = xsdk_shader_load(&pixel_shader, calculadora_calc_frag.container,
-                                  calculadora_calc_frag.container_bytes);
+        status = xsdk_shader_load(&pixel_shader, calc_frag.container,
+                                  calc_frag.container_bytes);
     if (NT_SUCCESS(status))
         status = xsdk_shader_set_vertex_layout(&vertex_shader, vertex_layout, 2,
                                                (const uint32_t[]){ VERTEX_BYTES });
@@ -300,14 +306,12 @@ int main(void)
             break;
         }
 
-        render_frame(&vertex_shader, &pixel_shader, address);
-        if (vertex_count) {
-            memcpy(upload_words, cpu_vertices, vertex_count * sizeof(Vertex));
-            const uint32_t words = vertex_count * VERTEX_FLOATS;
-            for (uint32_t i = 0; i < words; ++i)
-                gpu_vertices[i] = upload_words[i];
-            xsdk_gpu_invalidate(xsdk_gpu_address(gpu_vertices), vertex_count * VERTEX_BYTES);
+        status = xsdk_gpu_wait(xsdk_gpu_fence(), FRAME_TIMEOUT_MS);
+        if (!NT_SUCCESS(status)) {
+            xsdk_log_write("calculadora: GPU nao terminou o frame anterior: 0x%08X", (unsigned)status);
+            break;
         }
+        render_frame(&vertex_shader, &pixel_shader, address);
     }
 
     xsdk_present_close();
