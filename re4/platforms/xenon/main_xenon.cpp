@@ -6,6 +6,18 @@
 #include <xsdk/log.h>
 #include <stdio.h>
 
+// Independent file diagnostics; deliberately separate from the XSDK logger.
+extern "C" void re4_diag_write(const char* message)
+{
+    FILE* f = fopen("game:\\re4_boot.log", "ab");
+    if (f) {
+        fputs(message ? message : "(null)", f);
+        fputc(10, f);
+        fflush(f);
+        fclose(f);
+    }
+}
+
 extern int re4_game_main();
 
 // One call per presented frame (VISetNextFrameBuffer in os_compat.cpp).
@@ -28,7 +40,9 @@ static void LogCb(AuroraLogLevel level, const char* module, const char* message,
 
 int main(int argc, char* argv[])
 {
+    re4_diag_write("ENTRY: main_xenon entered");
     xsdk_log_write("re4: started");
+    re4_diag_write("ENTRY: before aurora_initialize");
     xsdk_log_write("re4: before aurora_initialize");
 
     AuroraConfig cfg = {};
@@ -42,19 +56,26 @@ int main(int argc, char* argv[])
     cfg.mem1Size = MEM1_DEFAULT_SIZE;
     cfg.mem2Size = ARAM_DEFAULT_SIZE;
     aurora_initialize(argc, argv, &cfg);
+    re4_diag_write("AURORA: initialize returned");
     xsdk_log_write("re4: aurora up");
 
+    re4_diag_write("DVD: before aurora_dvd_open");
     xsdk_log_write("re4: before aurora_dvd_open");
     if (!aurora_dvd_open(RE4_DISC_PATH)) {
+        re4_diag_write("DVD: open failed");
         xsdk_log_write("re4: cannot open disc image " RE4_DISC_PATH);
     } else {
+        re4_diag_write("DVD: image opened");
         xsdk_log_write("re4: disc image opened");
     }
 
+    re4_diag_write("VIDEO: before first aurora_begin_frame");
     xsdk_log_write("re4: before first aurora_begin_frame");
     aurora_begin_frame();
+    re4_diag_write("GAME: before re4_game_main");
     xsdk_log_write("re4: before re4_game_main");
     int r = re4_game_main();
+    re4_diag_write("GAME: re4_game_main returned");
     xsdk_log_write("re4: re4_game_main returned");
     aurora_shutdown();
     return r;
