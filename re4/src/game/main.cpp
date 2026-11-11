@@ -78,7 +78,9 @@ f32 ORTHO_R;
 
 extern "C" {
 void __main();
+void re4_boot_log(const char* message);
 }
+#define RE4_BOOT(message) re4_boot_log(message)
 void AllocDrawTmpBuf();   // game/TmpBuf.cpp
 void DbmenuModuleInit();  // game/db_menu.cpp
 
@@ -119,7 +121,10 @@ int main()
     int j;
     int ret;
 
+    RE4_BOOT("game main entered");
+    RE4_BOOT("systemStartInit begin");
     systemStartInit();
+    RE4_BOOT("systemStartInit complete");
 RESTART:
     {
         systemRestartInit();
@@ -252,8 +257,11 @@ void haltExecCheck()
 void systemStartInit()
 {
     memclr_asm(pG, sizeof(GLOBAL_WK));
+    RE4_BOOT("systemStartInit: OSInit");
     OSInit();
+    RE4_BOOT("systemStartInit: setLanguage");
     setLanguage();
+    RE4_BOOT("systemStartInit: RomFontSetting");
     RomFontSetting();
     if (OSGetConsoleType() & 0xF0000000) {
         pG->IsDevConsole = 1;
@@ -264,35 +272,58 @@ void systemStartInit()
             file_path("c:/");
         }
     }
+    RE4_BOOT("systemStartInit: ExceptionInit");
     ExceptionInit();
+    RE4_BOOT("systemStartInit: OSInitAlarm");
     OSInitAlarm();
+    RE4_BOOT("systemStartInit: VIInit");
     VIInit();
     systemVISetBlack(1);
     LCEnable();
+    RE4_BOOT("systemStartInit: VIWaitForRetrace");
     VIWaitForRetrace();
+    RE4_BOOT("systemStartInit: VISetPostRetraceCallback");
     VISetPostRetraceCallback(postVSyncCallback);
+    RE4_BOOT("systemStartInit: Dvd.Init");
     Dvd.Init();
+    RE4_BOOT("systemStartInit: CardInit");
     CardInit();
     /* GQR2-5 (paired-single quantisation) setup removed: no paired singles on the 360 */
+    RE4_BOOT("systemStartInit: SystemMemInit");
     SystemMemInit();
     if (pG->IsDevConsole == 1) {
         CardDbgCacheSet();
     }
+    RE4_BOOT("systemStartInit: TaskSchedulerInit");
     TaskSchedulerInit();
+    RE4_BOOT("systemStartInit: systemScreenInit");
     systemScreenInit();
+    RE4_BOOT("systemStartInit: Render_init");
     Render_init();
+    RE4_BOOT("systemStartInit: LightSetInit");
     LightSetInit();
+    RE4_BOOT("systemStartInit: RndInit");
     RndInit(0xD37);
     InitOt();
+    RE4_BOOT("systemStartInit: SndInit");
     SndInit();
+    RE4_BOOT("systemStartInit: SofdecInit");
     SofdecInit();
+    RE4_BOOT("systemStartInit: IdSys.gameInit");
     IdSys.gameInit(0x80);
+    RE4_BOOT("systemStartInit: IdTexGameInit");
     IdTexGameInit();
+    RE4_BOOT("systemStartInit: EprintfInit");
     EprintfInit();
+    RE4_BOOT("systemStartInit: LogInit");
     LogInit();
+    RE4_BOOT("systemStartInit: init_dbmodule");
     init_dbmodule();
+    RE4_BOOT("systemStartInit: Dvd.SizeTableRead");
     Dvd.SizeTableRead();
+    RE4_BOOT("systemStartInit: cMes.init");
     cMes.init();
+    RE4_BOOT("systemStartInit end");
 }
 
 // At boot and after every soft reset: pad, clears the game part of the global work, heap 1
@@ -304,8 +335,10 @@ void systemRestartInit()
     int i;
     int ret;
 
+    RE4_BOOT("systemRestartInit: PadInit");
     PadInit();
     memclr_asm(&pG->Rno0, sizeof(GLOBAL_WK) - 0x20);
+    RE4_BOOT("systemRestartInit: MemReplaceHeap");
     MemReplaceHeap(0, 1);
     MemSetCurrentHeap(1);
     systemWorkInit();
@@ -316,6 +349,7 @@ void systemRestartInit()
     {
         cMes.Clear();
     }
+    RE4_BOOT("systemRestartInit: DC.init");
     DC.init();
     AllocDrawTmpBuf();
     EmMgr.roomInit();
@@ -329,10 +363,12 @@ void systemRestartInit()
     FilterInit();
     ClothInit();
     Cckpt.gameInit();
+    RE4_BOOT("systemRestartInit: RoomData.init");
     RoomData.init();
     TexRenderMgrInit();
     ItemModelInit();
     EtcModelInit();
+    RE4_BOOT("systemRestartInit: EvtMgr.init");
     EvtMgr.init();
     CameraGameInit();
     View.gameInit(&pG->Camera);
@@ -355,6 +391,7 @@ void systemRestartInit()
     }
     pLog->modeSet(200, 0, 150, 4);
     SelfScreenShotInit();
+    RE4_BOOT("systemRestartInit end");
 }
 
 // Default projection constants (ZNEAR 100, ZFAR 1,000,000, 640x480 ortho), 2 vsyncs per frame,
