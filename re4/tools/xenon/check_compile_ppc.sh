@@ -75,11 +75,11 @@ for l in open(out+'/_status.txt'):
     if rc=='0': continue
     log=open(out+'/'+f.replace('/','_')+'.log',errors='ignore').read()
     e=[x for x in log.splitlines() if 'error' in x]
-    k=re.sub(r'\\d+','N',re.sub(r"'[^']*'","X",e[0].split('error',1)[-1])) if e else 'sem mensagem (crash/assembler?)'
+    k=re.sub(r'\d+','N',re.sub(r"'[^']*'","X",e[0].split('error',1)[-1])) if e else 'sem mensagem (crash/assembler?)'
     c[k].append(f)
 for k,v in sorted(c.items(), key=lambda kv:-len(kv[1])):
     print(f"{len(v):4d}  {k.strip()[:100]}"); print("      ex:", ", ".join(v[:4]))
-print("\\n== lista completa ==")
+print("\n== lista completa ==")
 for l in open(out+'/_status.txt'):
     f,rc=l.split()
     if rc!='0': print(f)
