@@ -140,6 +140,7 @@ jobs:
           done
           echo "--- erros do compilador ---"; grep -E "error|Error|ERRO" build/log.txt | head -40 || true
           ls -la build/*.xex 2>/dev/null || true
+          if [ "$fail" -ne 0 ]; then echo "--- log completo para diagnostico ---"; cat build/log.txt; fi
           exit $fail
 
       - name: Publicar resultado (Releases > ultimo-xex)
