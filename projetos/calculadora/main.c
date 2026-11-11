@@ -29,6 +29,7 @@ static uint32_t upload_words[MAX_VERTICES * VERTEX_FLOATS];
 static volatile uint32_t *gpu_vertices;
 static uint32_t vertex_count;
 static uint32_t screen_width, screen_height;
+static float ui_scale = 1.0f, ui_offset_x, ui_offset_y;
 
 static const XsdkVertexElement vertex_layout[] = {
     { .usage = XSDK_USAGE_POSITION, .format = XSDK_VERTEX_FLOAT2, .offset_bytes = 0 },
@@ -50,6 +51,10 @@ static void add_vertex(float x, float y, uint32_t color)
 
 static void rect(float x, float y, float w, float h, uint32_t color)
 {
+    x = x * ui_scale + ui_offset_x;
+    y = y * ui_scale + ui_offset_y;
+    w *= ui_scale;
+    h *= ui_scale;
     const float x2 = x + w, y2 = y + h;
     add_vertex(x, y, color);   add_vertex(x2, y, color);  add_vertex(x2, y2, color);
     add_vertex(x, y, color);   add_vertex(x2, y2, color); add_vertex(x, y2, color);
@@ -186,8 +191,8 @@ static void render_frame(const XsdkShader *vs, const XsdkShader *ps, uint32_t ad
     vertex_count = 0;
     rect(0, 0, (float)screen_width, (float)screen_height, CLEAR_ARGB);
 
-    draw_text((int)(screen_width / 2 - 60), 42, 5, 0xFF49FF91, "CALC");
-    const float panel_x = (float)screen_width / 2.0f - 280.0f;
+    draw_text(580, 42, 5, 0xFF49FF91, "CALC");
+    const float panel_x = 360.0f;
     rect(panel_x, 105, 560, 105, 0xFF10251A);
     rect(panel_x + 4, 109, 552, 97, 0xFF0B1911);
 
@@ -206,7 +211,7 @@ static void render_frame(const XsdkShader *vs, const XsdkShader *ps, uint32_t ad
         '7','8','9','/','4','5','6','*','1','2','3','-','C','0','=','+'
     };
     const float key_w = 130.0f, key_h = 78.0f, gap = 13.0f;
-    const float start_x = (float)screen_width / 2.0f - 280.0f;
+    const float start_x = 360.0f;
     const float start_y = 235.0f;
 
     for (unsigned i = 0; i < 16; ++i) {
@@ -271,6 +276,14 @@ int main(void)
         xsdk_log_write("calculadora: falha ao abrir display: 0x%08X", (unsigned)status);
         return 1;
     }
+
+    /* Layout em coordenadas logicas 1280x720, ajustado ao modo real do display. */
+    const float sx = (float)screen_width / 1280.0f;
+    const float sy = (float)screen_height / 720.0f;
+    ui_scale = sx < sy ? sx : sy;
+    ui_offset_x = ((float)screen_width - 1280.0f * ui_scale) * 0.5f;
+    ui_offset_y = ((float)screen_height - 720.0f * ui_scale) * 0.5f;
+    xsdk_log_write("calculadora: display %ux%u, escala UI %.3f", screen_width, screen_height, ui_scale);
 
     uint16_t previous_buttons = 0;
     for (;;) {
