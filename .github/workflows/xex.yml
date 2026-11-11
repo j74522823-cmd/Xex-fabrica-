@@ -52,7 +52,7 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y -q build-essential bison flex texinfo libgmp-dev libmpfr-dev libmpc-dev \
-            curl xz-utils patch python3 cmake ninja-build git
+            curl xz-utils patch python3 cmake ninja-build git glslang-tools
 
       - name: Compilador (baixa o pronto ou constroi)
         run: |
@@ -140,6 +140,7 @@ jobs:
           done
           echo "--- erros do compilador ---"; grep -E "error|Error|ERRO" build/log.txt | head -40 || true
           ls -la build/*.xex 2>/dev/null || true
+          if [ "$fail" -ne 0 ]; then echo "--- log completo para diagnostico ---"; cat build/log.txt; fi
           exit $fail
 
       - name: Publicar resultado (Releases > ultimo-xex)
