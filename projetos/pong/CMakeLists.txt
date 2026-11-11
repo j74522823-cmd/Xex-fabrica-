@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.25)
+project(pong C)
+add_executable(pong main.c)
+set_target_properties(pong PROPERTIES C_STANDARD 17 C_EXTENSIONS ON)
+target_compile_options(pong PRIVATE -Wall -Wextra -Werror)
+xsdk_add_shaders(pong pong.vert pong.frag)
+xsdk_add_xex(pong)
