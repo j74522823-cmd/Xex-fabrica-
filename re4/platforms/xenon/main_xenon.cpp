@@ -29,6 +29,7 @@ static void LogCb(AuroraLogLevel level, const char* module, const char* message,
 int main(int argc, char* argv[])
 {
     xsdk_log_write("re4: started");
+    xsdk_log_write("re4: before aurora_initialize");
 
     AuroraConfig cfg = {};
     cfg.appName = "RE4";
@@ -43,12 +44,18 @@ int main(int argc, char* argv[])
     aurora_initialize(argc, argv, &cfg);
     xsdk_log_write("re4: aurora up");
 
+    xsdk_log_write("re4: before aurora_dvd_open");
     if (!aurora_dvd_open(RE4_DISC_PATH)) {
         xsdk_log_write("re4: cannot open disc image " RE4_DISC_PATH);
+    } else {
+        xsdk_log_write("re4: disc image opened");
     }
 
+    xsdk_log_write("re4: before first aurora_begin_frame");
     aurora_begin_frame();
+    xsdk_log_write("re4: before re4_game_main");
     int r = re4_game_main();
+    xsdk_log_write("re4: re4_game_main returned");
     aurora_shutdown();
     return r;
 }
