@@ -9,7 +9,8 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  actions: write
 
 env:
   XSDK_SHA: 8c58c7a3fb37bb261c5a11a8a1f4fa8a8bfd0d28
@@ -100,10 +101,15 @@ jobs:
           } > summary.txt
           head -60 summary.txt
 
-      - name: Publicar (Releases > re4-link)
+      - name: Disponibilizar diagnostico e XEX como artefato
         if: always()
-        run: |
-          gh release delete re4-link --cleanup-tag -y 2>/dev/null || true
-          files=$(ls out/summary.txt out/link.log out/configure.log out/*.xex 2>/dev/null | tr '\n' ' ')
-          gh release create re4-link $files --target "$GITHUB_SHA" --title "re4-link" \
-            --notes "Resultado do ultimo link do RE4 para o 360 (summary.txt resume)."
+        uses: actions/upload-artifact@v4
+        with:
+          name: re4-diagnostic-xbox360-${{ github.run_number }}
+          path: |
+            out/summary.txt
+            out/link.log
+            out/configure.log
+            out/*.xex
+          if-no-files-found: warn
+          retention-days: 14
