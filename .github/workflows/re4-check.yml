@@ -43,7 +43,9 @@ jobs:
         run: |
           mkdir -p build/re4-check
           cd build/re4-check
-          tar -czf logs.tar.gz *.log _status.txt 2>/dev/null || tar -czf logs.tar.gz summary.txt _status.txt 2>/dev/null || true
+          [ -f summary.txt ] || printf "Compile-check nao chegou a gerar relatorio. Consulte o log do workflow.\n" > summary.txt
+          [ -f _status.txt ] || : > _status.txt
+          tar -czf logs.tar.gz ./*.log _status.txt 2>/dev/null || tar -czf logs.tar.gz _status.txt
           gh release delete re4-check --cleanup-tag -y 2>/dev/null || true
           gh release create re4-check summary.txt logs.tar.gz --target "$GITHUB_SHA" --title "re4-check" \
             --notes "Resultado do teste de compilacao do RE4 com o compilador do xsdk (veja summary.txt)."
