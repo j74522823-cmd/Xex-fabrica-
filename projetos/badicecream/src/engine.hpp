@@ -43,7 +43,8 @@ struct Ice { int x = 0, y = 0, state = ICE_ADD, timer = 0; };
 struct Ray { int owner = 0, dx = 0, dy = 0, cx = 0, cy = 0, dir = 0, range = 0, timer = 0; bool adding = false, checkAdding = true, dead = false; };
 
 struct Player : Walker {
-    int num = 1;                   // 1 ou 2 (cor: baunilha/morango/chocolate)
+    int num = 1;                   // 1 ou 2
+    int character = 0;             // 0 = Vanilla, 1 = Strawberry
     bool present = false, dead = false;
     int deadFrames = 0, turnTimer = 0, shootTimer = 0, score = 0;
     bool shootFrame = false, shootBreak = false, shootChecked = false, spaceKey = false;
