@@ -161,8 +161,14 @@ jobs:
           for z in projetos/*/runtime_data.zip; do
             [ -f "$z" ] && cp "$z" "build/$(basename "$(dirname "$z")")-data.zip"
           done
-          gh release delete ultimo-xex --cleanup-tag -y 2>/dev/null || true
-          gh release create ultimo-xex build/*.xex build/*-data.zip build/log.txt \
-            --target "$GITHUB_SHA" --title "ultimo-xex" \
+          RELEASE_TAG=ultimo-xex
+          RELEASE_TITLE=ultimo-xex
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            RELEASE_TAG=badicecream-pr5-test
+            RELEASE_TITLE=badicecream-pr5-test
+          fi
+          gh release delete "$RELEASE_TAG" --cleanup-tag -y 2>/dev/null || true
+          gh release create "$RELEASE_TAG" build/*.xex build/*-data.zip build/log.txt \
+            --target "$GITHUB_SHA" --title "$RELEASE_TITLE" \
             --notes "Resultado da ultima compilacao. Baixe o .xex; o log.txt mostra erros."
             

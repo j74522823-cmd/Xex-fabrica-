@@ -24,7 +24,7 @@ bool readFile(const std::string& path, std::vector<uint8_t>& out) {
 }
 
 const int kLevelCount = 40;
-enum State { ST_TITLE, ST_PLAYING, ST_WON, ST_LOST, ST_END };
+enum State { ST_TITLE, ST_SELECT, ST_PLAYING, ST_WON, ST_LOST, ST_END };
 
 struct Game {
     Platform& pf; Options opt;
@@ -33,6 +33,9 @@ struct Game {
     int level = 0, stateTimer = 0, totalScore = 0;
     bool coop = false;
     bool prevStart[2] = {false, false};
+    bool prevLeft[2] = {false, false}, prevRight[2] = {false, false};
+    bool joined[2] = {true, false};
+    int character[2] = {0, 1};
     std::string music;
 
     Game(Platform& p, const Options& o) : pf(p), opt(o) {}
@@ -76,7 +79,10 @@ struct Game {
         std::vector<uint8_t> buf; LevelData lv;
         if (!readFile(pf.dataDir() + path, buf) || !parseLevel(std::string(buf.begin(), buf.end()), lv)) return false;
         if (!world.load(lv, coop, 1234u + (uint32_t)n * 7919u)) return false;
-        world.stage = n; level = n; state = ST_PLAYING; stateTimer = 0;
+        world.stage = n; level = n;
+        world.players[0].character = character[0];
+        world.players[1].character = character[1];
+        state = ST_PLAYING; stateTimer = 0;
         setMusic("music_game");
         return true;
     }
@@ -95,9 +101,15 @@ struct Game {
         if (state == ST_TITLE) {
             center(120, 3, 0xFFFFFFFF, "BAD ICE-CREAM");
             center(190, 1, 0xFFB0D0FF, "versao Xbox 360");
-            center(290, 2, 0xFFFFE070, "START no controle 1: 1 jogador");
-            center(330, 2, 0xFFFF90B0, "START no controle 2: COOP (2 jogadores)");
-            center(440, 1, 0xFFB0B0B0, "Direcional/analogico: andar   A/B/X/Y: soprar gelo   BACK: sair");
+            center(290, 2, 0xFFFFE070, "START: escolher personagens");
+            center(330, 1, 0xFFFF90B0, "P2 pode entrar pressionando START");
+            center(440, 1, 0xFFB0B0B0, "BACK: sair");
+        } else if (state == ST_SELECT) {
+            center(80, 3, 0xFFFFFFFF, "ESCOLHA SEU SORVETE");
+            center(170, 2, 0xFFFFE070, character[0] == 0 ? "P1: VANILLA <" : "P1: STRAWBERRY >");
+            center(250, 2, 0xFFFF90B0, joined[1] ? (character[1] == 0 ? "P2: VANILLA <" : "P2: STRAWBERRY >") : "P2: START PARA ENTRAR");
+            center(360, 1, 0xFFB0D0FF, "D-PAD ESQUERDA/DIREITA: trocar personagem");
+            center(400, 1, 0xFFB0D0FF, "P1 START: comecar   P2 START: entrar");
         } else if (state == ST_WON) {
             snprintf(b, sizeof b, "FASE COMPLETA!  +%d", world.timeBonus()); center(240, 2, 0xFFFFFFFF, b);
             if (stateTimer > 60) center(280, 1, 0xFFB0D0FF, "START: proxima fase");
@@ -113,16 +125,29 @@ struct Game {
 
     // Um quadro lógico (1/FPS s).
     void tick(PadState pads[2]) {
-        bool st[2]; for (int i = 0; i < 2; i++) { st[i] = pads[i].start && !prevStart[i]; prevStart[i] = pads[i].start; }
+        bool st[2], left[2], right[2];
+        for (int i = 0; i < 2; i++) {
+            st[i] = pads[i].start && !prevStart[i]; prevStart[i] = pads[i].start;
+            left[i] = pads[i].left && !prevLeft[i]; right[i] = pads[i].right && !prevRight[i];
+            prevLeft[i] = pads[i].left; prevRight[i] = pads[i].right;
+        }
         stateTimer++;
         switch (state) {
             case ST_TITLE:
                 setMusic("music_menu");
                 if (opt.skipTitle) { coop = opt.coop == 1; startLevel(opt.startLevel); break; }
-                if (st[0] || st[1]) {
-                    coop = (st[1] && pads[1].connected) || opt.coop == 1;
+                if (st[0]) { state = ST_SELECT; stateTimer = 0; joined[1] = false; character[0] = 0; character[1] = 1; pf.playSound("select"); }
+                else if (st[1] && pads[1].connected) { state = ST_SELECT; stateTimer = 0; joined[1] = true; pf.playSound("select"); }
+                break;
+            case ST_SELECT:
+                if (st[1] && pads[1].connected) { joined[1] = true; pf.playSound("select"); }
+                for (int i = 0; i < 2; i++) if ((i == 0 || joined[1]) && pads[i].connected) {
+                    if (left[i] || right[i]) { character[i] = 1 - character[i]; pf.playSound("select"); }
+                }
+                if (st[0]) {
+                    coop = joined[1] && pads[1].connected;
                     if (opt.coop == 0) coop = false;
-                    pf.playSound("select"); totalScore = 0;
+                    totalScore = 0;
                     if (!startLevel(opt.startLevel)) printf("falha ao carregar a fase\n");
                 }
                 break;

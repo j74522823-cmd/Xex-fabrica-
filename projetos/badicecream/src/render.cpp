@@ -142,7 +142,7 @@ void buildScene(const World& w, const Atlas& atlas, DrawList& out) {
     for (int i = 0; i < 2; i++) {
         const Player& p = w.players[i];
         if (!p.present) continue;
-        const char* cls = p.num == 1 ? "PlayerVanilla" : "PlayerStrawberry";
+        const char* cls = p.character == 0 ? "PlayerVanilla" : "PlayerStrawberry";
         const char* d = kDir[p.lastDir ? p.lastDir : DIR_DOWN];
         std::string an; int idx = p.animFrame; bool loop = true;
         if (p.dead) { an = "Die"; idx = p.deadFrames; loop = false; }
