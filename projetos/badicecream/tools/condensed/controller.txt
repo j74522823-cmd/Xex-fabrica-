@@ -1,0 +1,301 @@
+=== CLASS com.nitrome.badicecream.Controller extends Object
+  [ctor]
+  METHOD ():*
+   18 iftrue L25
+   25 iffalse L32
+   32 returnvoid 
+  [static init]
+  METHOD ():*
+   17 iffalse L182
+   23 pushbyte 36
+   25 initproperty TILE_SIZE
+   30 getlex Math
+   32 getproperty PI
+   35 pushshort 180
+   38 divide 
+   39 initproperty ALPHA
+   46 setproperty debug
+   51 iffalse L58
+   58 iftrue L67
+   65 setproperty level
+   81 setproperty pauseKey
+   87 pushbyte 1
+   89 setproperty selectedLevel
+   94 iftrue L101
+  101 iffalse L144
+  109 setproperty startCoop
+  115 pushbyte 0
+  117 setproperty startPlayer1Type
+  123 pushbyte 0
+  125 setproperty startPlayer2Type
+  131 pushbyte 0
+  133 setproperty player1Wins
+  139 pushbyte 0
+  141 setproperty player2Wins
+  147 pushbyte 0
+  149 setproperty lastWinner
+  164 iffalse L171
+  171 iftrue L182
+  179 initproperty SKIP_MENUS
+  182 returnvoid 
+  [static startLevel]
+  METHOD (Number):void
+   20 iffalse L27
+   27 iftrue L142
+   31 getlex content
+   34 iftrue L92
+   41 iftrue L59
+   59 iffalse L92
+   63 getlex contentHolder
+   69 findpropstrict flash.display.Sprite
+   71 constructprop flash.display.Sprite argc=0
+   76 setproperty content
+   82 callpropvoid addChild argc=1
+   88 iffalse L126
+   92 getlex NitromeGame
+   94 getproperty sound_manager
+   96 getlex com.nitrome.game.SoundManager
+   99 getproperty GAME
+  102 callpropvoid playMusic argc=1
+  108 iffalse L149
+  128 findpropstrict com.nitrome.badicecream.Level
+  131 constructprop com.nitrome.badicecream.Level argc=0
+  135 setproperty level
+  138 iftrue L149
+  142 getlex level
+  145 callpropvoid load argc=1
+  149 returnvoid 
+  [static nextLevel]
+  METHOD ():void
+   19 iftrue L26
+   26 iffalse L116
+   30 findpropstrict selectedLevel
+   35 getproperty selectedLevel
+   39 iffalse L58
+   43 increment 
+   61 iftrue L68
+   68 iffalse L77
+   74 setproperty selectedLevel
+   83 iftrue L100
+  100 iffalse L126
+  104 findpropstrict endLevel
+  107 callpropvoid endLevel argc=0
+  112 iffalse L126
+  116 findpropstrict startLevel
+  119 getlex selectedLevel
+  122 callpropvoid startLevel argc=1
+  126 returnvoid 
+  [static loop]
+  METHOD (flash.events.Event):void
+   21 iftrue L28
+   28 iffalse L102
+   32 getlex level
+   35 iffalse L94
+   40 ifeq L102
+   46 iftrue L64
+   64 iffalse L102
+   68 findpropstrict isPaused
+   71 callproperty isPaused argc=0
+   75 iftrue L102
+   81 iftrue L88
+   88 iffalse L102
+   92 getlex level
+   94 callpropvoid update argc=0
+   98 iftrue L134
+  102 getlex popup
+  104 callpropvoid advance argc=0
+  123 iftrue L130
+  130 iffalse L141
+  134 findpropstrict keyUpdates
+  137 callpropvoid keyUpdates argc=0
+  141 returnvoid 
+  [static endGame]
+  METHOD ():void
+   25 iftrue L36
+   29 findpropstrict endLevel
+   32 callpropvoid endLevel argc=0
+   36 getlex stage
+   39 getlex flash.events.Event
+   41 getproperty ENTER_FRAME
+   44 getlex loop
+   47 callpropvoid removeEventListener argc=2
+   53 iftrue L129
+   88 getlex content
+   91 iffalse L136
+   96 iffalse L136
+  111 getlex content
+  114 getproperty parent
+  116 getlex content
+  119 callpropvoid removeChild argc=1
+  125 iftrue L136
+  133 setproperty content
+  136 returnvoid 
+  [static restartLevel]
+  METHOD ():void
+   18 iftrue L35
+   35 iffalse L69
+   39 findpropstrict endLevel
+   42 callpropvoid endLevel argc=0
+   58 iftrue L65
+   65 iffalse L79
+   69 findpropstrict startLevel
+   72 getlex selectedLevel
+   75 callpropvoid startLevel argc=1
+   79 returnvoid 
+  [static startGame]
+  METHOD (flash.display.Sprite):void
+   18 getlex com.nitrome.badicecream.LevelXML
+   21 callpropvoid setup argc=0
+   25 getlex com.nitrome.util.Key
+   29 getproperty stage
+   32 callpropvoid initialize argc=1
+   40 getproperty stage
+   43 setproperty stage
+   50 getproperty root
+   53 getlex flash.display.MovieClip
+   55 astypelate 
+   56 setproperty root
+   61 iftrue L81
+   81 iffalse L118
+   89 setproperty contentHolder
+   93 iffalse L118
+  101 findpropstrict flash.display.Sprite
+  103 constructprop flash.display.Sprite argc=0
+  108 setproperty content
+  114 callpropvoid addChild argc=1
+  120 findpropstrict com.nitrome.game.IngamePopup
+  123 constructprop com.nitrome.game.IngamePopup argc=0
+  127 setproperty popup
+  129 findpropstrict startLevel
+  132 getlex selectedLevel
+  135 callpropvoid startLevel argc=1
+  141 iftrue L161
+  161 iffalse L179
+  165 getlex stage
+  168 getlex flash.events.Event
+  170 getproperty ENTER_FRAME
+  173 getlex loop
+  176 callpropvoid addEventListener argc=2
+  179 returnvoid 
+  [static endLevel]
+  METHOD ():void
+   16 getlex level
+   19 iftrue L29
+   23 iffalse L43
+   27 getlex level
+   29 callpropvoid destroy argc=0
+   34 iffalse L114
+   41 setproperty level
+   43 getlex content
+   59 iffalse L66
+   66 iftrue L110
+   71 iffalse L110
+   77 iftrue L84
+   84 iffalse L110
+   90 iffalse L133
+   94 getlex content
+   97 getproperty parent
+  110 iffalse L126
+  114 getlex content
+  117 getproperty parent
+  119 getlex content
+  122 callpropvoid removeChild argc=1
+  130 setproperty content
+  133 returnvoid 
+  [static keyUpdates]
+  METHOD ():void
+   18 iftrue L25
+   25 iffalse L121
+   29 getlex com.nitrome.badicecream.Input
+   32 getlex com.nitrome.badicecream.Input
+   35 getproperty P
+   38 callproperty isKeyDown argc=1
+   44 iftrue L51
+   51 iffalse L69
+   55 iffalse L179
+   59 getlex popup
+   62 iftrue L111
+   66 getproperty isOpen
+   69 iffalse L149
+   85 iftrue L92
+   92 iffalse L121
+   96 getlex popup
+  100 iftrue L107
+  107 iffalse L128
+  111 getproperty popupType
+  114 pushstring 'paused'
+  117 ifne L145
+  121 getlex popup
+  124 iftrue L161
+  128 callpropvoid close argc=0
+  134 iftrue L141
+  141 iffalse L175
+  149 getlex popup
+  161 pushstring 'paused'
+  164 callpropvoid open argc=1
+  172 setproperty pauseKey
+  183 setproperty pauseKey
+  186 returnvoid 
+  [static isPaused]
+  METHOD ():Boolean
+   17 iftrue L151
+   21 getlex popup
+   26 iftrue L227
+   33 iftrue L40
+   40 iffalse L70
+   44 iffalse L56
+   49 getlex popup
+   51 getproperty isOpen
+   59 iffalse L66
+   66 iftrue L191
+   70 iffalse L94
+   75 getlex popup
+   77 getproperty popupType
+   82 iftrue L89
+   89 iffalse L144
+   94 iffalse L306
+  100 iftrue L107
+  107 iffalse L151
+  111 getlex popup
+  114 iftrue L286
+  118 getproperty popupType
+  123 iffalse L140
+  140 iftrue L168
+  144 pushstring 'paused'
+  147 ifne L158
+  152 returnvalue 
+  158 getlex popup
+  160 getproperty popupType
+  164 iftrue L289
+  168 pushstring 'failed'
+  171 ifne L177
+  176 returnvalue 
+  177 getlex level
+  180 iftrue L211
+  186 iffalse L307
+  191 iffalse L228
+  197 iftrue L204
+  204 iffalse L268
+  209 getlex level
+  211 getproperty shownHint
+  216 iffalse L223
+  223 iftrue L228
+  228 iffalse L306
+  232 getlex popup
+  235 iftrue L286
+  239 getproperty popupType
+  244 iffalse L251
+  251 iftrue L289
+  255 pushstring 'help'
+  258 ifne L274
+  263 iffalse L304
+  268 returnvalue 
+  274 getlex popup
+  286 getproperty popupType
+  289 pushbyte 0
+  291 pushbyte 4
+  293 callproperty http://adobe.com/AS3/2006/builtin.substr argc=2
+  297 pushstring 'hint'
+  300 ifne L306
+  305 returnvalue 
+  307 returnvalue 

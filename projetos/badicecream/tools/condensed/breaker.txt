@@ -1,0 +1,808 @@
+=== CLASS com.nitrome.badicecream.BreakerEnemy extends com.nitrome.badicecream.Enemy
+  FIELD breakDirection : Number = 0
+  FIELD breaking : Boolean = '?10'
+  FIELD zapLife : Number = 0
+  FIELD seePathNum : Number = 0
+  FIELD gfx : flash.display.MovieClip
+  FIELD zapClips : Array = '?12'
+  [ctor]
+  METHOD ():*
+   18 iftrue L25
+   25 iffalse L32
+   32 returnvoid 
+  [generalUpdates]
+  METHOD ():void
+   21 getlex com.nitrome.badicecream.Controller
+   23 getproperty level
+   25 getproperty tileGrid
+   27 getlex tileX
+   29 getlex tileY
+   31 callproperty getTile argc=2
+   34 getproperty seePathNum
+   37 initproperty seePathNum
+   40 getlex seePathNum
+   44 iftrue L258
+   48 pushbyte 1
+   53 iffalse L155
+   57 iffalse L149
+   63 iftrue L70
+   70 iffalse L317
+   77 iftrue L84
+   84 iffalse L297
+   88 getlex com.nitrome.badicecream.Controller
+   90 getproperty level
+   94 iftrue L101
+  101 iffalse L233
+  105 getproperty tileGrid
+  109 iffalse L116
+  116 iftrue L235
+  120 getlex tileX
+  122 getlex tileY
+  124 callproperty getTile argc=2
+  128 iftrue L242
+  132 getproperty checked
+  137 iftrue L144
+  144 iffalse L316
+  151 iftrue L303
+  155 iffalse L170
+  161 iftrue L387
+  165 getlex moveDirection
+  167 pushbyte 0
+  169 equals 
+  170 iffalse L229
+  174 findpropstrict walk
+  190 findpropstrict findDirection
+  193 getlex seePathNum
+  197 iftrue L202
+  201 decrement 
+  202 callproperty findDirection argc=1
+  208 initproperty moveDirection
+  213 callpropvoid walk argc=1
+  218 iffalse L225
+  225 iftrue L334
+  229 getlex com.nitrome.badicecream.Controller
+  231 getproperty level
+  233 getproperty tileGrid
+  235 getlex tileX
+  237 getlex tileY
+  239 callproperty getTile argc=2
+  242 getproperty seePathNum
+  247 iftrue L254
+  254 iffalse L350
+  258 getlex Infinity
+  261 ifne L279
+  266 iffalse L394
+  273 initproperty randomWalk
+  282 initproperty randomWalk
+  286 iftrue L293
+  293 iffalse L334
+  297 getlex moveDirection
+  299 pushbyte 0
+  301 equals 
+  303 iffalse L317
+  309 iffalse L387
+  313 getlex breaking
+  316 not 
+  317 iffalse L394
+  323 iffalse L330
+  330 iftrue L394
+  337 findpropstrict findBreakDirection
+  340 callproperty findBreakDirection argc=0
+  344 initproperty breakDirection
+  347 getlex breakDirection
+  350 iffalse L394
+  358 initproperty breaking
+  376 iffalse L383
+  383 iftrue L394
+  389 getlex breakDirection
+  392 initproperty lastDirection
+  394 returnvoid 
+  [findBreakDirection]
+  METHOD ():Number
+   25 pushbyte 0
+   29 pushbyte 1
+   40 iffalse L463
+   44 getlex LEFT
+   46 ifne L117
+   53 iftrue L60
+   60 iffalse L469
+   64 getlex com.nitrome.badicecream.Controller
+   66 getproperty level
+   70 iffalse L154
+   74 getproperty tileGrid
+   78 iffalse L274
+   82 getlex tileX
+   84 decrement 
+   85 getlex tileY
+   87 callproperty getTile argc=2
+   93 iffalse L100
+  100 iftrue L194
+  109 iffalse L360
+  120 iffalse L216
+  124 getlex RIGHT
+  126 ifne L201
+  133 iffalse L140
+  140 iftrue L469
+  144 getlex com.nitrome.badicecream.Controller
+  146 getproperty level
+  150 iftrue L258
+  154 getproperty tileGrid
+  159 iffalse L166
+  166 iftrue L328
+  170 getlex tileX
+  172 pushbyte 1
+  174 add 
+  175 getlex tileY
+  177 callproperty getTile argc=2
+  183 iffalse L190
+  190 iftrue L338
+  205 iffalse L212
+  212 iftrue L463
+  216 getlex UP
+  218 ifne L295
+  236 iffalse L322
+  240 getlex com.nitrome.badicecream.Controller
+  242 getproperty level
+  247 iftrue L254
+  254 iffalse L326
+  258 getproperty tileGrid
+  263 iftrue L270
+  270 iffalse L328
+  274 getlex tileX
+  276 getlex tileY
+  278 decrement 
+  279 callproperty getTile argc=2
+  284 iftrue L338
+  299 iftrue L306
+  306 iffalse L463
+  310 getlex DOWN
+  312 ifne L341
+  318 iftrue L469
+  322 getlex com.nitrome.badicecream.Controller
+  324 getproperty level
+  326 getproperty tileGrid
+  328 getlex tileX
+  330 getlex tileY
+  332 pushbyte 1
+  334 add 
+  335 callproperty getTile argc=2
+  342 iftrue L364
+  349 iffalse L356
+  356 iftrue L462
+  365 getproperty wall
+  370 iffalse L381
+  374 not 
+  377 iffalse L400
+  382 iffalse L421
+  389 iffalse L396
+  396 iftrue L421
+  404 iffalse L411
+  411 iftrue L462
+  416 getproperty itemInside
+  418 getlex com.nitrome.badicecream.IceTile
+  421 iffalse L460
+  428 iffalse L435
+  435 iftrue L460
+  456 iffalse L462
+  460 inclocal_i 
+  463 pushbyte 4
+  465 ifle L36
+  470 returnvalue 
+  [update]
+  METHOD ():void
+   22 iftrue L73
+   26 getlex breaking
+   29 iftrue L73
+   36 iffalse L43
+   43 iftrue L177
+   47 findpropstrict generalUpdates
+   50 callpropvoid generalUpdates argc=0
+   54 findpropstrict movement
+   57 callpropvoid movement argc=0
+   61 findpropstrict randomWalkUpdate
+   64 callpropvoid randomWalkUpdate argc=0
+   69 iffalse L177
+   73 findpropstrict frameControl
+   76 callpropvoid frameControl argc=0
+   83 iffalse L100
+  100 iftrue L111
+  104 getlex zapClips
+  107 iffalse L184
+  111 findpropstrict zapLife
+  116 getproperty zapLife
+  121 iftrue L128
+  128 iffalse L133
+  132 decrement 
+  136 iftrue L143
+  143 iffalse L164
+  161 setproperty zapLife
+  168 getlex zapLife
+  171 pushbyte 1
+  173 ifnlt L184
+  181 initproperty zapClips
+  184 returnvoid 
+  [create]
+  METHOD (Number, Number):void
+   23 iffalse L46
+   30 callsupervoid create argc=2
+   35 iffalse L42
+   42 iftrue L65
+   49 pushbyte 3
+   51 initproperty moveSpeed
+   66 getlex com.nitrome.badicecream.YellowBreakerEnemy
+   70 iffalse L92
+   75 iftrue L92
+   82 pushbyte 2
+   84 initproperty moveSpeed
+   88 iftrue L135
+   92 getlex com.nitrome.badicecream.Controller
+   94 getproperty level
+   96 getproperty tileGrid
+   98 getlex tileX
+  100 getlex tileY
+  102 callproperty getTile argc=2
+  106 setproperty itemInside
+  124 iftrue L131
+  131 iffalse L142
+  139 initproperty breaking
+  142 returnvoid 
+  [breakTiles]
+  METHOD ():void
+   24 pushnan 
+   26 iftrue L131
+   30 setslot 4
+   34 pushnan 
+   36 iftrue L101
+   40 setslot 5
+   45 iftrue L88
+   51 iffalse L62
+   57 setslot 6
+   64 setslot 7
+   69 iftrue L157
+   79 setslot 1
+   84 iftrue L110
+   88 pushbyte 0
+   91 iffalse L117
+   97 iffalse L160
+  101 setslot 2
+  104 iftrue L162
+  110 pushbyte 0
+  113 iftrue L159
+  120 iffalse L127
+  127 iftrue L160
+  131 setslot 3
+  134 getlex com.nitrome.badicecream.GreenBreakerEnemy
+  138 iffalse L485
+  144 iffalse L151
+  151 iftrue L162
+  157 pushbyte -1
+  160 setslot 2
+  169 pushbyte -1
+  174 iftrue L181
+  181 iffalse L622
+  185 setslot 3
+  188 iffalse L520
+  199 getslot 2
+  202 iffalse L606
+  206 pushbyte 0
+  210 iftrue L217
+  217 iffalse L477
+  221 equals 
+  223 iftrue L503
+  228 iffalse L289
+  234 iftrue L241
+  241 iffalse L503
+  247 iffalse L1142
+  254 iftrue L1050
+  258 getslot 3
+  260 pushbyte 0
+  264 iftrue L271
+  271 iffalse L415
+  275 equals 
+  278 iffalse L285
+  285 iftrue L872
+  289 iffalse L302
+  294 iffalse L766
+  306 iffalse L313
+  313 iftrue L661
+  317 getslot 1
+  320 iftrue L1337
+  324 getglobalscope 
+  326 iffalse L1021
+  330 getlex tileX
+  334 getslot 2
+  336 add 
+  337 getlex tileY
+  341 getslot 3
+  343 add 
+  344 call 2
+  348 iftrue L1061
+  354 getslot 3
+  358 iftrue L365
+  365 iffalse L606
+  369 increment 
+  371 iftrue L1226
+  377 iftrue L1247
+  385 iftrue L392
+  392 iffalse L911
+  397 setslot 3
+  400 iftrue L1206
+  406 getslot 3
+  408 pushbyte 1
+  411 iffalse L938
+  415 ifle L196
+  421 getslot 2
+  423 increment 
+  425 iffalse L1198
+  431 iftrue L1286
+  438 iftrue L1200
+  443 setslot 2
+  449 iffalse L456
+  456 iftrue L819
+  460 getslot 2
+  462 pushbyte 1
+  466 iftrue L473
+  473 iffalse L938
+  477 ifle L166
+  486 getlex com.nitrome.badicecream.BlueBreakerEnemy
+  492 iftrue L499
+  499 iffalse L850
+  503 iffalse L1210
+  509 iffalse L516
+  516 iftrue L766
+  520 getlex breakDirection
+  524 iffalse L904
+  528 getlex LEFT
+  530 ifne L546
+  535 iftrue L1244
+  541 pushbyte -1
+  544 setslot 2
+  546 getlex breakDirection
+  549 getlex RIGHT
+  551 ifne L590
+  557 iftrue L564
+  564 iffalse L1184
+  570 pushbyte 1
+  573 iffalse L663
+  579 iffalse L1276
+  583 setslot 2
+  586 iffalse L612
+  590 getlex breakDirection
+  595 iffalse L602
+  602 iftrue L936
+  606 getlex UP
+  608 ifne L637
+  614 pushbyte -1
+  617 iffalse L1317
+  622 setslot 3
+  626 iffalse L633
+  633 iftrue L1048
+  637 getlex breakDirection
+  640 getlex DOWN
+  642 ifne L666
+  650 iffalse L657
+  657 iftrue L1315
+  661 pushbyte 1
+  664 setslot 3
+  681 pushbyte 1
+  685 iffalse L692
+  692 iftrue L1270
+  698 iftrue L1318
+  702 setslot 4
+  706 iftrue L713
+  713 iffalse L1127
+  724 getlex com.nitrome.badicecream.Controller
+  726 getproperty level
+  728 getproperty tileGrid
+  730 getlex tileX
+  734 getslot 4
+  738 getslot 2
+  740 multiply 
+  741 add 
+  742 getlex tileY
+  746 getslot 4
+  750 getslot 3
+  752 multiply 
+  753 add 
+  754 callproperty getTile argc=2
+  759 setslot 6
+  762 iffalse L1184
+  768 getslot 6
+  772 iffalse L779
+  779 iftrue L834
+  783 iftrue L804
+  789 iffalse L796
+  796 iftrue L854
+  808 iftrue L815
+  815 iffalse L1144
+  819 getslot 6
+  823 iffalse L830
+  830 iftrue L867
+  834 getproperty wall
+  839 iffalse L846
+  846 iftrue L872
+  850 iffalse L858
+  861 iftrue L1050
+  865 getslot 6
+  867 getproperty itemInside
+  869 getlex com.nitrome.badicecream.IceTile
+  872 iftrue L880
+  884 iftrue L891
+  891 iffalse L1063
+  895 getslot 4
+  898 iffalse L1198
+  902 increment 
+  907 iffalse L1168
+  912 setslot 4
+  915 iffalse L1232
+  921 getslot 4
+  925 iffalse L932
+  932 iftrue L1286
+  936 pushbyte 100
+  938 iflt L721
+  943 iffalse L1266
+  950 pushbyte 12
+  952 initproperty zapLife
+  956 iftrue L1184
+  963 newarray 0
+  965 initproperty zapClips
+  970 pushbyte 1
+  974 iffalse L981
+  981 iftrue L1270
+  986 setslot 5
+  996 iftrue L1050
+ 1000 getslot 1
+ 1004 iffalse L1011
+ 1011 iftrue L1337
+ 1015 getglobalscope 
+ 1017 iffalse L1338
+ 1021 getlex tileX
+ 1025 getslot 5
+ 1029 getslot 2
+ 1031 multiply 
+ 1032 add 
+ 1033 getlex tileY
+ 1037 getslot 5
+ 1041 getslot 3
+ 1043 multiply 
+ 1044 add 
+ 1045 call 2
+ 1050 findpropstrict Zap
+ 1053 constructprop Zap argc=0
+ 1059 setslot 7
+ 1063 getslot 7
+ 1065 getlex tileX
+ 1069 getslot 5
+ 1073 getslot 2
+ 1075 multiply 
+ 1076 add 
+ 1077 pushdouble 0.5
+ 1079 add 
+ 1080 getlex com.nitrome.badicecream.Controller
+ 1082 getproperty TILE_SIZE
+ 1084 multiply 
+ 1085 setproperty x
+ 1088 iftrue L1266
+ 1094 getslot 7
+ 1096 getlex tileY
+ 1100 getslot 5
+ 1104 getslot 3
+ 1106 multiply 
+ 1107 add 
+ 1108 pushdouble 0.5
+ 1110 add 
+ 1111 getlex com.nitrome.badicecream.Controller
+ 1113 getproperty TILE_SIZE
+ 1115 multiply 
+ 1116 setproperty y
+ 1120 getslot 7
+ 1122 pushbyte 0
+ 1124 setproperty rotation
+ 1127 getlex zapClips
+ 1132 getslot 7
+ 1134 callpropvoid http://adobe.com/AS3/2006/builtin.push argc=1
+ 1138 iftrue L1292
+ 1144 getslot 5
+ 1146 increment 
+ 1149 iftrue L1198
+ 1157 iftrue L1164
+ 1164 iffalse L1200
+ 1169 setslot 5
+ 1173 iftrue L1180
+ 1180 iffalse L1244
+ 1187 iffalse L1234
+ 1191 getslot 5
+ 1194 iftrue L1247
+ 1200 getslot 4
+ 1202 iflt L992
+ 1210 getlex breakDirection
+ 1215 iffalse L1222
+ 1222 iftrue L1247
+ 1226 getlex LEFT
+ 1228 ifne L1244
+ 1234 pushbyte -1
+ 1237 iffalse L1296
+ 1242 setslot 2
+ 1244 getlex breakDirection
+ 1247 getlex RIGHT
+ 1249 ifne L1283
+ 1255 iffalse L1262
+ 1262 iftrue L1366
+ 1268 pushbyte 1
+ 1272 iffalse L1318
+ 1276 setslot 2
+ 1279 iffalse L1304
+ 1283 getlex breakDirection
+ 1286 getlex UP
+ 1288 ifne L1304
+ 1294 pushbyte -1
+ 1297 setslot 3
+ 1300 iftrue L1366
+ 1304 getlex breakDirection
+ 1307 getlex DOWN
+ 1309 ifne L1333
+ 1315 pushbyte 1
+ 1318 setslot 3
+ 1322 iftrue L1329
+ 1329 iffalse L1366
+ 1335 getslot 1
+ 1337 getglobalscope 
+ 1338 getlex tileX
+ 1353 getslot 2
+ 1355 add 
+ 1356 getlex tileY
+ 1360 getslot 3
+ 1362 add 
+ 1363 call 2
+ 1366 returnvoid 
+  [frameControl]
+  METHOD ():void
+   19 iffalse L36
+   36 iftrue L89
+   44 iftrue L51
+   51 iffalse L72
+   55 getlex breaking
+   68 iffalse L79
+   72 pushstring 'Break'
+   79 pushstring 'Walk'
+   82 initproperty frameAction
+   85 iftrue L94
+   90 callsupervoid frameControl argc=0
+   94 returnvoid 
+  [findDirection]
+  METHOD (Number):Number
+   23 pushbyte 0
+   27 getlex com.nitrome.badicecream.Controller
+   29 getproperty level
+   34 iffalse L41
+   41 iftrue L522
+   45 getproperty tileGrid
+   47 getlex tileX
+   49 decrement 
+   52 iftrue L59
+   59 iffalse L433
+   63 getlex tileY
+   65 callproperty getTile argc=2
+   69 iffalse L277
+   73 getproperty seePathNum
+   79 iffalse L86
+   86 iftrue L446
+   91 equals 
+   94 iftrue L472
+  101 iftrue L108
+  108 iffalse L468
+  112 iffalse L125
+  117 findpropstrict checkWalkable
+  119 getlex LEFT
+  121 callproperty checkWalkable argc=1
+  125 iffalse L150
+  131 iftrue L138
+  138 iffalse L240
+  142 getlex LEFT
+  150 getlex com.nitrome.badicecream.Controller
+  152 getproperty level
+  154 getproperty tileGrid
+  156 getlex tileX
+  158 pushbyte 1
+  160 add 
+  161 getlex tileY
+  163 callproperty getTile argc=2
+  168 iftrue L628
+  172 getproperty seePathNum
+  176 equals 
+  179 iffalse L468
+  183 iffalse L207
+  189 iffalse L393
+  193 findpropstrict checkWalkable
+  195 getlex RIGHT
+  197 callproperty checkWalkable argc=1
+  203 iftrue L702
+  207 iffalse L244
+  213 iftrue L220
+  220 iffalse L713
+  224 getlex RIGHT
+  229 iftrue L700
+  236 iftrue L604
+  244 getlex com.nitrome.badicecream.Controller
+  246 getproperty level
+  248 getproperty tileGrid
+  252 iftrue L259
+  259 iffalse L687
+  263 getlex tileX
+  265 getlex tileY
+  267 decrement 
+  268 callproperty getTile argc=2
+  273 iftrue L697
+  277 getproperty seePathNum
+  281 equals 
+  286 iffalse L293
+  293 iftrue L644
+  297 iffalse L310
+  302 findpropstrict checkWalkable
+  304 getlex UP
+  306 callproperty checkWalkable argc=1
+  310 iffalse L327
+  315 iffalse L667
+  319 getlex UP
+  327 getlex com.nitrome.badicecream.Controller
+  329 getproperty level
+  331 getproperty tileGrid
+  334 iffalse L524
+  338 getlex tileX
+  340 getlex tileY
+  342 pushbyte 1
+  344 add 
+  345 callproperty getTile argc=2
+  349 iffalse L534
+  353 getproperty seePathNum
+  357 equals 
+  372 iffalse L703
+  376 iffalse L389
+  381 findpropstrict checkWalkable
+  383 getlex DOWN
+  385 callproperty checkWalkable argc=1
+  389 iffalse L406
+  393 getlex DOWN
+  397 iffalse L755
+  406 getlex com.nitrome.badicecream.Controller
+  408 getproperty level
+  412 iftrue L419
+  419 iffalse L522
+  423 getproperty tileGrid
+  426 iffalse L524
+  430 getlex tileX
+  432 decrement 
+  433 getlex tileY
+  435 callproperty getTile argc=2
+  439 iffalse L697
+  443 getproperty seePathNum
+  449 iftrue L642
+  453 lessthan 
+  457 iftrue L464
+  464 iffalse L703
+  468 iffalse L481
+  473 findpropstrict checkWalkable
+  475 getlex LEFT
+  477 callproperty checkWalkable argc=1
+  481 iffalse L513
+  488 iffalse L495
+  495 iftrue L756
+  499 getlex LEFT
+  504 iftrue L757
+  513 getlex com.nitrome.badicecream.Controller
+  515 getproperty level
+  518 iffalse L685
+  522 getproperty tileGrid
+  524 getlex tileX
+  526 pushbyte 1
+  528 add 
+  529 getlex tileY
+  531 callproperty getTile argc=2
+  534 getproperty seePathNum
+  540 iffalse L547
+  547 iftrue L700
+  552 lessthan 
+  555 iftrue L648
+  560 iffalse L591
+  565 iffalse L657
+  572 iftrue L579
+  579 iffalse L649
+  583 findpropstrict checkWalkable
+  585 getlex RIGHT
+  587 callproperty checkWalkable argc=1
+  591 iffalse L608
+  595 getlex RIGHT
+  599 iffalse L755
+  608 getlex com.nitrome.badicecream.Controller
+  610 getproperty level
+  612 getproperty tileGrid
+  616 iftrue L687
+  620 getlex tileX
+  622 getlex tileY
+  624 decrement 
+  625 callproperty getTile argc=2
+  628 getproperty seePathNum
+  632 iffalse L670
+  638 iffalse L701
+  642 lessthan 
+  644 iffalse L657
+  649 findpropstrict checkWalkable
+  651 getlex UP
+  653 callproperty checkWalkable argc=1
+  657 iffalse L681
+  663 iftrue L677
+  667 getlex UP
+  673 iftrue L725
+  681 getlex com.nitrome.badicecream.Controller
+  683 getproperty level
+  685 getproperty tileGrid
+  687 getlex tileX
+  689 getlex tileY
+  691 pushbyte 1
+  693 add 
+  694 callproperty getTile argc=2
+  697 getproperty seePathNum
+  701 lessthan 
+  703 iffalse L721
+  709 iffalse L725
+  713 findpropstrict checkWalkable
+  715 getlex DOWN
+  717 callproperty checkWalkable argc=1
+  721 iffalse L756
+  725 getlex DOWN
+  744 iftrue L751
+  751 iffalse L757
+  757 returnvalue 
+  [resumeWalk]
+  METHOD ():void
+   27 iffalse L58
+   35 initproperty breaking
+   40 iffalse L47
+   47 iftrue L58
+   53 pushstring 'Walk'
+   56 initproperty frameAction
+   58 returnvoid 
+  [flashTileAhead]
+  METHOD ():void
+   25 findpropstrict getRelativeTile
+   28 getlex breakDirection
+   31 callproperty getRelativeTile argc=1
+   40 iffalse L47
+   47 iftrue L95
+   66 iffalse L81
+   71 iffalse L101
+   77 iffalse L101
+   84 iffalse L91
+   91 iftrue L105
+   96 getproperty itemInside
+   98 getlex com.nitrome.badicecream.IceTile
+  101 iffalse L140
+  105 findpropstrict com.nitrome.badicecream.IceTile
+  121 getproperty itemInside
+  123 callproperty com.nitrome.badicecream.IceTile argc=1
+  131 iffalse L140
+  136 callpropvoid flash argc=0
+  140 returnvoid 
+  [render]
+  METHOD ():void
+   28 iftrue L51
+   33 callsupervoid render argc=0
+   40 iftrue L47
+   47 iffalse L58
+   51 getlex zapClips
+   54 iffalse L143
+   58 pushbyte 0
+   72 getlex zapClips
+   91 iftrue L98
+   98 iffalse L132
+  102 getlex com.nitrome.badicecream.Controller
+  104 getproperty level
+  106 getproperty bitmapData
+  123 getproperty transform
+  126 getproperty matrix
+  129 callpropvoid draw argc=2
+  135 iftrue L81
+  143 returnvoid 
+  [static init]
+  METHOD ():*
+    2 returnvoid 

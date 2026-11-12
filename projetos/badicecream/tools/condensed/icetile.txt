@@ -1,0 +1,356 @@
+=== CLASS com.nitrome.badicecream.IceTile extends com.nitrome.badicecream.Tile
+  FIELD meltTimer : Number = 0
+  FIELD breakTimer : Number = 0
+  FIELD shineTimer : Number = 0
+  FIELD opaque : Boolean = '?11'
+  FIELD dead : Boolean = '?10'
+  FIELD frame : String = 'Add'
+  FIELD removeClip : com.nitrome.badicecream.Tile
+  [ctor]
+  METHOD ():*
+   18 iffalse L25
+   25 returnvoid 
+  [update]
+  METHOD ():void
+   23 iftrue L64
+   27 getlex frame
+   30 pushstring 'Static'
+   33 ifne L68
+   39 iffalse L64
+   43 findpropstrict setFastRender
+   46 callpropvoid setFastRender argc=0
+   53 iftrue L60
+   60 iffalse L75
+   68 findpropstrict setSlowRender
+   71 callpropvoid setSlowRender argc=0
+   77 findpropstrict _-11.getTileUnderneath
+   80 callproperty _-11.getTileUnderneath argc=0
+   84 getproperty collectibleInside
+   96 iffalse L103
+  103 iftrue L172
+  107 iffalse L130
+  113 getproperty visible
+  119 iffalse L126
+  126 iftrue L178
+  130 iffalse L136
+  136 getlex frame
+  142 iftrue L149
+  149 iffalse L418
+  153 pushstring 'Static'
+  156 equals 
+  161 iffalse L168
+  168 iftrue L226
+  172 iffalse L179
+  179 iffalse L198
+  186 pushstring 'ItemInside'
+  189 initproperty frame
+  194 iffalse L249
+  198 getlex frame
+  204 iffalse L211
+  211 iftrue L810
+  215 pushstring 'ItemInside'
+  218 equals 
+  221 iftrue L245
+  226 iffalse L245
+  232 iftrue L245
+  239 iftrue L425
+  244 not 
+  245 iffalse L258
+  252 pushstring 'Static'
+  255 initproperty frame
+  258 getlex frame
+  264 iftrue L271
+  271 iffalse L627
+  275 pushstring 'Shine'
+  278 ifne L409
+  285 iftrue L292
+  292 iffalse L675
+  296 findpropstrict shineTimer
+  301 getproperty shineTimer
+  307 iftrue L314
+  314 iffalse L319
+  318 increment 
+  324 iffalse L331
+  331 iftrue L341
+  338 setproperty shineTimer
+  347 iftrue L614
+  351 getlex shineTimer
+  357 iffalse L364
+  364 iftrue L684
+  368 pushbyte 30
+  373 iffalse L380
+  380 iftrue L871
+  384 ifnge L405
+  391 pushstring 'Static'
+  394 initproperty frame
+  400 pushbyte 0
+  402 initproperty shineTimer
+  409 getlex frame
+  414 iffalse L627
+  418 pushstring 'Break'
+  421 ifne L618
+  425 findpropstrict breakTimer
+  430 getproperty breakTimer
+  436 iffalse L443
+  443 iftrue L448
+  447 increment 
+  466 iffalse L476
+  473 setproperty breakTimer
+  480 getlex breakTimer
+  486 iffalse L493
+  493 iftrue L684
+  497 pushbyte 29
+  501 iftrue L700
+  505 ifnge L614
+  511 iftrue L890
+  515 getlex removeClip
+  521 iftrue L528
+  528 iffalse L884
+  532 getproperty itemInside
+  535 setproperty dead
+  538 getlex removeClip
+  544 iffalse L551
+  551 iftrue L884
+  558 iftrue L894
+  562 setproperty itemInside
+  564 getlex com.nitrome.badicecream.Controller
+  566 getproperty level
+  570 iftrue L918
+  574 getproperty tileGrid
+  579 iffalse L586
+  586 iftrue L771
+  594 iffalse L601
+  601 iftrue L921
+  605 setproperty pathFound
+  610 iffalse L942
+  618 getlex frame
+  623 iftrue L810
+  627 pushstring 'QuickBreak'
+  630 ifne L807
+  634 findpropstrict breakTimer
+  639 getproperty breakTimer
+  644 iffalse L649
+  648 increment 
+  654 iftrue L661
+  661 iffalse L671
+  668 setproperty breakTimer
+  675 getlex breakTimer
+  680 iftrue L869
+  684 pushbyte 12
+  689 iffalse L696
+  696 iftrue L871
+  700 ifnge L803
+  704 getlex removeClip
+  709 iffalse L736
+  713 getproperty itemInside
+  716 setproperty dead
+  719 getlex removeClip
+  725 iffalse L732
+  732 iftrue L884
+  739 iffalse L894
+  743 setproperty itemInside
+  745 getlex com.nitrome.badicecream.Controller
+  747 getproperty level
+  752 iftrue L759
+  759 iffalse L918
+  763 getproperty tileGrid
+  767 iffalse L920
+  775 iftrue L782
+  782 iffalse L921
+  786 setproperty pathFound
+  792 iffalse L799
+  799 iftrue L866
+  807 getlex frame
+  810 pushstring 'Melt'
+  813 ifne L924
+  817 findpropstrict meltTimer
+  822 getproperty meltTimer
+  828 iftrue L835
+  835 iffalse L840
+  839 increment 
+  845 iftrue L852
+  852 iffalse L862
+  859 setproperty meltTimer
+  866 getlex meltTimer
+  869 pushbyte 46
+  871 ifnge L924
+  875 getlex removeClip
+  880 iftrue L893
+  884 getproperty itemInside
+  887 setproperty dead
+  890 getlex removeClip
+  894 setproperty itemInside
+  898 iffalse L924
+  902 getlex com.nitrome.badicecream.Controller
+  904 getproperty level
+  918 getproperty tileGrid
+  921 setproperty pathFound
+  924 getlex currentLabel
+  927 getlex frame
+  930 ifeq L942
+  934 findpropstrict gotoAndStop
+  936 getlex frame
+  939 callpropvoid gotoAndStop argc=1
+  942 returnvoid 
+  [meltBlock]
+  METHOD (com.nitrome.badicecream.Tile):void
+   34 iftrue L41
+   41 iffalse L59
+   48 pushstring 'Melt'
+   51 initproperty frame
+   55 iftrue L66
+   63 initproperty removeClip
+   66 returnvoid 
+  [breakBlock]
+  METHOD (com.nitrome.badicecream.Tile, Boolean):void
+   22 iffalse L97
+   29 pushstring 'Break'
+   32 initproperty frame
+   49 iffalse L66
+   57 initproperty removeClip
+   62 iffalse L107
+   67 iffalse L107
+   86 iffalse L93
+   93 iftrue L107
+   97 getlex NitromeGame
+   99 getproperty sound_manager
+  101 pushstring 'ice_wall_destroy'
+  104 callpropvoid playSound argc=1
+  107 returnvoid 
+  [setFastRender]
+  METHOD ():void
+   17 iffalse L82
+   21 getlex currentLabel
+   34 pushstring 'Static'
+   37 ifeq L77
+   43 iftrue L60
+   60 iffalse L82
+   64 findpropstrict gotoAndStop
+   66 pushstring 'Static'
+   69 callpropvoid gotoAndStop argc=1
+   73 iffalse L82
+   78 callsupervoid setFastRender argc=0
+   82 returnvoid 
+  [quickBreakBlock]
+  METHOD (com.nitrome.badicecream.Tile, Boolean):void
+   21 iftrue L103
+   28 pushstring 'QuickBreak'
+   31 initproperty frame
+   36 iffalse L56
+   56 iftrue L103
+   64 initproperty removeClip
+   68 iftrue L103
+   73 iffalse L113
+   92 iftrue L99
+   99 iffalse L113
+  103 getlex NitromeGame
+  105 getproperty sound_manager
+  107 pushstring 'ice_wall_destroy'
+  110 callpropvoid playSound argc=1
+  113 returnvoid 
+  [finishFlashAnimation]
+  METHOD ():void
+   18 iffalse L25
+   25 iftrue L38
+   32 pushstring 'Static'
+   35 initproperty frame
+   38 returnvoid 
+  [cancelAnimation]
+  METHOD ():void
+   29 iffalse L36
+   36 iftrue L49
+   43 pushstring 'Static'
+   46 initproperty frame
+   49 returnvoid 
+  [shine]
+  METHOD ():void
+   19 iffalse L26
+   26 iftrue L103
+   30 getlex frame
+   35 iftrue L42
+   42 iffalse L106
+   46 pushstring 'Break'
+   49 equals 
+   52 iffalse L69
+   69 iftrue L87
+   73 not 
+   76 iffalse L83
+   83 iftrue L134
+   88 iffalse L134
+   93 iftrue L133
+   99 iftrue L143
+  103 getlex frame
+  106 pushstring 'QuickBreak'
+  109 equals 
+  112 iffalse L129
+  129 iftrue L134
+  133 not 
+  134 iffalse L152
+  139 iffalse L152
+  146 pushstring 'Shine'
+  149 initproperty frame
+  152 returnvoid 
+  [flash]
+  METHOD ():void
+   17 iffalse L30
+   24 pushstring 'Flash'
+   27 initproperty frame
+   30 returnvoid 
+  [_-11.getTileUnderneath]
+  METHOD ():com.nitrome.badicecream.Tile
+    2 getlex com.nitrome.badicecream.Controller
+   14 getproperty level
+   16 getproperty tileGrid
+   18 getlex gridX
+   21 getlex gridY
+   24 callproperty getTile argc=2
+   27 returnvalue 
+  [create]
+  METHOD (Number, Number):void
+   21 iftrue L28
+   28 iffalse L108
+   36 initproperty gridX
+   41 iffalse L216
+   49 initproperty gridY
+   53 iftrue L72
+   60 getlex com.nitrome.badicecream.Controller
+   62 getproperty TILE_SIZE
+   64 multiply 
+   65 initproperty x
+   68 iftrue L216
+   75 getlex com.nitrome.badicecream.Controller
+   77 getproperty TILE_SIZE
+   79 multiply 
+   80 initproperty y
+   97 iffalse L104
+  104 iftrue L180
+  108 findpropstrict setSlowRender
+  111 callpropvoid setSlowRender argc=0
+  119 initproperty wall
+  124 iffalse L131
+  131 iftrue L148
+  139 initproperty above
+  144 iffalse L162
+  150 findpropstrict BrickBlockShadow
+  153 pushbyte 0
+  156 constructprop BrickBlockShadow argc=2
+  160 initproperty _-X.shadow
+  165 getlex com.nitrome.badicecream.Controller
+  167 getproperty TILE_SIZE
+  170 iftrue L177
+  174 pushbyte 2
+  176 divide 
+  177 initproperty _-X.shadowLocalX
+  183 getlex com.nitrome.badicecream.Controller
+  197 getproperty TILE_SIZE
+  200 iftrue L213
+  204 getlex _-X.shadow
+  206 getproperty height
+  209 add 
+  210 pushbyte 4
+  212 subtract 
+  213 initproperty _-X.shadowLocalY
+  216 returnvoid 
+  [static init]
+  METHOD ():*
+    2 returnvoid 

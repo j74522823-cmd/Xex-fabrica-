@@ -1,0 +1,292 @@
+=== CLASS com.nitrome.badicecream.TowerEnemy extends com.nitrome.badicecream.Enemy
+  FIELD moves : Number = 0
+  FIELD okToMove : Boolean = '?10'
+  FIELD stomp : flash.display.MovieClip = '?12'
+  [ctor]
+  METHOD ():*
+   17 iftrue L24
+   24 returnvoid 
+  [_-0w.stepped]
+  METHOD ():void
+   19 iffalse L36
+   36 iftrue L75
+   41 callsupervoid _-1g.stepped argc=0
+   57 iftrue L64
+   64 iffalse L75
+   72 initproperty okToMove
+   75 returnvoid 
+  [finishTeleportAnimation]
+  METHOD ():void
+   27 iffalse L63
+   33 pushstring 'Walk'
+   36 initproperty frameAction
+   39 iftrue L63
+   46 pushbyte 0
+   48 initproperty moves
+   52 iffalse L63
+   56 findpropstrict nextMove
+   59 callpropvoid nextMove argc=0
+   63 returnvoid 
+  [nextMove]
+  METHOD ():void
+   19 iftrue L140
+   23 findpropstrict moves
+   28 getproperty moves
+   32 iffalse L37
+   36 increment 
+   41 iffalse L48
+   48 iftrue L57
+   54 setproperty moves
+   61 getlex moves
+   67 iffalse L74
+   74 iftrue L335
+   78 pushbyte 8
+   85 iffalse L92
+   92 iftrue L253
+   96 iffalse L129
+  103 iftrue L110
+  110 iffalse L401
+  114 getlex Math
+  116 callproperty random argc=0
+  120 pushdouble 0.6
+  125 iftrue L252
+  129 iffalse L141
+  135 pushstring 'TeleportOut'
+  138 initproperty frameAction
+  140 returnvoid 
+  144 getlex com.nitrome.badicecream.Controller
+  146 getproperty level
+  148 getproperty tileGrid
+  150 getlex tileX
+  152 getlex tileY
+  154 callproperty getTile argc=2
+  157 getproperty pathNum
+  160 initproperty pathNum
+  163 getlex pathNum
+  166 pushbyte 1
+  171 iffalse L253
+  175 iffalse L252
+  194 iffalse L353
+  198 getlex com.nitrome.badicecream.Controller
+  200 getproperty level
+  204 iftrue L323
+  208 getproperty tileGrid
+  212 iftrue L219
+  219 iffalse L325
+  223 getlex tileX
+  225 getlex tileY
+  227 callproperty getTile argc=2
+  231 iffalse L332
+  235 getproperty checked
+  240 iftrue L247
+  247 iffalse L252
+  253 iffalse L276
+  259 iftrue L266
+  266 iffalse L276
+  271 getlex moveDirection
+  273 pushbyte 0
+  275 equals 
+  276 iffalse L319
+  283 iffalse L290
+  290 iftrue L319
+  294 findpropstrict walk
+  298 findpropstrict findDirection
+  301 getlex pathNum
+  304 decrement 
+  305 callproperty findDirection argc=1
+  311 initproperty moveDirection
+  316 callpropvoid walk argc=1
+  319 getlex com.nitrome.badicecream.Controller
+  321 getproperty level
+  323 getproperty tileGrid
+  325 getlex tileX
+  327 getlex tileY
+  329 callproperty getTile argc=2
+  332 getproperty pathNum
+  335 getlex Infinity
+  338 ifne L357
+  344 iftrue L362
+  351 initproperty randomWalk
+  360 initproperty randomWalk
+  362 getlex randomWalk
+  377 iffalse L388
+  381 findpropstrict randomWalkUpdate
+  384 callpropvoid randomWalkUpdate argc=0
+  392 initproperty okToMove
+  397 getlex moveDirection
+  399 initproperty lastDirection
+  401 returnvoid 
+  [doStomp]
+  METHOD ():void
+   18 iftrue L35
+   35 iffalse L57
+   42 findpropstrict Stomp
+   45 constructprop Stomp argc=0
+   49 initproperty stomp
+   53 iftrue L89
+   57 getlex stomp
+   70 getlex x
+   72 setproperty x
+   75 iffalse L89
+   79 getlex stomp
+   82 getlex y
+   84 pushbyte 18
+   86 add 
+   87 setproperty y
+   89 returnvoid 
+  [movement]
+  METHOD ():void
+   27 iffalse L43
+   31 getlex okToMove
+   34 iftrue L49
+   39 iffalse L49
+   43 returnvoid 
+   50 callsupervoid movement argc=0
+   54 returnvoid 
+  [teleport]
+  METHOD ():void
+   28 newarray 0
+   33 pushbyte 0
+   37 getlex com.nitrome.badicecream.Controller
+   39 getproperty level
+   41 getproperty tileGrid
+   43 getproperty list
+   65 iffalse L72
+   72 iftrue L112
+   77 getproperty wall
+   83 iffalse L90
+   90 iftrue L134
+   94 iffalse L116
+  101 iffalse L108
+  108 iftrue L204
+  117 getproperty itemInside
+  123 iftrue L130
+  130 iffalse L177
+  135 iftrue L177
+  142 iftrue L149
+  149 iffalse L177
+  156 iftrue L204
+  161 getproperty collectibleInside
+  177 iffalse L199
+  184 iffalse L191
+  191 iftrue L204
+  201 callpropvoid http://adobe.com/AS3/2006/builtin.push argc=1
+  207 iftrue L53
+  217 iftrue L249
+  221 findpropstrict getTileUnderneath
+  224 callproperty getTileUnderneath argc=0
+  228 getproperty itemInside
+  231 ifne L259
+  238 iffalse L245
+  245 iftrue L259
+  249 findpropstrict getTileUnderneath
+  252 callproperty getTileUnderneath argc=0
+  257 setproperty itemInside
+  260 getlex Math
+  263 getproperty length
+  265 getlex Math
+  267 callproperty random argc=0
+  271 multiply 
+  272 callproperty floor argc=1
+  276 getproperty *
+  284 iftrue L357
+  291 getproperty gridX
+  294 initproperty tileX
+  299 getproperty gridY
+  302 initproperty tileY
+  306 getlex tileX
+  308 pushdouble 0.5
+  310 add 
+  311 getlex com.nitrome.badicecream.Controller
+  313 getproperty TILE_SIZE
+  315 multiply 
+  316 initproperty x
+  320 getlex tileY
+  322 getlex com.nitrome.badicecream.Controller
+  324 getproperty TILE_SIZE
+  326 multiply 
+  327 initproperty y
+  332 iftrue L353
+  353 iffalse L374
+  359 setproperty itemInside
+  363 iftrue L374
+  369 pushstring 'TeleportIn'
+  372 initproperty frameAction
+  374 returnvoid 
+  [randomWalkUpdate]
+  METHOD ():void
+   18 iftrue L27
+   23 callsupervoid randomWalkUpdate argc=0
+   27 returnvoid 
+  [render]
+  METHOD ():void
+   18 iftrue L35
+   35 iffalse L72
+   39 findpropstrict renderExtra
+   42 getlex stomp
+   45 callpropvoid renderExtra argc=1
+   61 iftrue L68
+   68 iffalse L77
+   73 callsupervoid render argc=0
+   77 returnvoid 
+  [frameControl]
+  METHOD ():void
+   18 iftrue L25
+   25 iffalse L89
+   29 getlex frameAction
+   31 pushstring 'TeleportOut'
+   34 equals 
+   36 iftrue L50
+   41 iftrue L72
+   46 iffalse L72
+   62 iftrue L133
+   66 getlex frameAction
+   68 pushstring 'TeleportIn'
+   71 equals 
+   72 iffalse L137
+   78 iffalse L85
+   85 iftrue L133
+   89 getlex currentLabel
+   92 getlex frameAction
+   94 ifeq L133
+   99 iftrue L142
+  103 findpropstrict gotoAndStop
+  105 getlex frameAction
+  107 callpropvoid gotoAndStop argc=1
+  122 iftrue L129
+  129 iffalse L142
+  138 callsupervoid frameControl argc=0
+  142 returnvoid 
+  [update]
+  METHOD ():void
+   18 iftrue L35
+   35 iffalse L76
+   39 findpropstrict movement
+   42 callpropvoid movement argc=0
+   58 iffalse L65
+   65 iftrue L76
+   69 findpropstrict frameControl
+   72 callpropvoid frameControl argc=0
+   76 returnvoid 
+  [create]
+  METHOD (Number, Number):void
+   21 iffalse L28
+   28 iftrue L114
+   35 callsupervoid create argc=2
+   53 iftrue L60
+   60 iffalse L114
+   67 pushbyte 3
+   69 initproperty moveSpeed
+   75 iftrue L94
+   94 iffalse L114
+   98 getlex com.nitrome.badicecream.Controller
+  100 getproperty level
+  102 getproperty tileGrid
+  104 getlex tileX
+  106 getlex tileY
+  108 callproperty getTile argc=2
+  112 setproperty itemInside
+  114 returnvoid 
+  [static init]
+  METHOD ():*
+    2 returnvoid 

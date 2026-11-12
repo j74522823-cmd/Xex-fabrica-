@@ -1,0 +1,252 @@
+=== CLASS com.nitrome.badicecream.LogEnemy extends com.nitrome.badicecream.Enemy
+  FIELD rolling : Boolean = '?10'
+  FIELD transitionAnimation : Boolean = '?10'
+  FIELD stomp : flash.display.MovieClip = '?12'
+  [ctor]
+  METHOD ():*
+   19 iftrue L26
+   26 iffalse L33
+   33 returnvoid 
+  [startRolling]
+  METHOD ():void
+   18 iffalse L35
+   35 iftrue L61
+   43 initproperty transitionAnimation
+   57 iffalse L80
+   65 initproperty rolling
+   69 iftrue L80
+   75 pushstring 'StartRoll'
+   78 initproperty frameAction
+   80 returnvoid 
+  [doStomp]
+  METHOD ():void
+   18 iftrue L88
+   25 findpropstrict Stomp
+   28 constructprop Stomp argc=0
+   32 initproperty stomp
+   47 iftrue L54
+   54 iffalse L88
+   58 getlex stomp
+   61 getlex x
+   63 setproperty x
+   67 iftrue L84
+   84 iffalse L98
+   88 getlex stomp
+   91 getlex y
+   93 pushbyte 18
+   95 add 
+   96 setproperty y
+   98 returnvoid 
+  [update]
+  METHOD ():void
+   18 iffalse L98
+   22 getlex transitionAnimation
+   27 iffalse L34
+   34 iftrue L68
+   38 iftrue L154
+   44 iffalse L51
+   51 iftrue L161
+   55 getlex rolling
+   68 iffalse L109
+   74 iftrue L81
+   81 iffalse L147
+   88 pushbyte 10
+   90 initproperty moveSpeed
+   94 iffalse L105
+   98 findpropstrict movement
+  101 callpropvoid movement argc=0
+  112 pushbyte 3
+  114 initproperty moveSpeed
+  117 findpropstrict movement
+  120 callpropvoid movement argc=0
+  136 iffalse L143
+  143 iftrue L154
+  147 findpropstrict randomWalkUpdate
+  150 callpropvoid randomWalkUpdate argc=0
+  154 findpropstrict frameControl
+  157 callpropvoid frameControl argc=0
+  161 returnvoid 
+  [endRolling]
+  METHOD ():void
+   18 iffalse L82
+   26 initproperty transitionAnimation
+   41 iftrue L48
+   48 iffalse L82
+   56 initproperty rolling
+   71 iffalse L78
+   78 iftrue L89
+   84 pushstring 'EndRoll'
+   87 initproperty frameAction
+   89 returnvoid 
+  [_-2O.stepped]
+  METHOD ():void
+   22 pushnan 
+   26 pushnan 
+   36 iftrue L43
+   43 iffalse L54
+   47 getlex rolling
+   50 iftrue L536
+   54 pushbyte 0
+   58 getlex UP
+   60 getlex DOWN
+   62 getlex LEFT
+   64 getlex RIGHT
+   66 newarray 4
+   84 iffalse L475
+   89 getlex lastDirection
+   91 getlex LEFT
+   93 equals 
+   98 iftrue L105
+  105 iffalse L221
+  109 iffalse L130
+  116 iffalse L169
+  121 getlex RIGHT
+  123 equals 
+  126 iffalse L273
+  130 iffalse L138
+  138 getlex lastDirection
+  140 getlex RIGHT
+  142 equals 
+  146 iffalse L264
+  150 iffalse L193
+  158 iffalse L165
+  165 iftrue L321
+  173 iffalse L180
+  180 iftrue L475
+  184 getlex LEFT
+  186 equals 
+  189 iffalse L236
+  193 iffalse L201
+  201 getlex lastDirection
+  203 getlex UP
+  205 equals 
+  210 iftrue L217
+  217 iffalse L264
+  221 iffalse L236
+  228 iffalse L321
+  233 getlex DOWN
+  235 equals 
+  236 iffalse L244
+  244 getlex lastDirection
+  246 getlex DOWN
+  248 equals 
+  252 iftrue L259
+  259 iffalse L268
+  264 iffalse L273
+  270 getlex UP
+  272 equals 
+  273 iffalse L281
+  300 iftrue L307
+  307 iffalse L321
+  311 pushbyte 1
+  317 iffalse L481
+  326 findpropstrict getRelativeTile
+  331 callproperty getRelativeTile argc=2
+  340 not 
+  344 iffalse L386
+  348 iftrue L385
+  354 iffalse L482
+  361 iftrue L438
+  367 getproperty wall
+  374 iftrue L381
+  381 iffalse L445
+  386 iftrue L398
+  393 getproperty itemInside
+  395 getlex com.nitrome.badicecream.IceTile
+  398 iffalse L406
+  408 getproperty itemInside
+  410 getlex com.nitrome.badicecream.Player
+  413 iffalse L450
+  421 iftrue L428
+  428 iffalse L473
+  432 pushbyte 1
+  434 ifngt L446
+  441 iffalse L482
+  453 iftrue L473
+  457 increment 
+  461 iftrue L468
+  468 iffalse L473
+  475 pushbyte 100
+  477 iflt L325
+  482 iffalse L525
+  488 iffalse L514
+  500 initproperty lastDirection
+  506 initproperty moveDirection
+  510 iftrue L521
+  514 findpropstrict startRolling
+  517 callpropvoid startRolling argc=0
+  528 iftrue L75
+  536 getlex rolling
+  539 iffalse L635
+  546 iftrue L553
+  553 iffalse L574
+  559 getlex lastDirection
+  561 initproperty moveDirection
+  563 findpropstrict checkWalkable
+  565 getlex lastDirection
+  567 callproperty checkWalkable argc=1
+  570 iffalse L612
+  574 findpropstrict walk
+  578 getlex lastDirection
+  583 initproperty moveDirection
+  589 callpropvoid walk argc=1
+  614 pushbyte 0
+  616 initproperty moveDirection
+  618 findpropstrict endRolling
+  621 callpropvoid endRolling argc=0
+  625 getlex NitromeGame
+  627 getproperty sound_manager
+  629 pushstring 'log_roll_hit'
+  632 callpropvoid playSound argc=1
+  635 returnvoid 
+  [endTransitionAnimation]
+  METHOD ():void
+   18 iffalse L25
+   25 iftrue L51
+   43 initproperty transitionAnimation
+   47 iffalse L104
+   51 getlex rolling
+   54 iffalse L97
+   60 iffalse L67
+   67 iftrue L104
+   83 pushstring 'Roll'
+   86 initproperty frameAction
+   89 iffalse L104
+   99 pushstring 'Walk'
+  102 initproperty frameAction
+  104 returnvoid 
+  [render]
+  METHOD ():void
+   18 iffalse L35
+   35 iftrue L72
+   39 findpropstrict renderExtra
+   42 getlex stomp
+   45 callpropvoid renderExtra argc=1
+   61 iffalse L68
+   68 iftrue L77
+   73 callsupervoid render argc=0
+   77 returnvoid 
+  [create]
+  METHOD (Number, Number):void
+   20 iffalse L123
+   27 callsupervoid create argc=2
+   33 iffalse L40
+   40 iftrue L118
+   57 pushbyte 3
+   59 initproperty moveSpeed
+   64 iftrue L71
+   71 iffalse L123
+   75 getlex com.nitrome.badicecream.Controller
+   77 getproperty level
+   79 getproperty tileGrid
+   81 getlex tileX
+   83 getlex tileY
+   85 callproperty getTile argc=2
+   89 setproperty itemInside
+  107 iftrue L114
+  114 iffalse L123
+  121 initproperty randomWalk
+  123 returnvoid 
+  [static init]
+  METHOD ():*
+    2 returnvoid 

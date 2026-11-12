@@ -1,0 +1,348 @@
+=== CLASS com.nitrome.badicecream.Input extends Object
+  [ctor]
+  METHOD ():*
+   17 iftrue L24
+   24 returnvoid 
+  [static init]
+  METHOD ():*
+   17 iffalse L842
+   24 findpropstrict Array
+   26 pushshort 255
+   29 constructprop Array argc=1
+   32 setproperty Keys
+   39 setproperty MD
+   46 setproperty initialized
+   50 iftrue L1096
+   57 pushbyte 65
+   59 initproperty A
+   65 pushbyte 66
+   67 initproperty B
+   71 iffalse L1049
+   78 pushbyte 67
+   80 initproperty C
+   86 pushbyte 68
+   88 initproperty D
+   94 pushbyte 69
+   96 initproperty E
+  102 pushbyte 70
+  104 initproperty F
+  110 pushbyte 71
+  112 initproperty G
+  117 iftrue L124
+  124 iffalse L643
+  131 pushbyte 72
+  133 initproperty H
+  138 iffalse L145
+  145 iftrue L680
+  152 pushbyte 73
+  154 initproperty I
+  160 pushbyte 74
+  162 initproperty J
+  168 pushbyte 75
+  170 initproperty K
+  176 pushbyte 76
+  178 initproperty L
+  184 pushbyte 77
+  186 initproperty M
+  191 iffalse L198
+  198 iftrue L770
+  205 pushbyte 78
+  207 initproperty N
+  213 pushbyte 79
+  215 initproperty O
+  221 pushbyte 80
+  223 initproperty P
+  227 iftrue L474
+  234 pushbyte 81
+  236 initproperty Q
+  242 pushbyte 82
+  244 initproperty R
+  250 pushbyte 83
+  252 initproperty S
+  257 iftrue L264
+  264 iffalse L967
+  271 pushbyte 84
+  273 initproperty T
+  279 pushbyte 85
+  281 initproperty U
+  287 pushbyte 86
+  289 initproperty V
+  294 iftrue L301
+  301 iffalse L856
+  308 pushbyte 87
+  310 initproperty W
+  316 pushbyte 88
+  318 initproperty X
+  323 iffalse L330
+  330 iftrue L474
+  337 pushbyte 89
+  339 initproperty Y
+  345 pushbyte 90
+  347 initproperty Z
+  353 pushbyte 112
+  355 initproperty F1
+  361 pushbyte 113
+  363 initproperty F2
+  369 pushbyte 114
+  371 initproperty F3
+  375 iffalse L416
+  382 pushbyte 115
+  384 initproperty F4
+  390 pushbyte 116
+  392 initproperty F5
+  398 pushbyte 117
+  400 initproperty F6
+  405 iffalse L412
+  412 iftrue L856
+  419 pushbyte 118
+  421 initproperty F7
+  427 pushbyte 119
+  429 initproperty F8
+  435 pushbyte 120
+  437 initproperty F9
+  443 pushbyte 121
+  445 initproperty F10
+  449 iffalse L659
+  456 pushbyte 122
+  458 initproperty F11
+  463 iftrue L470
+  470 iffalse L945
+  477 pushbyte 123
+  479 initproperty F12
+  485 pushbyte 124
+  487 initproperty F13
+  493 pushbyte 125
+  495 initproperty F14
+  500 iftrue L507
+  507 iffalse L754
+  514 pushbyte 126
+  516 initproperty F15
+  521 iftrue L528
+  528 iffalse L825
+  535 pushbyte 48
+  537 initproperty NUMBER_0
+  543 pushbyte 49
+  545 initproperty NUMBER_1
+  551 pushbyte 50
+  553 initproperty NUMBER_2
+  559 pushbyte 51
+  561 initproperty NUMBER_3
+  567 pushbyte 52
+  569 initproperty NUMBER_4
+  575 pushbyte 53
+  577 initproperty NUMBER_5
+  583 pushbyte 54
+  585 initproperty NUMBER_6
+  591 pushbyte 55
+  593 initproperty NUMBER_7
+  608 iffalse L615
+  615 iftrue L1030
+  622 pushbyte 56
+  624 initproperty NUMBER_8
+  630 pushbyte 57
+  632 initproperty NUMBER_9
+  638 pushbyte 21
+  640 initproperty NUMPAD
+  646 pushbyte 96
+  648 initproperty NUMPAD_0
+  654 pushbyte 97
+  656 initproperty NUMPAD_1
+  662 pushbyte 98
+  664 initproperty NUMPAD_2
+  669 iffalse L676
+  676 iftrue L872
+  683 pushbyte 99
+  685 initproperty NUMPAD_3
+  689 iftrue L770
+  696 pushbyte 100
+  698 initproperty NUMPAD_4
+  704 pushbyte 101
+  706 initproperty NUMPAD_5
+  712 pushbyte 102
+  714 initproperty NUMPAD_6
+  720 pushbyte 103
+  722 initproperty NUMPAD_7
+  727 iftrue L734
+  734 iffalse L1030
+  741 pushbyte 104
+  743 initproperty NUMPAD_8
+  749 pushbyte 105
+  751 initproperty NUMPAD_9
+  757 pushbyte 107
+  759 initproperty NUMPAD_ADD
+  765 pushbyte 110
+  767 initproperty NUMPAD_DECIMAL
+  773 pushbyte 111
+  775 initproperty NUMPAD_DIVIDE
+  779 iffalse L945
+  786 pushbyte 108
+  788 initproperty NUMPAD_ENTER
+  792 iffalse L1151
+  799 pushbyte 106
+  801 initproperty NUMPAD_MULTIPLY
+  807 pushbyte 109
+  809 initproperty NUMPAD_SUBTRACT
+  814 iffalse L821
+  821 iftrue L1142
+  828 pushbyte 18
+  830 initproperty ALTERNATE
+  836 pushshort 192
+  839 initproperty BACKQUOTE
+  845 pushshort 220
+  848 initproperty BACKSLASH
+  852 iffalse L1080
+  859 pushbyte 8
+  861 initproperty BACKSPACE
+  867 pushbyte 20
+  869 initproperty CAPS_LOCK
+  875 pushshort 188
+  878 initproperty COMMA
+  884 pushbyte 15
+  886 initproperty COMMAND
+  891 iffalse L898
+  898 iftrue L1151
+  905 pushbyte 17
+  907 initproperty CONTROL
+  913 pushbyte 46
+  915 initproperty DELETE
+  920 iffalse L927
+  927 iftrue L1118
+  933 pushbyte 40
+  935 initproperty DOWN
+  940 pushbyte 35
+  942 initproperty END
+  948 pushbyte 13
+  950 initproperty ENTER
+  954 iffalse L1127
+  961 pushshort 187
+  964 initproperty EQUAL
+  970 pushbyte 27
+  972 initproperty ESCAPE
+  977 iffalse L984
+  984 iftrue L1088
+  991 pushbyte 36
+  993 initproperty HOME
+  998 iffalse L1005
+ 1005 iftrue L1151
+ 1012 pushbyte 45
+ 1014 initproperty INSERT
+ 1019 iftrue L1026
+ 1026 iffalse L1071
+ 1032 pushbyte 37
+ 1034 initproperty LEFT
+ 1038 iftrue L1045
+ 1045 iffalse L1223
+ 1052 pushshort 219
+ 1055 initproperty LEFTBRACKET
+ 1060 iffalse L1067
+ 1067 iftrue L1133
+ 1074 pushshort 189
+ 1077 initproperty MINUS
+ 1083 pushbyte 34
+ 1085 initproperty PAGE_DOWN
+ 1091 pushbyte 33
+ 1093 initproperty PAGE_UP
+ 1099 pushshort 190
+ 1102 initproperty PERIOD
+ 1107 iftrue L1114
+ 1114 iffalse L1204
+ 1121 pushshort 222
+ 1124 initproperty QUOTE
+ 1129 pushbyte 39
+ 1131 initproperty RIGHT
+ 1136 pushshort 221
+ 1139 initproperty RIGHTBRACKET
+ 1145 pushshort 186
+ 1148 initproperty SEMICOLON
+ 1154 pushbyte 16
+ 1156 initproperty SHIFT
+ 1160 iftrue L1204
+ 1167 pushshort 191
+ 1170 initproperty SLASH
+ 1175 iffalse L1182
+ 1182 iftrue L1223
+ 1189 pushbyte 32
+ 1201 initproperty SPACE
+ 1207 pushbyte 9
+ 1209 initproperty TAB
+ 1213 iffalse L1223
+ 1219 pushbyte 38
+ 1221 initproperty UP
+ 1223 returnvoid 
+  [static MouseUp]
+  METHOD (flash.events.MouseEvent):void
+   20 iffalse L27
+   27 iftrue L38
+   35 setproperty MD
+   38 returnvoid 
+  [static setup]
+  METHOD (flash.display.Stage):*
+   18 iffalse L55
+   22 getlex initialized
+   25 iffalse L48
+   30 iffalse L109
+   34 returnvoid 
+   52 setproperty initialized
+   56 getlex flash.events.KeyboardEvent
+   59 getproperty KEY_DOWN
+   62 getlex KeyDown
+   66 pushbyte 0
+   69 callpropvoid addEventListener argc=5
+   73 getlex flash.events.KeyboardEvent
+   91 getproperty KEY_UP
+   94 getlex KeyUp
+   98 pushbyte 0
+  101 callpropvoid addEventListener argc=5
+  105 iftrue L167
+  110 getlex flash.events.MouseEvent
+  112 getproperty MOUSE_DOWN
+  115 getlex MouseDown
+  119 pushbyte 0
+  122 callpropvoid addEventListener argc=5
+  127 iftrue L134
+  134 iffalse L183
+  139 getlex flash.events.MouseEvent
+  141 getproperty MOUSE_UP
+  144 getlex MouseUp
+  148 pushbyte 0
+  164 callpropvoid addEventListener argc=5
+  168 getlex flash.events.Event
+  170 getproperty DEACTIVATE
+  173 getlex StageDeactivate
+  177 pushbyte 0
+  180 callpropvoid addEventListener argc=5
+  183 returnvoid 
+  [static MouseDown]
+  METHOD (flash.events.MouseEvent):void
+   21 iftrue L32
+   29 setproperty MD
+   32 returnvoid 
+  [static isMouseDown]
+  METHOD ():Boolean
+    2 getlex MD
+    5 returnvalue 
+  [static isKeyDown]
+  METHOD (int):Boolean
+    2 getlex Keys
+   16 getproperty *
+   19 returnvalue 
+  [static KeyUp]
+  METHOD (flash.events.KeyboardEvent):void
+   18 iffalse L33
+   22 getlex Keys
+   26 getproperty keyCode
+   30 setproperty *
+   33 returnvoid 
+  [static KeyDown]
+  METHOD (flash.events.KeyboardEvent):void
+   31 iftrue L38
+   38 iffalse L53
+   42 getlex Keys
+   46 getproperty keyCode
+   50 setproperty *
+   53 returnvoid 
+  [static StageDeactivate]
+  METHOD (flash.events.Event):void
+   20 iffalse L31
+   28 setproperty MD
+   31 returnvoid 

@@ -1,0 +1,797 @@
+=== CLASS com.nitrome.badicecream.TileGrid extends Object
+  FIELD gridWidth : Number = 0
+  FIELD FIRST_TILE_TYPE : Number = 32
+  FIELD grid : Array
+  FIELD tileTypes : Array
+  FIELD gridHeight : Number = 0
+  FIELD pathFound : Boolean = '?10'
+  FIELD list : Array
+  [ctor]
+  METHOD ():*
+   19 iffalse L26
+   26 iftrue L64
+   33 newarray 0
+   35 initproperty list
+   40 iffalse L47
+   47 iftrue L64
+   54 newarray 0
+   56 initproperty grid
+   60 iffalse L300
+   67 pushstring 'BlockTile'
+   70 pushstring 'LandTile'
+   73 pushstring 'BigTree'
+   76 pushstring 'BigWell'
+   79 pushstring 'BrickBlockBlue'
+   82 pushstring 'BrickBlockRed'
+   85 pushstring 'BrickBlockYellow'
+   88 pushstring 'CubedLog'
+   91 pushstring 'FourBlue'
+   94 pushstring 'FourRed'
+   97 pushstring 'FourYellow'
+  100 pushstring 'OneBlue'
+  103 pushstring 'OneBlueHole'
+  106 pushstring 'OneRed'
+  109 pushstring 'OneRedHole'
+  112 pushstring 'OneYellow'
+  115 pushstring 'OneYellowHole'
+  118 pushstring 'StripedBlock1'
+  121 pushstring 'StripedBlock2'
+  124 pushstring 'StripedBlock3'
+  137 pushstring 'TwoBlue'
+  140 pushstring 'TwoRed'
+  143 pushstring 'TwoTallBlue'
+  146 pushstring 'TwoTallRed'
+  149 pushstring 'TwoTallYellow'
+  152 pushstring 'TwoYellow'
+  155 pushstring 'Hut1'
+  158 pushstring 'Hut2'
+  161 pushstring 'Igloo'
+  164 pushstring 'LargeGroundHole'
+  167 pushstring 'LargeSnowMound'
+  170 pushstring 'LittleTree'
+  173 pushstring 'Log'
+  176 pushstring 'LogsLeft'
+  179 pushstring 'LogsMiddle'
+  182 pushstring 'LogsRight'
+  185 pushstring 'LogsSingle'
+  188 pushstring 'MedGroundHole'
+  191 pushstring 'MeltedSnow1'
+  194 pushstring 'MeltedSnow2'
+  197 pushstring 'MeltedSnow3'
+  200 pushstring 'MeltedSnow4'
+  203 pushstring 'MeltedSnow5'
+  206 pushstring 'MeltedSnow6'
+  209 pushstring 'MeltedSnow7'
+  212 pushstring 'MeltedSnow8'
+  215 pushstring 'MeltedSnow9'
+  218 pushstring 'MeltedSnow10'
+  221 pushstring 'MeltedSnow11'
+  224 pushstring 'MeltedSnow12'
+  227 pushstring 'SideSnowLeft'
+  230 pushstring 'SideSnowRight'
+  233 pushstring 'SmallGroundHole'
+  236 pushstring 'SmallSnowMound'
+  239 pushstring 'SnowSprig'
+  242 pushstring 'SnowySideLeft'
+  245 pushstring 'SnowySideRight'
+  248 pushstring 'Stones1'
+  251 pushstring 'Stones2'
+  254 pushstring 'Stones3'
+  257 pushstring 'PoleTree'
+  260 pushstring 'SmokeStackBlue'
+  263 pushstring 'SmokeStackYellow'
+  266 pushstring 'Snowman'
+  269 pushstring 'Campfire'
+  272 newarray 65
+  274 initproperty tileTypes
+  289 iftrue L296
+  296 iffalse L303
+  303 returnvoid 
+  [getTile]
+  METHOD (Number, Number):com.nitrome.badicecream.Tile
+   22 iffalse L29
+   29 iftrue L93
+   33 getlex grid
+   50 iftrue L96
+   56 iftrue L97
+   60 getproperty *
+   63 iftrue L93
+   69 iffalse L87
+   87 iftrue L93
+   92 returnvalue 
+   93 getlex grid
+   97 getproperty *
+  101 getproperty *
+  104 returnvalue 
+  [findPath]
+  METHOD ():void
+   39 iffalse L46
+   46 iftrue L57
+   50 findpropstrict cleanPath
+   53 callpropvoid cleanPath argc=0
+   57 newarray 0
+   62 findpropstrict flash.geom.Point
+   65 getlex com.nitrome.badicecream.Controller
+   67 getproperty level
+   69 getproperty player1
+   72 getproperty tileX
+   74 getlex com.nitrome.badicecream.Controller
+   76 getproperty level
+   78 getproperty player1
+   81 getproperty tileY
+   83 constructprop flash.geom.Point argc=2
+   91 findpropstrict getTile
+   94 getproperty x
+   97 getproperty y
+   99 callproperty getTile argc=2
+  107 setproperty checked
+  110 getlex com.nitrome.badicecream.Controller
+  112 getproperty level
+  117 iffalse L124
+  124 iftrue L198
+  128 getproperty player1
+  131 callproperty isDead argc=0
+  138 iftrue L145
+  145 iffalse L201
+  149 iftrue L189
+  154 pushbyte 1
+  156 setproperty pathNum
+  161 iftrue L205
+  166 pushbyte 1
+  168 setproperty jumpPathNum
+  172 pushbyte 1
+  174 setproperty seePathNum
+  179 iffalse L205
+  184 pushbyte 1
+  186 setproperty player1PathNum
+  191 callpropvoid http://adobe.com/AS3/2006/builtin.push argc=1
+  194 getlex com.nitrome.badicecream.Controller
+  196 getproperty level
+  198 getproperty coop
+  201 iffalse L323
+  205 findpropstrict flash.geom.Point
+  208 getlex com.nitrome.badicecream.Controller
+  210 getproperty level
+  212 getproperty player2
+  215 getproperty tileX
+  217 getlex com.nitrome.badicecream.Controller
+  219 getproperty level
+  221 getproperty player2
+  224 getproperty tileY
+  226 constructprop flash.geom.Point argc=2
+  234 findpropstrict getTile
+  237 getproperty x
+  240 getproperty y
+  242 callproperty getTile argc=2
+  250 iffalse L300
+  256 setproperty checked
+  262 iffalse L269
+  269 iftrue L294
+  273 getlex com.nitrome.badicecream.Controller
+  275 getproperty level
+  277 getproperty player2
+  280 callproperty isDead argc=0
+  284 iftrue L318
+  289 pushbyte 1
+  291 setproperty pathNum
+  295 pushbyte 1
+  297 setproperty jumpPathNum
+  301 pushbyte 1
+  303 setproperty seePathNum
+  307 pushbyte 1
+  309 setproperty player2PathNum
+  314 iffalse L323
+  320 callpropvoid http://adobe.com/AS3/2006/builtin.push argc=1
+  329 callproperty http://adobe.com/AS3/2006/builtin.shift argc=0
+  337 findpropstrict addPathNode
+  342 getproperty gridX
+  348 iffalse L355
+  355 iftrue L360
+  359 decrement 
+  362 getproperty gridY
+  367 getproperty pathNum
+  372 iffalse L379
+  376 pushbyte 1
+  378 add 
+  381 getproperty jumpPathNum
+  387 iftrue L394
+  394 iffalse L401
+  398 pushbyte 1
+  400 add 
+  403 getproperty seePathNum
+  408 iffalse L415
+  412 pushbyte 1
+  414 add 
+  417 getproperty player1PathNum
+  423 iftrue L430
+  430 iffalse L437
+  434 pushbyte 1
+  436 add 
+  439 getproperty player2PathNum
+  444 iftrue L451
+  448 pushbyte 1
+  450 add 
+  452 callpropvoid addPathNode argc=8
+  456 findpropstrict addPathNode
+  461 getproperty gridX
+  466 iffalse L473
+  470 pushbyte 1
+  472 add 
+  475 getproperty gridY
+  480 getproperty pathNum
+  486 iftrue L493
+  493 iffalse L500
+  497 pushbyte 1
+  499 add 
+  502 getproperty jumpPathNum
+  507 iffalse L514
+  511 pushbyte 1
+  513 add 
+  516 getproperty seePathNum
+  522 iffalse L543
+  543 iftrue L550
+  547 pushbyte 1
+  549 add 
+  552 getproperty player1PathNum
+  558 iffalse L565
+  565 iftrue L572
+  569 pushbyte 1
+  571 add 
+  574 getproperty player2PathNum
+  579 iftrue L586
+  583 pushbyte 1
+  585 add 
+  587 callpropvoid addPathNode argc=8
+  591 findpropstrict addPathNode
+  596 getproperty gridX
+  601 getproperty gridY
+  607 iffalse L614
+  614 iftrue L619
+  618 decrement 
+  621 getproperty pathNum
+  627 iftrue L634
+  634 iffalse L641
+  638 pushbyte 1
+  640 add 
+  643 getproperty jumpPathNum
+  648 iffalse L655
+  652 pushbyte 1
+  654 add 
+  657 getproperty seePathNum
+  663 iffalse L670
+  670 iftrue L677
+  674 pushbyte 1
+  676 add 
+  679 getproperty player1PathNum
+  685 iftrue L692
+  692 iffalse L699
+  696 pushbyte 1
+  698 add 
+  701 getproperty player2PathNum
+  707 iffalse L714
+  714 iftrue L721
+  718 pushbyte 1
+  720 add 
+  722 callpropvoid addPathNode argc=8
+  726 findpropstrict addPathNode
+  731 getproperty gridX
+  736 getproperty gridY
+  741 iftrue L748
+  745 pushbyte 1
+  747 add 
+  750 getproperty pathNum
+  755 iftrue L762
+  759 pushbyte 1
+  761 add 
+  764 getproperty jumpPathNum
+  769 iffalse L776
+  773 pushbyte 1
+  775 add 
+  778 getproperty seePathNum
+  784 iffalse L791
+  791 iftrue L798
+  795 pushbyte 1
+  797 add 
+  800 getproperty player1PathNum
+  806 iftrue L813
+  813 iffalse L820
+  817 pushbyte 1
+  819 add 
+  822 getproperty player2PathNum
+  828 iffalse L835
+  835 iftrue L842
+  839 pushbyte 1
+  841 add 
+  843 callpropvoid addPathNode argc=8
+  849 iffalse L1010
+  853 findpropstrict addPathNode
+  858 getproperty gridX
+  863 iftrue L870
+  867 pushbyte 2
+  869 subtract 
+  872 getproperty gridY
+  875 getlex Infinity
+  880 getproperty jumpPathNum
+  883 pushbyte 10
+  885 add 
+  886 getlex Infinity
+  889 getlex Infinity
+  892 getlex Infinity
+  896 callpropvoid addPathNode argc=8
+  900 findpropstrict addPathNode
+  905 getproperty gridX
+  911 iffalse L918
+  918 iftrue L925
+  922 pushbyte 2
+  924 add 
+  927 getproperty gridY
+  930 getlex Infinity
+  935 getproperty jumpPathNum
+  938 pushbyte 10
+  940 add 
+  941 getlex Infinity
+  944 getlex Infinity
+  947 getlex Infinity
+  951 callpropvoid addPathNode argc=8
+  955 findpropstrict addPathNode
+  960 getproperty gridX
+  965 getproperty gridY
+  971 iffalse L978
+  978 iftrue L985
+  982 pushbyte 2
+  984 subtract 
+  985 getlex Infinity
+  990 getproperty jumpPathNum
+  993 pushbyte 10
+  995 add 
+  996 getlex Infinity
+  999 getlex Infinity
+ 1002 getlex Infinity
+ 1006 callpropvoid addPathNode argc=8
+ 1010 findpropstrict addPathNode
+ 1015 getproperty gridX
+ 1020 getproperty gridY
+ 1025 iftrue L1032
+ 1029 pushbyte 2
+ 1031 add 
+ 1032 getlex Infinity
+ 1037 getproperty jumpPathNum
+ 1040 pushbyte 10
+ 1042 add 
+ 1043 getlex Infinity
+ 1046 getlex Infinity
+ 1049 getlex Infinity
+ 1053 callpropvoid addPathNode argc=8
+ 1058 getproperty length
+ 1060 pushbyte 0
+ 1062 ifgt L327
+ 1083 iffalse L1090
+ 1090 iftrue L1101
+ 1098 initproperty pathFound
+ 1101 returnvoid 
+  [addPathNode]
+  METHOD (Number, Number, Number, Number, Number, Number, Number, Array):void
+   20 findpropstrict getTile
+   24 callproperty getTile argc=2
+   32 iftrue L49
+   38 iftrue L86
+   42 returnvoid 
+   51 getproperty wall
+   57 iftrue L64
+   64 iffalse L88
+   68 iffalse L87
+   75 iffalse L82
+   82 iftrue L87
+   86 returnvoid 
+   92 getproperty itemInside
+   94 getlex com.nitrome.badicecream.Walker
+  100 iffalse L107
+  107 iftrue L434
+  112 iftrue L123
+  119 getproperty itemInside
+  122 equals 
+  123 iffalse L427
+  129 getproperty pathNum
+  135 iffalse L469
+  139 ifngt L204
+  146 iffalse L153
+  153 iftrue L329
+  160 setproperty pathNum
+  166 setproperty seePathNum
+  172 setproperty checked
+  178 iftrue L185
+  185 iffalse L444
+  192 iffalse L507
+  200 iffalse L522
+  206 getproperty jumpPathNum
+  214 iftrue L221
+  221 iffalse L357
+  225 ifngt L285
+  232 iftrue L253
+  253 iffalse L329
+  261 setproperty jumpPathNum
+  267 setproperty checked
+  272 iffalse L329
+  281 iftrue L444
+  287 getproperty player1PathNum
+  292 iffalse L453
+  300 iffalse L469
+  304 ifngt L344
+  311 iffalse L318
+  318 iftrue L509
+  326 setproperty player1PathNum
+  332 iffalse L434
+  340 iffalse L509
+  346 getproperty player2PathNum
+  353 iffalse L469
+  357 ifngt L427
+  364 iftrue L371
+  371 iffalse L480
+  379 setproperty player2PathNum
+  385 iffalse L392
+  392 iftrue L480
+  400 iffalse L407
+  407 iftrue L511
+  416 iffalse L423
+  423 iftrue L473
+  429 getproperty itemInside
+  431 getlex com.nitrome.badicecream.IceTile
+  434 iffalse L462
+  440 iftrue L473
+  448 iffalse L453
+  452 increment 
+  458 iffalse L509
+  464 getproperty seePathNum
+  469 ifngt L509
+  477 setproperty seePathNum
+  483 setproperty checked
+  503 iffalse L511
+  511 iffalse L522
+  519 callpropvoid http://adobe.com/AS3/2006/builtin.push argc=1
+  522 returnvoid 
+  [cleanPath]
+  METHOD ():void
+   25 pushbyte 0
+   33 getlex list
+   37 getproperty *
+   44 getlex Infinity
+   47 setproperty pathNum
+   51 getlex Infinity
+   54 setproperty jumpPathNum
+   72 iffalse L79
+   79 iftrue L97
+   84 getlex Infinity
+   87 setproperty seePathNum
+   91 getlex Infinity
+   94 setproperty player1PathNum
+   98 getlex Infinity
+  101 setproperty player2PathNum
+  105 getproperty wall
+  108 iffalse L138
+  113 pushbyte 0
+  115 setproperty pathNum
+  119 pushbyte 0
+  121 setproperty jumpPathNum
+  140 setproperty checked
+  143 inclocal_i 
+  146 getlex list
+  149 getproperty length
+  151 decrement 
+  152 iflt L32
+  156 returnvoid 
+  [create]
+  METHOD (Number, Number, XMLList):void
+   24 iffalse L31
+   31 iftrue L74
+   39 initproperty gridWidth
+   45 iffalse L52
+   52 iftrue L74
+   60 initproperty gridHeight
+   74 pushbyte 0
+   83 getlex grid
+   88 newarray 0
+   90 setproperty *
+   96 iftrue L103
+  103 iffalse L123
+  107 inclocal_i 
+  108 getsuper __id26_
+  112 iffalse L119
+  119 iftrue L165
+  140 iflt L82
+  146 iffalse L165
+  150 findpropstrict buildTiles
+  153 findpropstrict deserialize
+  157 callproperty deserialize argc=1
+  161 callpropvoid buildTiles argc=1
+  165 returnvoid 
+  [buildTiles]
+  METHOD (Array):void
+   28 iftrue L35
+   35 iffalse L104
+   39 pushbyte 0
+   44 iffalse L51
+   51 iftrue L111
+   55 setslot 3
+   59 pushnan 
+   60 setslot 4
+   67 iffalse L84
+   73 setslot 5
+   80 iffalse L92
+   87 setslot 6
+   94 setslot 7
+  100 iftrue L109
+  105 setslot 1
+  109 pushbyte 0
+  111 setslot 2
+  120 pushbyte 0
+  125 iffalse L132
+  132 iftrue L864
+  136 setslot 3
+  141 iffalse L148
+  148 iftrue L514
+  162 iftrue L169
+  169 iffalse L1156
+  177 iftrue L1020
+  181 getslot 1
+  186 iffalse L193
+  193 iftrue L316
+  201 iftrue L332
+  205 getslot 3
+  210 iftrue L217
+  217 iffalse L348
+  221 getproperty *
+  226 getslot 2
+  228 getproperty *
+  234 iffalse L390
+  238 setslot 4
+  242 iffalse L424
+  248 getslot 4
+  253 iftrue L260
+  260 iffalse L566
+  264 pushbyte 0
+  268 iffalse L585
+  272 ifne L392
+  278 iffalse L880
+  289 iftrue L296
+  296 iffalse L912
+  300 getslot 1
+  305 iffalse L312
+  312 iftrue L914
+  321 iftrue L328
+  328 iffalse L916
+  332 getslot 3
+  337 iffalse L344
+  344 iftrue L918
+  348 getproperty *
+  353 getslot 2
+  355 pushbyte 1
+  357 getlex FIRST_TILE_TYPE
+  360 add 
+  363 setproperty *
+  371 iftrue L390
+  379 iffalse L386
+  386 iftrue L929
+  390 setslot 4
+  394 findpropstrict flash.utils.getDefinitionByName
+  397 getlex tileTypes
+  402 getslot 4
+  404 getlex FIRST_TILE_TYPE
+  407 subtract 
+  408 getproperty *
+  411 callproperty flash.utils.getDefinitionByName argc=1
+  415 getlex Class
+  418 astypelate 
+  422 setslot 6
+  471 iffalse L1020
+  475 getslot 6
+  477 construct 0
+  479 getlex com.nitrome.badicecream.Tile
+  481 astypelate 
+  484 setslot 5
+  490 iffalse L516
+  494 getslot 5
+  499 iftrue L506
+  506 iffalse L545
+  510 iftrue L527
+  516 findpropstrict LandTile
+  519 constructprop LandTile argc=0
+  525 setslot 5
+  529 getslot 5
+  534 iffalse L541
+  541 iftrue L605
+  547 getslot 2
+  551 getslot 3
+  553 callpropvoid create argc=2
+  558 getslot 4
+  562 iftrue L570
+  566 getlex FIRST_TILE_TYPE
+  569 subtract 
+  570 pushbyte 0
+  585 ifne L609
+  591 iffalse L937
+  599 iftrue L939
+  603 getslot 5
+  606 setproperty wall
+  609 getlex list
+  614 iftrue L656
+  623 iftrue L630
+  630 iffalse L672
+  634 getslot 5
+  636 callpropvoid http://adobe.com/AS3/2006/builtin.push argc=1
+  639 getlex grid
+  645 iftrue L652
+  652 iffalse L1085
+  661 iftrue L668
+  668 iffalse L1087
+  672 getslot 2
+  674 getproperty *
+  679 getslot 3
+  683 getslot 5
+  685 setproperty *
+  690 getslot 3
+  695 iffalse L702
+  702 iftrue L707
+  706 increment_i 
+  710 setslot 3
+  717 iftrue L724
+  724 iffalse L904
+  728 getslot 3
+  734 iftrue L1175
+  738 getslot 1
+  743 iffalse L750
+  750 iftrue L822
+  754 getproperty length
+  756 iflt L156
+  763 iftrue L770
+  770 iffalse L983
+  778 iffalse L1033
+  782 getslot 2
+  784 increment_i 
+  789 iftrue L1134
+  794 setslot 2
+  800 iftrue L1065
+  804 getslot 2
+  810 iftrue L1134
+  814 getslot 1
+  818 iffalse L1142
+  822 pushbyte 0
+  826 iftrue L1201
+  830 getproperty *
+  833 getproperty length
+  836 iflt L117
+  843 iftrue L850
+  850 iffalse L891
+  856 pushbyte 0
+  860 iffalse L889
+  864 setslot 2
+  869 iftrue L876
+  876 iffalse L1191
+  887 pushbyte 0
+  889 setslot 3
+  900 iftrue L1156
+  908 iffalse L1020
+  912 getslot 1
+  916 getslot 3
+  918 getproperty *
+  923 getslot 2
+  925 getproperty *
+  929 setslot 4
+  933 iftrue L1148
+  939 findpropstrict flash.utils.getDefinitionByName
+  942 getlex tileTypes
+  947 getslot 4
+  949 getlex FIRST_TILE_TYPE
+  952 subtract 
+  953 getproperty *
+  956 callproperty flash.utils.getDefinitionByName argc=1
+  960 getlex Class
+  963 astypelate 
+  967 setslot 6
+  972 iffalse L979
+  979 iftrue L1191
+ 1020 getslot 6
+ 1022 construct 0
+ 1024 getlex com.nitrome.badicecream.StaticObject
+ 1026 astypelate 
+ 1029 setslot 7
+ 1033 getslot 7
+ 1037 iftrue L1067
+ 1041 iftrue L1063
+ 1048 iffalse L1055
+ 1055 iftrue L1211
+ 1065 getslot 7
+ 1069 getslot 2
+ 1073 getslot 3
+ 1075 callpropvoid create argc=2
+ 1078 getlex com.nitrome.badicecream.Controller
+ 1080 getproperty level
+ 1082 getproperty staticArray
+ 1087 getslot 7
+ 1089 callpropvoid http://adobe.com/AS3/2006/builtin.push argc=1
+ 1094 getslot 3
+ 1098 iftrue L1103
+ 1102 increment_i 
+ 1106 setslot 3
+ 1113 iffalse L1120
+ 1120 iftrue L1156
+ 1124 getslot 3
+ 1130 iffalse L1175
+ 1134 getslot 1
+ 1138 iftrue L1199
+ 1142 getproperty length
+ 1144 iflt L895
+ 1152 iftrue L1193
+ 1156 getslot 2
+ 1158 increment_i 
+ 1164 iffalse L1171
+ 1171 iftrue L1197
+ 1189 setslot 2
+ 1193 getslot 2
+ 1197 getslot 1
+ 1199 pushbyte 0
+ 1201 getproperty *
+ 1204 getproperty length
+ 1207 iflt L884
+ 1211 returnvoid 
+  [deserialize]
+  METHOD (XMLList):Array
+   20 pushbyte 0
+   30 pushnan 
+   37 newarray 0
+   42 findpropstrict String
+   45 callproperty String argc=1
+   48 pushstring ','
+   51 callproperty http://adobe.com/AS3/2006/builtin.split argc=1
+   58 pushbyte 0
+   63 findpropstrict Array
+   65 constructprop Array argc=0
+   80 getproperty *
+   83 pushstring ':'
+   86 callproperty split argc=1
+   96 iftrue L144
+  100 pushbyte 1
+  106 iftrue L113
+  113 iffalse L152
+  121 iftrue L154
+  127 pushbyte 1
+  129 getproperty *
+  132 getlex undefined
+  134 ifstricteq L154
+  140 iffalse L154
+  146 pushbyte 1
+  148 getproperty *
+  156 pushbyte 0
+  158 getproperty *
+  179 iftrue L186
+  186 iffalse L359
+  200 iftrue L207
+  207 iffalse L239
+  211 decrement 
+  214 iffalse L223
+  223 increment 
+  227 iftrue L234
+  234 iffalse L313
+  245 callpropvoid http://adobe.com/AS3/2006/builtin.push argc=1
+  248 getlex gridWidth
+  254 iffalse L261
+  261 iftrue L356
+  267 ifne L311
+  274 iftrue L281
+  281 iffalse L291
+  288 callpropvoid http://adobe.com/AS3/2006/builtin.push argc=1
+  291 findpropstrict Array
+  293 constructprop Array argc=0
+  302 iftrue L311
+  306 pushbyte 0
+  313 pushbyte 0
+  315 ifgt L194
+  321 iftrue L359
+  330 iftrue L351
+  351 iffalse L357
+  355 increment 
+  362 getproperty length
+  364 iflt L76
+  369 returnvalue 
+  [static init]
+  METHOD ():*
+    2 returnvoid 

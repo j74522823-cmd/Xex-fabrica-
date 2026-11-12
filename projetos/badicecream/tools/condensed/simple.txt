@@ -1,0 +1,233 @@
+=== CLASS com.nitrome.badicecream.SimpleEnemy extends com.nitrome.badicecream.Enemy
+  FIELD alwaysChasePlayer : Boolean = '?10'
+  FIELD alwaysRightTurn : Boolean = '?10'
+  [ctor]
+  METHOD ():*
+   19 iffalse L26
+   26 iftrue L33
+   33 returnvoid 
+  [_-10.stepped]
+  METHOD ():void
+   17 iftrue L28
+   21 findpropstrict _-10.nextStep
+   24 callpropvoid _-10.nextStep argc=0
+   28 returnvoid 
+  [frameControl]
+  METHOD ():void
+   17 getlex moveDirection
+   19 pushbyte 0
+   21 ifne L72
+   37 pushstring 'Stand'
+   40 initproperty frameAction
+   42 getlex currentLabel
+   45 getlex frameAction
+   47 ifeq L68
+   51 findpropstrict gotoAndStop
+   53 getlex frameAction
+   65 callpropvoid gotoAndStop argc=1
+   74 pushstring 'Walk'
+   77 initproperty frameAction
+   80 iftrue L89
+   85 callsupervoid frameControl argc=0
+   89 returnvoid 
+  [update]
+  METHOD ():void
+   18 iftrue L35
+   35 iffalse L93
+   39 findpropstrict movement
+   42 callpropvoid movement argc=0
+   47 iffalse L86
+   51 getlex moveDirection
+   53 pushbyte 0
+   65 ifne L86
+   70 iffalse L86
+   74 findpropstrict _-10.nextStep
+   77 callpropvoid _-10.nextStep argc=0
+   82 iftrue L93
+   86 findpropstrict frameControl
+   89 callpropvoid frameControl argc=0
+   93 returnvoid 
+  [checkWalkable]
+  METHOD (Number):Boolean
+   26 iffalse L33
+   33 iftrue L60
+   38 getlex com.nitrome.badicecream.SimpleEnemy1
+   45 iffalse L52
+   52 iftrue L156
+   56 iffalse L151
+   60 findpropstrict getRelativeTile
+   77 callproperty getRelativeTile argc=1
+   87 iffalse L94
+   94 iftrue L149
+   99 getproperty collectibleInside
+  102 getlex com.nitrome.badicecream.CollectibleStrawberry
+  109 iffalse L116
+  116 iftrue L150
+  120 iffalse L151
+  127 iffalse L145
+  145 iftrue L151
+  150 returnvalue 
+  153 callsuper checkWalkable argc=1
+  156 returnvalue 
+  [create]
+  METHOD (Number, Number):void
+   23 callsupervoid create argc=2
+   29 pushdouble 1.5
+   31 initproperty moveSpeed
+   35 getlex com.nitrome.badicecream.SimpleEnemy1
+   42 iffalse L49
+   49 iftrue L130
+   53 iffalse L64
+   61 initproperty alwaysRightTurn
+   65 getlex com.nitrome.badicecream.SimpleEnemy2
+   71 iftrue L130
+   75 iffalse L112
+   80 iffalse L92
+   87 pushbyte 3
+   89 initproperty moveSpeed
+  109 initproperty alwaysChasePlayer
+  113 getlex com.nitrome.badicecream.SimpleEnemy3
+  119 iftrue L126
+  126 iffalse L152
+  130 iffalse L147
+  137 pushbyte 1
+  139 initproperty moveSpeed
+  143 iffalse L191
+  148 getlex com.nitrome.badicecream.SimpleEnemy4
+  152 iffalse L177
+  159 pushbyte 4
+  161 initproperty moveSpeed
+  168 initproperty alwaysChasePlayer
+  173 iftrue L191
+  179 getlex alwaysChasePlayer
+  184 iftrue L189
+  188 not 
+  189 initproperty randomWalk
+  191 findpropstrict _-10.nextStep
+  206 callpropvoid _-10.nextStep argc=0
+  210 getlex com.nitrome.badicecream.Controller
+  212 getproperty level
+  214 getproperty tileGrid
+  216 getlex tileX
+  218 getlex tileY
+  220 callproperty getTile argc=2
+  224 setproperty itemInside
+  226 returnvoid 
+  [_-10.nextStep]
+  METHOD ():void
+   21 pushnan 
+   26 iffalse L33
+   33 iftrue L57
+   37 getlex alwaysRightTurn
+   40 iffalse L439
+   46 iftrue L53
+   53 iffalse L61
+   57 pushbyte 0
+   66 findpropstrict checkWalkable
+   68 getlex lastDirection
+   70 callproperty checkWalkable argc=1
+   73 iffalse L114
+   77 findpropstrict walk
+   81 getlex lastDirection
+   85 initproperty moveDirection
+   90 callpropvoid walk argc=1
+   95 iftrue L102
+  102 iffalse L608
+  121 getlex RIGHT
+  123 initproperty lastDirection
+  132 getlex DOWN
+  134 initproperty lastDirection
+  137 iffalse L527
+  148 getlex LEFT
+  150 initproperty lastDirection
+  159 getlex UP
+  161 initproperty lastDirection
+  166 iffalse L173
+  173 iftrue L370
+  186 getlex lastDirection
+  191 iftrue L198
+  198 iffalse L215
+  202 getlex UP
+  205 ifstrictne L226
+  211 iftrue L298
+  215 pushbyte 0
+  218 iffalse L313
+  226 getlex RIGHT
+  229 ifstrictne L266
+  236 iffalse L243
+  243 iftrue L298
+  247 pushbyte 1
+  251 iftrue L258
+  258 iffalse L348
+  266 getlex DOWN
+  269 ifstrictne L317
+  276 iffalse L294
+  294 iftrue L324
+  298 pushbyte 2
+  302 iftrue L309
+  309 iffalse L332
+  317 getlex LEFT
+  320 ifstrictne L336
+  324 pushbyte 3
+  328 iftrue L348
+  346 pushbyte 4
+  350 lookupswitch L181 L118 L129 L145 L156 L181
+  374 iffalse L381
+  381 iftrue L399
+  385 increment 
+  388 iftrue L395
+  395 iffalse L413
+  402 iftrue L409
+  409 iffalse L415
+  415 pushbyte 4
+  417 iflt L65
+  424 iffalse L431
+  431 iftrue L618
+  439 getlex alwaysChasePlayer
+  442 iffalse L612
+  448 iftrue L578
+  452 findpropstrict getTileUnderneath
+  455 callproperty getTileUnderneath argc=0
+  459 getproperty pathNum
+  462 getlex Infinity
+  465 ifne L511
+  471 iftrue L478
+  478 iffalse L500
+  485 initproperty randomWalk
+  489 iftrue L496
+  496 iffalse L507
+  500 findpropstrict randomWalkUpdate
+  503 callpropvoid randomWalkUpdate argc=0
+  514 findpropstrict getTileUnderneath
+  517 callproperty getTileUnderneath argc=0
+  521 getproperty pathNum
+  524 initproperty pathNum
+  527 getlex pathNum
+  530 pushbyte 1
+  536 iftrue L543
+  543 iffalse L564
+  547 iffalse L563
+  552 findpropstrict getTileUnderneath
+  555 callproperty getTileUnderneath argc=0
+  559 getproperty checked
+  564 iffalse L574
+  569 getlex moveDirection
+  571 pushbyte 0
+  573 equals 
+  574 iffalse L608
+  578 findpropstrict walk
+  580 findpropstrict findDirection
+  583 getlex pathNum
+  586 decrement 
+  587 callproperty findDirection argc=1
+  605 callpropvoid walk argc=1
+  612 getlex randomWalk
+  614 iffalse L631
+  620 pushbyte 0
+  622 initproperty moveDirection
+  624 findpropstrict randomWalkUpdate
+  627 callpropvoid randomWalkUpdate argc=0
+  631 returnvoid 
+  [static init]
+  METHOD ():*
+    2 returnvoid 

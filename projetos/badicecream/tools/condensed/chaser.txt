@@ -1,0 +1,355 @@
+=== CLASS com.nitrome.badicecream.ChaserEnemy extends com.nitrome.badicecream.Enemy
+  FIELD retractAnimation : Boolean = '?10'
+  FIELD timer : Number = 0
+  FIELD followP2Next : Boolean
+  FIELD chasingPlayer : com.nitrome.badicecream.Player = '?12'
+  FIELD popupAnimation : Boolean = '?10'
+  [ctor]
+  METHOD ():*
+   17 iftrue L24
+   24 returnvoid 
+  [endAnimation]
+  METHOD ():void
+   18 iffalse L93
+   22 getlex retractAnimation
+   25 iffalse L74
+   41 iffalse L48
+   48 iftrue L86
+   56 initproperty chasingPlayer
+   70 iftrue L86
+   78 initproperty popupAnimation
+   82 iftrue L93
+   90 initproperty retractAnimation
+   93 returnvoid 
+  [frameControl]
+  METHOD ():void
+   18 findpropstrict colour
+   21 getlex chasingPlayer
+   24 callproperty colour argc=1
+   30 iffalse L37
+   37 iftrue L42
+   45 iffalse L52
+   52 iftrue L109
+   56 getlex popupAnimation
+   61 iftrue L68
+   68 iffalse L105
+   72 iffalse L102
+   78 iffalse L85
+   85 iftrue L153
+   91 pushstring 'Popup'
+   95 add 
+   96 initproperty frameAction
+  102 getlex retractAnimation
+  105 iffalse L136
+  111 pushstring 'Retract'
+  115 add 
+  116 initproperty frameAction
+  138 pushstring 'Walk'
+  142 add 
+  143 initproperty frameAction
+  145 getlex moveDirection
+  147 getlex LEFT
+  149 ifne L163
+  155 getlex frameAction
+  157 pushstring 'Left'
+  160 add 
+  161 initproperty frameAction
+  163 getlex moveDirection
+  165 getlex RIGHT
+  167 ifne L194
+  173 getlex frameAction
+  175 pushstring 'Right'
+  178 add 
+  179 initproperty frameAction
+  183 iftrue L190
+  190 iffalse L277
+  194 getlex moveDirection
+  196 getlex UP
+  198 ifne L212
+  204 getlex frameAction
+  206 pushstring 'Up'
+  209 add 
+  210 initproperty frameAction
+  212 getlex moveDirection
+  214 getlex DOWN
+  216 ifne L261
+  221 iffalse L270
+  227 getlex frameAction
+  229 pushstring 'Down'
+  232 add 
+  233 initproperty frameAction
+  237 iftrue L257
+  257 iffalse L270
+  261 getlex currentLabel
+  264 getlex frameAction
+  266 ifeq L277
+  270 findpropstrict gotoAndStop
+  272 getlex frameAction
+  274 callpropvoid gotoAndStop argc=1
+  277 returnvoid 
+  [update]
+  METHOD ():void
+   30 iftrue L37
+   37 iffalse L657
+   47 iffalse L54
+   54 iftrue L65
+   58 getlex chasingPlayer
+   61 iffalse L100
+   65 pushdouble 5.5
+   70 iftrue L77
+   77 iffalse L96
+   85 iftrue L92
+   92 iffalse L103
+  100 pushbyte 3
+  103 initproperty moveSpeed
+  108 iftrue L575
+  112 findpropstrict timer
+  117 getproperty timer
+  122 iffalse L156
+  126 increment 
+  129 iffalse L156
+  138 iffalse L145
+  145 iftrue L154
+  151 setproperty timer
+  158 pushshort 180
+  161 ifngt L539
+  168 pushbyte 0
+  170 initproperty timer
+  173 getlex chasingPlayer
+  178 iftrue L639
+  182 iffalse L197
+  190 initproperty retractAnimation
+  203 iftrue L210
+  210 iffalse L288
+  214 getlex followP2Next
+  219 iftrue L283
+  226 iffalse L249
+  231 iffalse L284
+  238 iffalse L245
+  245 iftrue L283
+  252 iftrue L288
+  256 getlex com.nitrome.badicecream.Controller
+  258 getproperty level
+  263 iftrue L270
+  270 iffalse L319
+  274 getproperty coop
+  279 iftrue L284
+  284 iffalse L328
+  288 getlex com.nitrome.badicecream.Controller
+  290 getproperty level
+  295 iftrue L315
+  315 iffalse L332
+  319 getproperty player2
+  328 getlex com.nitrome.badicecream.Controller
+  330 getproperty level
+  332 getproperty player1
+  337 initproperty chasingPlayer
+  340 getlex chasingPlayer
+  345 iffalse L394
+  349 callproperty isDead argc=0
+  356 iftrue L363
+  363 iffalse L574
+  367 iffalse L486
+  373 iftrue L636
+  377 getlex chasingPlayer
+  383 iffalse L390
+  390 iftrue L639
+  394 callproperty otherPlayer argc=0
+  403 iffalse L486
+  412 iffalse L419
+  419 iftrue L460
+  424 iffalse L461
+  431 iftrue L438
+  438 iffalse L461
+  445 iffalse L479
+  450 callproperty isAlive argc=0
+  456 iftrue L461
+  461 iffalse L486
+  468 iffalse L475
+  475 iftrue L486
+  483 initproperty chasingPlayer
+  489 getlex followP2Next
+  494 iffalse L499
+  498 not 
+  499 initproperty followP2Next
+  506 initproperty popupAnimation
+  512 iffalse L519
+  519 iftrue L539
+  523 getlex NitromeGame
+  525 getproperty sound_manager
+  527 pushstring 'change_flower'
+  530 callpropvoid playSound argc=1
+  535 iffalse L650
+  541 getlex chasingPlayer
+  544 not 
+  545 initproperty randomWalk
+  547 getlex popupAnimation
+  552 iftrue L574
+  556 not 
+  559 iffalse L593
+  564 iffalse L593
+  570 iffalse L592
+  575 getlex retractAnimation
+  581 iftrue L588
+  588 iffalse L593
+  592 not 
+  593 iffalse L650
+  600 iftrue L607
+  607 iffalse L636
+  611 findpropstrict movement
+  626 callpropvoid movement argc=0
+  632 iffalse L657
+  636 getlex chasingPlayer
+  639 iftrue L650
+  643 findpropstrict randomWalkUpdate
+  646 callpropvoid randomWalkUpdate argc=0
+  650 findpropstrict frameControl
+  653 callpropvoid frameControl argc=0
+  657 returnvoid 
+  [_-7.stepped]
+  METHOD ():void
+   17 pushbyte 0
+   23 iffalse L30
+   30 iftrue L96
+   34 getlex chasingPlayer
+   38 iftrue L99
+   42 getlex com.nitrome.badicecream.Controller
+   44 getproperty level
+   47 iffalse L103
+   51 getproperty player1
+   54 ifne L96
+   58 findpropstrict _-7.bestP1ChaseDirection
+   61 callproperty _-7.bestP1ChaseDirection argc=0
+   67 iftrue L74
+   74 iffalse L95
+   91 iftrue L143
+   96 getlex chasingPlayer
+   99 getlex com.nitrome.badicecream.Controller
+  101 getproperty level
+  103 getproperty player2
+  106 ifne L142
+  111 iftrue L163
+  115 findpropstrict _-7.bestP2ChaseDirection
+  118 callproperty _-7.bestP2ChaseDirection argc=0
+  123 iftrue L141
+  130 iffalse L137
+  137 iftrue L143
+  143 iffalse L167
+  150 initproperty randomWalk
+  153 iftrue L183
+  157 findpropstrict walk
+  160 callpropvoid walk argc=1
+  181 initproperty randomWalk
+  185 pushbyte 0
+  187 initproperty moveDirection
+  190 iffalse L201
+  194 findpropstrict randomWalkUpdate
+  197 callpropvoid randomWalkUpdate argc=0
+  201 returnvoid 
+  [_-7.bestP1ChaseDirection]
+  METHOD ():Number
+   21 pushnan 
+   23 pushnan 
+   26 getlex Infinity
+   31 pushbyte 0
+   35 pushbyte 0
+   39 getlex LEFT
+   41 getlex RIGHT
+   43 getlex UP
+   45 getlex DOWN
+   47 newarray 4
+   66 iftrue L73
+   73 iffalse L203
+   81 iffalse L88
+   88 iftrue L121
+   92 findpropstrict checkWalkable
+  108 callproperty checkWalkable argc=1
+  111 iftrue L125
+  117 iffalse L226
+  125 findpropstrict getRelativeTile
+  129 callproperty getRelativeTile argc=1
+  133 getproperty player1PathNum
+  141 iftrue L148
+  148 iffalse L169
+  157 iftrue L164
+  164 iffalse L224
+  169 ifnlt L226
+  176 iffalse L183
+  183 iftrue L223
+  192 iffalse L199
+  199 iftrue L204
+  219 iffalse L226
+  229 iftrue L56
+  238 returnvalue 
+  [_-7.bestP2ChaseDirection]
+  METHOD ():Number
+   21 pushnan 
+   23 pushnan 
+   26 getlex Infinity
+   31 pushbyte 0
+   35 pushbyte 0
+   39 getlex LEFT
+   41 getlex RIGHT
+   43 getlex UP
+   45 getlex DOWN
+   47 newarray 4
+   65 iffalse L160
+   73 iftrue L80
+   80 iffalse L121
+   84 findpropstrict checkWalkable
+   87 callproperty checkWalkable argc=1
+   90 iftrue L125
+   97 iftrue L117
+  117 iffalse L197
+  125 findpropstrict getRelativeTile
+  129 callproperty getRelativeTile argc=1
+  133 getproperty player2PathNum
+  140 iftrue L147
+  147 iffalse L224
+  154 iftrue L161
+  161 ifnlt L225
+  168 iftrue L175
+  175 iffalse L225
+  186 iftrue L193
+  193 iffalse L225
+  201 iffalse L219
+  219 iftrue L224
+  228 iftrue L56
+  237 returnvalue 
+  [colour]
+  METHOD (com.nitrome.badicecream.Player):Number
+   20 iftrue L39
+   39 iffalse L77
+   44 iffalse L77
+   61 iffalse L68
+   68 iftrue L77
+   73 getproperty colour
+   76 returnvalue 
+   77 pushbyte 0
+   79 returnvalue 
+  [create]
+  METHOD (Number, Number):void
+   21 iftrue L123
+   28 callsupervoid create argc=2
+   33 iftrue L123
+   40 pushbyte 3
+   42 initproperty moveSpeed
+   58 iftrue L107
+   65 initproperty randomWalk
+   69 iftrue L123
+   76 getlex Math
+   78 callproperty random argc=0
+   82 pushdouble 0.5
+   85 initproperty followP2Next
+  103 iftrue L123
+  107 getlex com.nitrome.badicecream.Controller
+  109 getproperty level
+  111 getproperty tileGrid
+  113 getlex tileX
+  115 getlex tileY
+  117 callproperty getTile argc=2
+  121 setproperty itemInside
+  123 returnvoid 
+  [static init]
+  METHOD ():*
+    2 returnvoid 

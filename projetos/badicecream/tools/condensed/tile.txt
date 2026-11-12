@@ -1,0 +1,78 @@
+=== CLASS com.nitrome.badicecream.Tile extends com.nitrome.badicecream.Renderable
+  FIELD wall : Boolean = '?10'
+  FIELD player1PathNum : Number = 0
+  FIELD gridX : Number
+  FIELD jumpPathNum : Number = 0
+  FIELD seePathNum : Number = 0
+  FIELD collectibleInside : com.nitrome.badicecream.Collectible = '?12'
+  FIELD gridY : Number
+  FIELD pathNum : Number = 0
+  FIELD checked : Boolean = '?10'
+  FIELD itemInside : Object = '?12'
+  FIELD player2PathNum : Number = 0
+  FIELD type : Number
+  [ctor]
+  METHOD ():*
+   19 iftrue L26
+   26 iffalse L33
+   33 returnvoid 
+  [destroy]
+  METHOD ():void
+    2 returnvoid 
+  [update]
+  METHOD ():void
+    2 returnvoid 
+  [toString]
+  METHOD ():String
+   17 pushstring '['
+   20 findpropstrict flash.utils.getQualifiedClassName
+   24 callproperty flash.utils.getQualifiedClassName argc=1
+   28 pushstring '::'
+   31 callproperty http://adobe.com/AS3/2006/builtin.split argc=1
+   35 pushbyte 1
+   37 getproperty *
+   40 add 
+   42 iffalse L88
+   56 pushstring ' '
+   59 add 
+   61 iftrue L79
+   65 getlex gridX
+   69 iftrue L91
+   73 add 
+   75 iftrue L88
+   79 pushstring ', '
+   82 add 
+   84 iffalse L119
+   88 getlex gridY
+   91 add 
+  104 iftrue L111
+  111 iffalse L119
+  115 pushstring ']'
+  118 add 
+  119 returnvalue 
+  [create]
+  METHOD (Number, Number):void
+   20 iftrue L136
+   28 initproperty gridX
+   33 iffalse L40
+   40 iftrue L136
+   48 initproperty gridY
+   67 iffalse L74
+   74 iftrue L136
+   81 getlex com.nitrome.badicecream.Controller
+   83 getproperty TILE_SIZE
+   85 multiply 
+   86 initproperty x
+   89 iftrue L129
+   96 getlex com.nitrome.badicecream.Controller
+   98 getproperty TILE_SIZE
+  100 multiply 
+  101 initproperty y
+  118 iffalse L125
+  125 iftrue L136
+  129 findpropstrict setFastRender
+  132 callpropvoid setFastRender argc=0
+  136 returnvoid 
+  [static init]
+  METHOD ():*
+    2 returnvoid 

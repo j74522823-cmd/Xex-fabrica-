@@ -1,0 +1,426 @@
+=== CLASS com.nitrome.badicecream.Walker extends com.nitrome.badicecream.Renderable
+  FIELD frameAction : String = 'Stand'
+  FIELD lastDirection : Number = 4
+  FIELD tileX : Number = 0
+  FIELD tileY : Number = 0
+  FIELD frame : String = 'Down'
+  FIELD moveDirection : Number = 0
+  FIELD moveSpeed : Number = 3
+  [ctor]
+  METHOD ():*
+   18 iftrue L25
+   25 iffalse L32
+   32 returnvoid 
+  [movement]
+  METHOD ():void
+   20 pushnan 
+   22 pushnan 
+   26 iffalse L51
+   30 getlex moveDirection
+   34 iffalse L41
+   41 iftrue L114
+   45 pushbyte 0
+   47 ifeq L519
+   53 getlex moveDirection
+   55 initproperty lastDirection
+   60 iftrue L67
+   67 iffalse L412
+   71 getlex tileX
+   76 iftrue L83
+   83 iffalse L90
+   87 pushdouble 0.5
+   89 add 
+   90 getlex com.nitrome.badicecream.Controller
+   92 getproperty TILE_SIZE
+   95 iftrue L192
+   99 multiply 
+  103 iftrue L110
+  110 iffalse L281
+  117 iffalse L143
+  124 iffalse L314
+  128 getlex tileY
+  132 iffalse L139
+  139 iftrue L281
+  143 getlex com.nitrome.badicecream.Controller
+  145 getproperty TILE_SIZE
+  149 iffalse L192
+  153 multiply 
+  158 iftrue L165
+  165 iffalse L281
+  171 iftrue L376
+  175 getlex moveDirection
+  179 iffalse L186
+  186 iftrue L431
+  190 getlex RIGHT
+  192 ifne L279
+  198 iffalse L205
+  205 iftrue L450
+  211 getlex x
+  213 getlex moveSpeed
+  216 add 
+  217 initproperty x
+  219 getlex x
+  222 ifnge L275
+  227 iftrue L346
+  247 initproperty x
+  251 pushbyte 0
+  253 initproperty moveDirection
+  255 findpropstrict _-1g.stepped
+  258 callpropvoid _-1g.stepped argc=0
+  264 iffalse L271
+  271 iftrue L376
+  279 getlex moveDirection
+  281 getlex LEFT
+  284 iftrue L372
+  288 ifne L350
+  294 getlex x
+  296 getlex moveSpeed
+  299 subtract 
+  300 initproperty x
+  302 getlex x
+  305 ifnle L346
+  312 initproperty x
+  316 pushbyte 0
+  318 initproperty moveDirection
+  323 iftrue L330
+  330 iffalse L512
+  334 findpropstrict _-1g.stepped
+  337 callpropvoid _-1g.stepped argc=0
+  342 iftrue L376
+  350 getlex moveDirection
+  353 iftrue L431
+  357 getlex DOWN
+  361 iffalse L368
+  368 iftrue L433
+  372 ifne L429
+  378 getlex y
+  380 getlex moveSpeed
+  383 add 
+  384 initproperty y
+  386 getlex y
+  389 ifnge L425
+  396 initproperty y
+  401 iftrue L408
+  408 iffalse L425
+  414 pushbyte 0
+  416 initproperty moveDirection
+  418 findpropstrict _-1g.stepped
+  421 callpropvoid _-1g.stepped argc=0
+  429 getlex moveDirection
+  431 getlex UP
+  433 ifne L519
+  439 iffalse L446
+  446 iftrue L506
+  452 getlex y
+  454 getlex moveSpeed
+  457 subtract 
+  458 initproperty y
+  462 iffalse L469
+  469 iftrue L506
+  473 getlex y
+  476 ifnle L519
+  497 iffalse L506
+  504 initproperty y
+  508 pushbyte 0
+  510 initproperty moveDirection
+  512 findpropstrict _-1g.stepped
+  515 callpropvoid _-1g.stepped argc=0
+  519 returnvoid 
+  [walk]
+  METHOD (Number):void
+   23 iffalse L67
+   28 iftrue L67
+   35 iftrue L42
+   42 iffalse L67
+   48 pushbyte 0
+   50 initproperty moveDirection
+   55 iffalse L62
+   62 iftrue L67
+   66 returnvoid 
+   67 findpropstrict getTileUnderneath
+   70 callproperty getTileUnderneath argc=0
+   77 findpropstrict getRelativeTile
+   81 pushbyte 1
+   83 callproperty getRelativeTile argc=2
+   91 getproperty itemInside
+   94 ifne L102
+  100 setproperty itemInside
+  104 setproperty itemInside
+  109 iftrue L283
+  113 getlex LEFT
+  118 iftrue L125
+  125 iffalse L335
+  129 ifne L186
+  135 getlex tileX
+  140 iffalse L147
+  147 iftrue L152
+  151 decrement 
+  152 initproperty tileX
+  157 iftrue L178
+  178 iffalse L365
+  190 iftrue L197
+  197 iffalse L283
+  201 getlex RIGHT
+  206 iffalse L213
+  213 iftrue L291
+  217 ifne L268
+  224 iffalse L231
+  231 iftrue L264
+  237 getlex tileX
+  241 iffalse L248
+  245 pushbyte 1
+  247 add 
+  248 initproperty tileX
+  253 iffalse L260
+  260 iftrue L370
+  272 iffalse L279
+  279 iftrue L333
+  283 getlex UP
+  287 iftrue L335
+  291 ifne L332
+  298 iftrue L305
+  305 iffalse L370
+  311 getlex tileY
+  315 iffalse L320
+  319 decrement 
+  320 initproperty tileY
+  324 iftrue L339
+  333 getlex DOWN
+  335 ifne L365
+  352 getlex tileY
+  356 iffalse L363
+  360 pushbyte 1
+  362 add 
+  363 initproperty tileY
+  368 initproperty moveDirection
+  370 returnvoid 
+  [getTileUnderneath]
+  METHOD ():com.nitrome.badicecream.Tile
+    2 getlex com.nitrome.badicecream.Controller
+   14 getproperty level
+   16 getproperty tileGrid
+   18 getlex tileX
+   20 getlex tileY
+   22 callproperty getTile argc=2
+   25 returnvalue 
+  [getRelativeTile]
+  METHOD (Number, Number):com.nitrome.badicecream.Tile
+   25 iffalse L32
+   32 iftrue L295
+   36 getlex LEFT
+   41 iftrue L48
+   48 iffalse L297
+   52 ifne L122
+   56 getlex com.nitrome.badicecream.Controller
+   58 getproperty level
+   62 iffalse L157
+   66 getproperty tileGrid
+   70 iffalse L258
+   74 getlex tileX
+   77 iftrue L191
+   82 subtract 
+   84 iftrue L191
+   88 getlex tileY
+   90 callproperty getTile argc=2
+   96 iftrue L103
+  103 iffalse L348
+  107 returnvalue 
+  125 iffalse L295
+  129 getlex RIGHT
+  133 iffalse L140
+  140 iftrue L238
+  144 ifne L223
+  148 getlex com.nitrome.badicecream.Controller
+  150 getproperty level
+  153 iftrue L319
+  157 getproperty tileGrid
+  172 iftrue L258
+  176 getlex tileX
+  180 iffalse L187
+  187 iftrue L266
+  192 add 
+  195 iffalse L202
+  202 iftrue L336
+  206 getlex tileY
+  208 callproperty getTile argc=2
+  213 iffalse L293
+  217 returnvalue 
+  226 iffalse L295
+  230 getlex UP
+  234 iffalse L297
+  238 ifne L294
+  242 getlex com.nitrome.badicecream.Controller
+  244 getproperty level
+  247 iftrue L319
+  251 getproperty tileGrid
+  254 iftrue L334
+  258 getlex tileX
+  262 iffalse L336
+  266 getlex tileY
+  271 iffalse L344
+  275 subtract 
+  276 callproperty getTile argc=2
+  282 iftrue L289
+  289 iffalse L348
+  293 returnvalue 
+  295 getlex DOWN
+  297 ifne L349
+  304 iftrue L311
+  311 iffalse L349
+  315 getlex com.nitrome.badicecream.Controller
+  317 getproperty level
+  319 getproperty tileGrid
+  334 getlex tileX
+  336 getlex tileY
+  339 iftrue L345
+  344 add 
+  345 callproperty getTile argc=2
+  348 returnvalue 
+  350 returnvalue 
+  [checkWalkable]
+  METHOD (Number):Boolean
+   20 findpropstrict getRelativeTile
+   24 pushbyte 1
+   26 callproperty getRelativeTile argc=2
+   34 getproperty wall
+   37 iffalse L43
+   42 returnvalue 
+   44 getproperty itemInside
+   46 iffalse L126
+   62 getproperty itemInside
+   64 getlex com.nitrome.badicecream.Player
+   68 iffalse L118
+   75 iffalse L124
+   79 findpropstrict com.nitrome.badicecream.Player
+   82 getproperty itemInside
+   84 callproperty com.nitrome.badicecream.Player argc=1
+   87 callproperty isDead argc=0
+   94 iftrue L113
+  113 iffalse L127
+  118 iffalse L124
+  123 returnvalue 
+  125 returnvalue 
+  127 returnvalue 
+  [_-1g.stepped]
+  METHOD ():void
+    2 returnvoid 
+  [create]
+  METHOD (Number, Number):void
+   22 iffalse L106
+   30 initproperty above
+   36 iftrue L43
+   43 iffalse L82
+   50 getlex com.nitrome.badicecream.Controller
+   52 getproperty TILE_SIZE
+   54 multiply 
+   55 initproperty x
+   60 iftrue L78
+   78 iffalse L166
+   85 getlex com.nitrome.badicecream.Controller
+   87 getproperty TILE_SIZE
+   89 multiply 
+   90 initproperty y
+   95 iftrue L102
+  102 iffalse L166
+  108 getlex Math
+  110 getlex x
+  112 getlex com.nitrome.badicecream.Controller
+  114 getproperty TILE_SIZE
+  116 divide 
+  117 callproperty floor argc=1
+  121 initproperty tileX
+  125 getlex Math
+  127 getlex y
+  129 getlex com.nitrome.badicecream.Controller
+  131 getproperty TILE_SIZE
+  144 divide 
+  145 callproperty floor argc=1
+  149 initproperty tileY
+  154 pushbyte 0
+  156 initproperty _-X.shadowLocalX
+  163 initproperty tall
+  166 returnvoid 
+  [frameControl]
+  METHOD ():void
+   18 iffalse L205
+   22 getlex lastDirection
+   26 iftrue L33
+   33 iffalse L199
+   37 getlex LEFT
+   41 iffalse L48
+   48 iftrue L201
+   52 ifne L77
+   59 pushstring 'Left'
+   62 getlex frameAction
+   64 add 
+   65 initproperty frame
+   69 iffalse L126
+   77 getlex lastDirection
+   81 iffalse L88
+   88 iftrue L199
+   92 getlex RIGHT
+   96 iftrue L113
+  113 iffalse L201
+  117 ifne L142
+  122 iftrue L168
+  129 pushstring 'Right'
+  132 getlex frameAction
+  134 add 
+  135 initproperty frame
+  142 getlex lastDirection
+  145 iftrue L199
+  149 getlex UP
+  153 iffalse L160
+  160 iftrue L201
+  164 ifne L197
+  171 pushstring 'Up'
+  174 getlex frameAction
+  176 add 
+  177 initproperty frame
+  182 iffalse L189
+  189 iftrue L250
+  197 getlex lastDirection
+  199 getlex DOWN
+  201 ifne L240
+  208 pushstring 'Down'
+  211 getlex frameAction
+  213 add 
+  214 initproperty frame
+  219 iftrue L236
+  236 iffalse L250
+  240 getlex currentLabel
+  243 getlex frame
+  246 ifeq L258
+  250 findpropstrict gotoAndStop
+  252 getlex frame
+  255 callpropvoid gotoAndStop argc=1
+  258 returnvoid 
+  [static init]
+  METHOD ():*
+   17 iffalse L90
+   23 pushbyte 1
+   25 initproperty LEFT
+   29 iftrue L46
+   46 iffalse L96
+   52 pushbyte 2
+   54 initproperty RIGHT
+   58 iftrue L75
+   75 iffalse L96
+   81 pushbyte 3
+   83 initproperty UP
+   86 iffalse L96
+   92 pushbyte 4
+   94 initproperty DOWN
+   96 returnvoid 
+  [static DIR]
+  METHOD (Number):String
+   17 pushstring 'LEFT'
+   30 pushstring 'RIGHT'
+   32 pushstring 'UP'
+   34 pushstring 'DOWN'
+   36 newarray 4
+   41 iffalse L48
+   48 iftrue L53
+   52 decrement 
+   53 getproperty *
+   56 returnvalue 
