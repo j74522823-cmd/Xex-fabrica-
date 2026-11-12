@@ -19,7 +19,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  XSDK_SHA: 49307c7b5fe6cc0e262da7b31af58e4e309aa18e
+  XSDK_SHA: 3960a1d12707157271f087d5e3598d69429fa9e0
   GH_TOKEN: ${{ github.token }}
   GH_REPO: ${{ github.repository }}
 
