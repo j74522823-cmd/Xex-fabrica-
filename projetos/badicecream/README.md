@@ -4,7 +4,7 @@ Estado: **escrito, mas não compilado com a toolchain PowerPC nem rodado no cons
 
 ## Build (na sua máquina, com o xsdk já montado)
 ```
-cmake -S projetos/badicecream/xbox360 -B build/bic -G Ninja -DCMAKE_TOOLCHAIN_FILE=<xsdk>/cmake/xsdk.cmake
+cmake -S xbox360 -B build/bic -G Ninja -DCMAKE_TOOLCHAIN_FILE=<xsdk>/cmake/xsdk.cmake
 cmake --build build/bic
 ```
 Saída: `build/bic/badicecream.xex`. O CMake compila `src/engine.cpp`, `src/render.cpp`, `src/game.cpp` e `xbox360/platform_xbox360.cpp`, e gera `badicecream_shaders.h` com `xsdk_add_shaders` (nomes esperados: `sprite_vert`, `sprite_frag`, `SPRITE_VERT_PUSH`, `SPRITE_VERT_PUSH_REGISTERS`, `SPRITE_FRAG_SAMPLER_0_0`; se o gerador der outros nomes, ajuste em `platform_xbox360.cpp`).
