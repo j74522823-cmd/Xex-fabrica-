@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include <cstdio>
 #include "platform.hpp"
 #include "badicecream_shaders.h"
 #include "xsdk/audio.h"
@@ -60,7 +61,20 @@ struct Voice { const Sound* snd = nullptr; size_t pos = 0; bool active = false; 
 
 class XboxPlatform : public Platform {
 public:
-    std::string dataDir() const override { return "game:/data/"; }
+    // Os dados ficam em data/ ao lado do .xex; se o .xex estiver dentro da própria pasta de dados, usa a pasta dele.
+    std::string dataDir() const override {
+        static std::string dir;
+        if (dir.empty()) {
+            const char* candidates[] = {"game:/data/", "game:/"};
+            dir = candidates[0];
+            for (const char* c : candidates) {
+                FILE* f = fopen((std::string(c) + "atlas.txt").c_str(), "rb");
+                if (f) { fclose(f); dir = c; break; }
+            }
+            xsdk_log_write("bic: dados em %s", dir.c_str());
+        }
+        return dir;
+    }
 
     bool init() override {
         NTSTATUS st = xsdk_gpu_open();
