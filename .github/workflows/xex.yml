@@ -146,8 +146,12 @@ jobs:
         if: always()
         run: |
           [ -f build/log.txt ] || { mkdir -p build; echo "falhou antes de compilar; veja a aba Actions" > build/log.txt; }
+          # dados de jogo opcionais: projetos/<nome>/runtime_data.zip vira <nome>-data.zip na release
+          for z in projetos/*/runtime_data.zip; do
+            [ -f "$z" ] && cp "$z" "build/$(basename "$(dirname "$z")")-data.zip"
+          done
           gh release delete ultimo-xex --cleanup-tag -y 2>/dev/null || true
-          gh release create ultimo-xex build/*.xex build/log.txt \
+          gh release create ultimo-xex build/*.xex build/*-data.zip build/log.txt \
             --target "$GITHUB_SHA" --title "ultimo-xex" \
             --notes "Resultado da ultima compilacao. Baixe o .xex; o log.txt mostra erros."
             
