@@ -82,6 +82,17 @@ jobs:
           fi
           "$TC/bin/powerpc-xsdk-elf-gcc" --version | head -1
 
+      - name: Construir o glslang (para shaders)
+        run: |
+          set -e
+          git clone -q --depth 1 --branch xenon https://github.com/xenosworks/glslang-xenon.git "$HOME/glslang-xenon"
+          cd "$HOME/glslang-xenon" && python3 update_glslang_sources.py
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DENABLE_OPT=ON \
+            -DSPIRV_SKIP_EXECUTABLES=ON -DGLSLANG_TESTS=OFF
+          cmake --build build
+          cp build/StandAlone/glslang "$HOME/xsdk-gcc/bin/"
+          "$HOME/xsdk-gcc/bin/glslang" --version | head -1
+
       - name: Construir a biblioteca do xsdk
         run: |
           cd "$HOME/xsdk"
