@@ -137,7 +137,7 @@ struct Game {
                 setMusic("music_menu");
                 if (opt.skipTitle) { coop = opt.coop == 1; startLevel(opt.startLevel); break; }
                 if (st[0]) { state = ST_SELECT; stateTimer = 0; joined[1] = false; character[0] = 0; character[1] = 1; pf.playSound("select"); }
-                if (opt.coop == 1 && st[1] && pads[1].connected) { state = ST_SELECT; joined[1] = true; }
+                else if (st[1] && pads[1].connected) { state = ST_SELECT; stateTimer = 0; joined[1] = true; pf.playSound("select"); }
                 break;
             case ST_SELECT:
                 if (st[1] && pads[1].connected) { joined[1] = true; pf.playSound("select"); }
