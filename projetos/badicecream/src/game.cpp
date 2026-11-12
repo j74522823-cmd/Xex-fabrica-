@@ -28,7 +28,8 @@ enum State { ST_TITLE, ST_PLAYING, ST_WON, ST_LOST, ST_END };
 
 struct Game {
     Platform& pf; Options opt;
-    Atlas atlas; World world; DrawList list;
+    Atlas atlas; World world; World titleWorld; DrawList list;
+    bool titleDemoReady = false;
     State state = ST_TITLE;
     int level = 0, stateTimer = 0, totalScore = 0;
     bool coop = false;
@@ -66,7 +67,46 @@ struct Game {
                 pos = e + 1;
             }
         }
+        titleDemoReady = resetTitleDemo();
         return true;
+    }
+
+    // Usa a própria fase inicial como demonstração animada no menu.
+    bool resetTitleDemo() {
+        std::vector<uint8_t> raw; LevelData lv;
+        if (!readFile(pf.dataDir() + "levels/level00.xml", raw) ||
+            !parseLevel(std::string(raw.begin(), raw.end()), lv)) return false;
+        if (!titleWorld.load(lv, false, 0xB1C0FFEEu)) return false;
+        titleWorld.stage = 0;
+        return true;
+    }
+
+    void updateTitleDemo() {
+        if (!titleDemoReady) return;
+        PadState demo[2];
+        demo[0].connected = true;
+        const int f = titleWorld.frameNumber;
+        switch ((f / 72) % 4) {
+            case 0: demo[0].right = true; break;
+            case 1: demo[0].down = true; break;
+            case 2: demo[0].left = true; break;
+            default: demo[0].up = true; break;
+        }
+        demo[0].shoot = (f % 84) == 8;
+        titleWorld.update(demo);
+        titleWorld.clearSounds();
+        if (titleWorld.phase != PHASE_PLAYING) titleDemoReady = resetTitleDemo();
+    }
+
+    void addSnow() {
+        const int f = titleDemoReady ? titleWorld.frameNumber : stateTimer;
+        for (int i = 0; i < 34; ++i) {
+            const int x = (i * 137 + f * (1 + i % 3)) % SCREEN;
+            const int y = (i * 71 + f * (2 + i % 3)) % SCREEN;
+            const char* flake = (i % 5 == 0) ? "*" : ".";
+            const uint32_t color = (i % 3 == 0) ? 0xFFE8F7FF : 0xFFB9DFFF;
+            text(x, y, (i % 7 == 0) ? 2 : 1, color, flake);
+        }
     }
 
     void setMusic(const char* m) { if (music != m) { music = m; pf.playMusic(m); } }
@@ -119,6 +159,8 @@ struct Game {
             case ST_TITLE:
                 setMusic("music_menu");
                 if (opt.skipTitle) { coop = opt.coop == 1; startLevel(opt.startLevel); break; }
+                if (!titleDemoReady) titleDemoReady = resetTitleDemo();
+                updateTitleDemo();
                 if (st[0] || st[1]) {
                     coop = (st[1] && pads[1].connected) || opt.coop == 1;
                     if (opt.coop == 0) coop = false;
@@ -149,9 +191,11 @@ struct Game {
                 if (st[0] || st[1]) { state = ST_TITLE; stateTimer = 0; }
                 break;
         }
-        if (state == ST_PLAYING || state == ST_WON || state == ST_LOST) buildScene(world, atlas, list);
+        if (state == ST_TITLE && titleDemoReady) buildScene(titleWorld, atlas, list);
+        else if (state == ST_PLAYING || state == ST_WON || state == ST_LOST) buildScene(world, atlas, list);
         else { list.clear(); }
         hud();
+        if (state == ST_TITLE) addSnow();
     }
 };
 
