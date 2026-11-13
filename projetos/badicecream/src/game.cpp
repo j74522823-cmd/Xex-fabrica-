@@ -24,7 +24,10 @@ bool readFile(const std::string& path, std::vector<uint8_t>& out) {
 }
 
 const int kLevelCount = 40;
-enum State { ST_TITLE, ST_PLAYING, ST_WON, ST_LOST, ST_END };
+enum State { ST_TITLE, ST_SELECT, ST_PLAYING, ST_WON, ST_LOST, ST_END };
+
+const char* const kCharacterNames[3] = {"BAUNILHA", "MORANGO", "CHOCOLATE"};
+const char* const kCharacterClasses[3] = {"PlayerVanilla", "PlayerStrawberry", "PlayerChocolate"};
 
 struct Game {
     Platform& pf; Options opt;
@@ -36,6 +39,10 @@ struct Game {
     bool titleLogoAvailable = false;
     int demoFrames = 0;
     bool prevStart[2] = {false, false};
+    bool prevShoot[2] = {false, false};
+    bool selectionCoop = false;
+    int selectedCharacter[2] = {0, 1};
+    bool characterConfirmed[2] = {false, false};
     std::string music;
 
     Game(Platform& p, const Options& o) : pf(p), opt(o) {}
@@ -107,7 +114,10 @@ struct Game {
         std::vector<uint8_t> buf; LevelData lv;
         if (!readFile(pf.dataDir() + path, buf) || !parseLevel(std::string(buf.begin(), buf.end()), lv)) return false;
         if (!world.load(lv, coop, 1234u + (uint32_t)n * 7919u)) return false;
-        world.stage = n; level = n; state = ST_PLAYING; stateTimer = 0;
+        world.stage = n; level = n;
+        for (int i = 0; i < 2; i++) if (world.players[i].present)
+            world.players[i].characterId = std::max(0, std::min(2, selectedCharacter[i]));
+        state = ST_PLAYING; stateTimer = 0;
         setMusic("music_game");
         return true;
     }
@@ -136,6 +146,34 @@ struct Game {
             center(374, 2, 0xFFFFE070, "START");
             center(422, 2, 0xFFFF90B0, "CO-OP");
             center(480, 1, 0xFFE6F4FF, "P1 START: SOLO   P2 START: CO-OP");
+        } else if (state == ST_SELECT) {
+            center(54, 2, 0xFFFFFFFF, selectionCoop ? "ESCOLHA DOS SORVETES" : "ESCOLHA SEU SORVETE");
+            center(112, 1, 0xFFE6F4FF, "D-PAD: TROCAR   A: CONFIRMAR");
+            for (int i = 0; i < (selectionCoop ? 2 : 1); i++) {
+                const int x = selectionCoop ? (i == 0 ? 150 : 400) : 275;
+                const int id = std::max(0, std::min(2, selectedCharacter[i]));
+                const Anim* preview = atlas.find(kCharacterClasses[id], "DownStand");
+                if (preview && !preview->f.empty()) {
+                    const Frame& f = preview->f[0];
+                    const Atlas::Page& pg = atlas.pages[f.page];
+                    Quad q = {};
+                    q.x0 = (float)x - f.w * 0.5f; q.y0 = 190; q.x1 = q.x0 + f.w; q.y1 = q.y0 + f.h;
+                    q.u0 = (float)f.x / pg.w; q.v0 = (float)f.y / pg.h;
+                    q.u1 = (float)(f.x + f.w) / pg.w; q.v1 = (float)(f.y + f.h) / pg.h;
+                    q.r = q.g = q.b = q.a = 1.f; q.page = f.page;
+                    list.quads.push_back(q);
+                }
+                char label[64];
+                snprintf(label, sizeof label, "P%d: %s", i + 1, kCharacterNames[id]);
+                text(selectionCoop ? (i == 0 ? 65 : 315) : 190,
+                     selectionCoop ? 340 : 340, 2,
+                     characterConfirmed[i] ? 0xFF80FF90 : (i == 0 ? 0xFFFFE070 : 0xFFFF90B0), label);
+                text(selectionCoop ? (i == 0 ? 65 : 315) : 190, 380, 1,
+                     characterConfirmed[i] ? 0xFF80FF90 : 0xFFE6F4FF,
+                     characterConfirmed[i] ? "CONFIRMADO" : "ESQUERDA / DIREITA");
+            }
+            if (selectionCoop && characterConfirmed[0] && characterConfirmed[1])
+                center(475, 1, 0xFF80FF90, "INICIANDO...");
         } else if (state == ST_WON) {
             snprintf(b, sizeof b, "FASE COMPLETA!  +%d", world.timeBonus()); center(240, 2, 0xFFFFFFFF, b);
             if (stateTimer > 60) center(280, 1, 0xFFB0D0FF, "START: proxima fase");
@@ -151,7 +189,11 @@ struct Game {
 
     // Um quadro lógico (1/FPS s).
     void tick(PadState pads[2]) {
-        bool st[2]; for (int i = 0; i < 2; i++) { st[i] = pads[i].start && !prevStart[i]; prevStart[i] = pads[i].start; }
+        bool st[2], confirm[2];
+        for (int i = 0; i < 2; i++) {
+            st[i] = pads[i].start && !prevStart[i]; prevStart[i] = pads[i].start;
+            confirm[i] = pads[i].shoot && !prevShoot[i]; prevShoot[i] = pads[i].shoot;
+        }
         stateTimer++;
         switch (state) {
             case ST_TITLE:
@@ -165,10 +207,31 @@ struct Game {
                 }
                 if (opt.skipTitle) { coop = opt.coop == 1; startLevel(opt.startLevel); break; }
                 if (st[0] || st[1]) {
-                    coop = (st[1] && pads[1].connected) || opt.coop == 1;
-                    if (opt.coop == 0) coop = false;
+                    selectionCoop = (st[1] && pads[1].connected) || opt.coop == 1;
+                    if (opt.coop == 0) selectionCoop = false;
+                    selectedCharacter[0] = 0; selectedCharacter[1] = 1;
+                    characterConfirmed[0] = characterConfirmed[1] = false;
+                    coop = selectionCoop;
                     pf.playSound("select"); totalScore = 0;
-                    if (!startLevel(opt.startLevel)) printf("falha ao carregar a fase\n");
+                    state = ST_SELECT; stateTimer = 0;
+                }
+                break;
+            case ST_SELECT:
+                for (int i = 0; i < (selectionCoop ? 2 : 1); i++) {
+                    if (characterConfirmed[i]) continue;
+                    int step = (pads[i].right || pads[i].down) ? 1 : (pads[i].left || pads[i].up) ? -1 : 0;
+                    if (step) selectedCharacter[i] = (selectedCharacter[i] + step + 3) % 3;
+                    if (confirm[i]) {
+                        characterConfirmed[i] = true;
+                        pf.playSound("select");
+                    }
+                }
+                if (characterConfirmed[0] && (!selectionCoop || characterConfirmed[1])) {
+                    coop = selectionCoop;
+                    if (!startLevel(opt.startLevel)) {
+                        printf("falha ao carregar a fase\n");
+                        state = ST_TITLE;
+                    }
                 }
                 break;
             case ST_PLAYING:
