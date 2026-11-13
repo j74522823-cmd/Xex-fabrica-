@@ -6,16 +6,22 @@
 #include <xsdk/log.h>
 #include <stdio.h>
 
-// Independent file diagnostics; deliberately separate from the XSDK logger.
-extern "C" void re4_diag_write(const char* message)
+// Independent file diagnostics; write both names so they are easy to find on different launch setups.
+static void re4_diag_write_file(const char* path, const char* message)
 {
-    FILE* f = fopen("game:\\re4_boot.log", "ab");
+    FILE* f = fopen(path, "ab");
     if (f) {
         fputs(message ? message : "(null)", f);
         fputc(10, f);
         fflush(f);
         fclose(f);
     }
+}
+
+extern "C" void re4_diag_write(const char* message)
+{
+    re4_diag_write_file("game:\\re4_boot.log", message);
+    re4_diag_write_file("game:\\re4.log", message);
 }
 
 extern int re4_game_main();
