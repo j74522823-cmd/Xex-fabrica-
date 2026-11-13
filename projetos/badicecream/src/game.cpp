@@ -61,6 +61,20 @@ struct Game {
             for (size_t k = 0; k < px.size(); k++) px[k] = (uint32_t)buf[k * 4] << 24 | (uint32_t)buf[k * 4 + 1] << 16 | (uint32_t)buf[k * 4 + 2] << 8 | buf[k * 4 + 3];
             pf.uploadPage((int)i, pg.w, pg.h, px.data());
         }
+        // Piso de neve procedural: página 7, separado do fundo azul da plataforma.
+        // Textura pequena e tileável para cobrir as células LandTile sem alterar colisões.
+        std::vector<uint32_t> snow(36u * 36u);
+        for (int y = 0; y < 36; ++y) for (int x = 0; x < 36; ++x) {
+            uint32_t color = 0xFFF0F7FF;
+            const int grain = (x * 17 + y * 29 + x * y * 3) % 31;
+            if (grain == 0 || grain == 1) color = 0xFFFFFFFF;
+            else if (grain == 2 || grain == 3) color = 0xFFDCEBFA;
+            if (y == 0 || y == 35 || x == 0 || x == 35) color = 0xFFE5F1FC;
+            if ((x + y * 2) % 19 == 0) color = 0xFFEAF4FD;
+            snow[(size_t)y * 36u + (size_t)x] = color;
+        }
+        pf.uploadPage(7, 36, 36, snow.data());
+
         // Arte extra do título: página 6, fora do atlas original.
         // Se o arquivo não existir, o menu continua funcionando com o título em texto.
         if (readFile(dir + "title_logo.argb", buf) && buf.size() == 512u * 512u * 4u) {
