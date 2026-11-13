@@ -157,9 +157,31 @@ struct Game {
             } else {
                 center(72, 3, 0xFFFFFFFF, "BAD ICE-CREAM");
             }
-            center(374, 2, 0xFFFFE070, "START");
-            center(422, 2, 0xFFFF90B0, "CO-OP");
-            center(480, 1, 0xFFE6F4FF, "P1 START: SOLO   P2 START: CO-OP");
+            // Trio decorativo do menu: reaproveita a animação original "Win"
+            // dos três sabores. Os ciclos ficam defasados para não se moverem juntos.
+            static const char* const menuClasses[3] = {
+                "PlayerVanilla", "PlayerStrawberry", "PlayerChocolate"
+            };
+            const int menuX[3] = {190, 275, 360};
+            for (int i = 0; i < 3; ++i) {
+                const Anim* a = atlas.find(menuClasses[i], "Win");
+                if (!a || a->f.empty()) a = atlas.find(menuClasses[i], "DownStand");
+                if (!a || a->f.empty()) continue;
+                const int frame = (stateTimer / 5 + i * 6) % (int)a->f.size();
+                const Frame& f = a->f[frame];
+                const Atlas::Page& pg = atlas.pages[f.page];
+                Quad q = {};
+                q.x0 = (float)menuX[i] - f.ox;
+                q.y0 = 350.0f - f.oy;
+                q.x1 = q.x0 + f.w; q.y1 = q.y0 + f.h;
+                q.u0 = (float)f.x / pg.w; q.v0 = (float)f.y / pg.h;
+                q.u1 = (float)(f.x + f.w) / pg.w; q.v1 = (float)(f.y + f.h) / pg.h;
+                q.r = q.g = q.b = q.a = 1.f; q.page = f.page;
+                list.quads.push_back(q);
+            }
+            center(414, 2, 0xFFFFE070, "START");
+            center(458, 2, 0xFFFF90B0, "CO-OP");
+            center(510, 1, 0xFFE6F4FF, "P1 START: SOLO   P2 START: CO-OP");
         } else if (state == ST_SELECT) {
             center(54, 2, 0xFFFFFFFF, selectionCoop ? "ESCOLHA DOS SORVETES" : "ESCOLHA SEU SORVETE");
             center(112, 1, 0xFFE6F4FF, "D-PAD: TROCAR   BOTAO: CONFIRMAR");
