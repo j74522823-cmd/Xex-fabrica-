@@ -68,3 +68,26 @@ A camada `platforms/xenon/gc_compat.cpp` atual não é um renderizador: contém 
 ## Próxima tarefa técnica
 
 Executar G1: produzir a lista real das APIs GX usadas pelo RE4 e comparar com as implementações da branch `xenon` de `xenosworks/aurora-xenon`. A primeira lista de prioridade é o caminho do primeiro frame: init GX, viewport/projeção, descriptors/arrays, TEV, textura, draw, copy/present e sincronização VI.
+
+## G1 — primeira auditoria externa (Aurora Xenon, branch `xenon`)
+
+Consulta direta ao código de `xenosworks/aurora-xenon` confirmou lacunas reais na implementação GX:
+
+| API / recurso | Estado encontrado | Arquivo Aurora |
+|---|---|---|
+| `GXCopyDisp` | função vazia (`{}`) | `lib/dolphin/gx/GXFrameBuffer.cpp` |
+| `GXSetDispCopySrc` | função vazia | `lib/dolphin/gx/GXFrameBuffer.cpp` |
+| `GXSetDispCopyDst` | função vazia | `lib/dolphin/gx/GXFrameBuffer.cpp` |
+| `GXSetCopyFilter` | função vazia | `lib/dolphin/gx/GXFrameBuffer.cpp` |
+| `GXSetDispCopyGamma` | função vazia | `lib/dolphin/gx/GXFrameBuffer.cpp` |
+| `GXSetDispCopyYScale` | retorna 0 | `lib/dolphin/gx/GXFrameBuffer.cpp` |
+| `GXClearBoundingBox` / leitura | TODO | `lib/dolphin/gx/GXFrameBuffer.cpp` |
+| `GXCopyTex` | envia comando Aurora e publica FIFO | `lib/dolphin/gx/GXFrameBuffer.cpp` |
+
+A observação acima é sobre a implementação da biblioteca, não prova que todas essas APIs sejam chamadas no caminho de boot/primeiro frame do RE4. Antes de implementar qualquer uma, G1 precisa confirmar os call sites no jogo e a semântica esperada.
+
+### Interpretação
+
+Isto confirma que há partes do GX de apresentação/cópia de framebuffer que não estão implementadas no Aurora. É uma hipótese concreta para tela preta ou apresentação incorreta, mas ainda não explica sozinha a ausência do marcador `MAIN_XENON`: esse marcador fica antes da inicialização Aurora e antes do primeiro desenho.
+
+Próxima prioridade: localizar as chamadas do RE4 a `GXCopyDisp`, `GXSetDispCopySrc/Dst`, `GXDrawDone`, `VISetNextFrameBuffer` e `GXClearBoundingBox`; em seguida, decidir se o jogo depende delas no fluxo normal.
