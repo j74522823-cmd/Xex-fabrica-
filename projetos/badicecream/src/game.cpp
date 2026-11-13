@@ -32,6 +32,8 @@ struct Game {
     State state = ST_TITLE;
     int level = 0, stateTimer = 0, totalScore = 0;
     bool coop = false;
+    bool demoReady = false;
+    int demoFrames = 0;
     bool prevStart[2] = {false, false};
     std::string music;
 
@@ -66,6 +68,24 @@ struct Game {
                 pos = e + 1;
             }
         }
+        demoReady = loadTitleDemo();
+        return true;
+    }
+
+    // Carrega a primeira fase como demonstração do título. A simulação usa
+    // controles neutros; ao terminar ou após 20 s, reinicia sem sair do menu.
+    bool loadTitleDemo() {
+        std::vector<uint8_t> buf;
+        LevelData lv;
+        if (!readFile(pf.dataDir() + "levels/level00.xml", buf) ||
+            !parseLevel(std::string(buf.begin(), buf.end()), lv) ||
+            !world.load(lv, false, 0xB1C2026u)) {
+            demoReady = false;
+            return false;
+        }
+        world.stage = 0;
+        demoFrames = 0;
+        demoReady = true;
         return true;
     }
 
@@ -93,11 +113,12 @@ struct Game {
             if (coop) { snprintf(b, sizeof b, "P2 %d", world.players[1].score); text(SCREEN - 8 - (int)strlen(b) * 10, SCREEN - 24, 1, 0xFFFF90B0, b); }
         }
         if (state == ST_TITLE) {
-            center(120, 3, 0xFFFFFFFF, "BAD ICE-CREAM");
-            center(190, 1, 0xFFB0D0FF, "versao Xbox 360");
-            center(290, 2, 0xFFFFE070, "START no controle 1: 1 jogador");
-            center(330, 2, 0xFFFF90B0, "START no controle 2: COOP (2 jogadores)");
-            center(440, 1, 0xFFB0B0B0, "Direcional/analogico: andar   A/B/X/Y: soprar gelo   BACK: sair");
+            // A logo gráfica original será desenhada como arte separada; estes
+            // rótulos mantêm o menu funcional enquanto a arte é integrada.
+            center(72, 3, 0xFFFFFFFF, "BAD ICE-CREAM");
+            center(366, 2, 0xFFFFE070, "START");
+            center(414, 2, 0xFFFF90B0, "CO-OP");
+            center(474, 1, 0xFFE6F4FF, "P1 START: SOLO   P2 START: CO-OP");
         } else if (state == ST_WON) {
             snprintf(b, sizeof b, "FASE COMPLETA!  +%d", world.timeBonus()); center(240, 2, 0xFFFFFFFF, b);
             if (stateTimer > 60) center(280, 1, 0xFFB0D0FF, "START: proxima fase");
@@ -118,6 +139,13 @@ struct Game {
         switch (state) {
             case ST_TITLE:
                 setMusic("music_menu");
+                if (demoReady) {
+                    PadState idle[2] = {};
+                    world.update(idle);
+                    world.clearSounds(); // a demonstração não dispara áudio de jogo
+                    if (world.phase != PHASE_PLAYING || ++demoFrames > FPS * 20)
+                        loadTitleDemo();
+                }
                 if (opt.skipTitle) { coop = opt.coop == 1; startLevel(opt.startLevel); break; }
                 if (st[0] || st[1]) {
                     coop = (st[1] && pads[1].connected) || opt.coop == 1;
@@ -149,7 +177,9 @@ struct Game {
                 if (st[0] || st[1]) { state = ST_TITLE; stateTimer = 0; }
                 break;
         }
-        if (state == ST_PLAYING || state == ST_WON || state == ST_LOST) buildScene(world, atlas, list);
+        if (state == ST_PLAYING || state == ST_WON || state == ST_LOST ||
+            (state == ST_TITLE && demoReady))
+            buildScene(world, atlas, list);
         else { list.clear(); }
         hud();
     }
