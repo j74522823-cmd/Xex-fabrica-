@@ -44,7 +44,7 @@ struct Ray { int owner = 0, dx = 0, dy = 0, cx = 0, cy = 0, dir = 0, range = 0, 
 
 struct Player : Walker {
     int num = 1;                   // slot do jogador: 1 ou 2
-    int characterId = 0;           // 0 baunilha, 1 morango, 2 chocolate
+    int characterId = 0;           // 0..7: baunilha, morango, chocolate, sorbet, menta, chiclete, alcaçuz, bacon
     bool present = false, dead = false;
     int deadFrames = 0, turnTimer = 0, shootTimer = 0, score = 0;
     bool shootFrame = false, shootBreak = false, shootChecked = false, spaceKey = false;
