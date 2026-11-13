@@ -26,7 +26,7 @@ const Frame* pick(const Anim* a, int idx, bool loop) {
 // Desenha o quadro com (px,py) = canto superior esquerdo da célula, em coordenadas do mundo.
 bool makeQuad(const Ctx& c, const Frame* f, float px, float py, float alpha, Quad& q) {
     if (!f) return false;
-    float x0 = std::floor(px - f->ox - c.camX + 0.5f), y0 = std::floor(py - f->oy - c.camY + 0.5f);
+    float x0 = px - f->ox - c.camX, y0 = py - f->oy - c.camY;
     if (x0 > SCREEN || y0 > SCREEN || x0 + f->w < 0 || y0 + f->h < 0) return false;
     const Atlas::Page& pg = c.atlas.pages[f->page];
     q.x0 = x0; q.y0 = y0; q.x1 = x0 + f->w; q.y1 = y0 + f->h;
@@ -48,8 +48,9 @@ void buildScene(const World& w, const Atlas& atlas, DrawList& out) {
     out.clear();
     std::vector<Item> items; std::vector<Quad> floor;
     items.reserve(1024); floor.reserve(1024);
-    Ctx c{atlas, w, items, floor, std::floor(w.cameraX + 0.5f), std::floor(w.cameraY + 0.5f)};
+    Ctx c{atlas, w, items, floor, w.cameraX, w.cameraY};
     const float T = TILE_SIZE;
+    static const Frame snowFloor{7, 0, 0, TILE_SIZE, TILE_SIZE, 0, 0};
 
     // ---- tiles
     int x0 = std::max(0, (int)(c.camX / T) - 1), x1 = std::min(w.w, (int)((c.camX + SCREEN) / T) + 2);
@@ -61,8 +62,14 @@ void buildScene(const World& w, const Atlas& atlas, DrawList& out) {
             int k = id - FIRST_TILE_TYPE;
             if (k >= kTileNameCount) continue;
             const TileInfo& ti = kTileInfo[k];
-            if (ti.free) addFloor(c, kTileNames[k], "_", 0, false, x * T, y * T);
-            else addItem(c, kTileNames[k], "_", 0, false, x * T, y * T, (y + ti.fh - 1) * TILE_SIZE, 0);
+            if (ti.free) {
+                // LandTile é transparente no atlas original: agora recebe neve
+                // própria; os demais elementos livres continuam usando seus sprites.
+                if (id == FIRST_TILE_TYPE + 1) {
+                    Quad q;
+                    if (makeQuad(c, &snowFloor, x * T, y * T, 1.f, q)) c.floor.push_back(q);
+                } else addFloor(c, kTileNames[k], "_", 0, false, x * T, y * T);
+            } else addItem(c, kTileNames[k], "_", 0, false, x * T, y * T, (y + ti.fh - 1) * TILE_SIZE, 0);
         }
     // ---- objetos de chão
     for (const Obj& o : w.objs) {
