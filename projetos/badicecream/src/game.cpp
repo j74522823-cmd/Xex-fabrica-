@@ -33,6 +33,7 @@ struct Game {
     int level = 0, stateTimer = 0, totalScore = 0;
     bool coop = false;
     bool demoReady = false;
+    bool titleLogoAvailable = false;
     int demoFrames = 0;
     bool prevStart[2] = {false, false};
     std::string music;
@@ -51,6 +52,16 @@ struct Game {
             std::vector<uint32_t> px((size_t)pg.w * pg.h);
             for (size_t k = 0; k < px.size(); k++) px[k] = (uint32_t)buf[k * 4] << 24 | (uint32_t)buf[k * 4 + 1] << 16 | (uint32_t)buf[k * 4 + 2] << 8 | buf[k * 4 + 3];
             pf.uploadPage((int)i, pg.w, pg.h, px.data());
+        }
+        // Arte extra do título: página 6, fora do atlas original.
+        // Se o arquivo não existir, o menu continua funcionando com o título em texto.
+        if (readFile(dir + "title_logo.argb", buf) && buf.size() == 512u * 512u * 4u) {
+            std::vector<uint32_t> px(512u * 512u);
+            for (size_t k = 0; k < px.size(); k++)
+                px[k] = (uint32_t)buf[k * 4] << 24 | (uint32_t)buf[k * 4 + 1] << 16 |
+                        (uint32_t)buf[k * 4 + 2] << 8 | buf[k * 4 + 3];
+            pf.uploadPage(6, 512, 512, px.data());
+            titleLogoAvailable = true;
         }
         if (readFile(dir + "snd.txt", buf)) {
             std::string txt(buf.begin(), buf.end()); size_t pos = 0;
@@ -113,12 +124,18 @@ struct Game {
             if (coop) { snprintf(b, sizeof b, "P2 %d", world.players[1].score); text(SCREEN - 8 - (int)strlen(b) * 10, SCREEN - 24, 1, 0xFFFF90B0, b); }
         }
         if (state == ST_TITLE) {
-            // A logo gráfica original será desenhada como arte separada; estes
-            // rótulos mantêm o menu funcional enquanto a arte é integrada.
-            center(72, 3, 0xFFFFFFFF, "BAD ICE-CREAM");
-            center(366, 2, 0xFFFFE070, "START");
-            center(414, 2, 0xFFFF90B0, "CO-OP");
-            center(474, 1, 0xFFE6F4FF, "P1 START: SOLO   P2 START: CO-OP");
+            if (titleLogoAvailable) {
+                Quad q = {};
+                q.x0 = 105; q.y0 = 4; q.x1 = 445; q.y1 = 344;
+                q.u0 = 0; q.v0 = 0; q.u1 = 1; q.v1 = 1;
+                q.r = q.g = q.b = q.a = 1; q.page = 6;
+                list.quads.push_back(q);
+            } else {
+                center(72, 3, 0xFFFFFFFF, "BAD ICE-CREAM");
+            }
+            center(374, 2, 0xFFFFE070, "START");
+            center(422, 2, 0xFFFF90B0, "CO-OP");
+            center(480, 1, 0xFFE6F4FF, "P1 START: SOLO   P2 START: CO-OP");
         } else if (state == ST_WON) {
             snprintf(b, sizeof b, "FASE COMPLETA!  +%d", world.timeBonus()); center(240, 2, 0xFFFFFFFF, b);
             if (stateTimer > 60) center(280, 1, 0xFFB0D0FF, "START: proxima fase");
