@@ -126,7 +126,7 @@ endforeach ()
 # Entry: platforms/xenon/main_xenon.cpp (Aurora init) -> re4_game_main (the game's own main, renamed below).
 set_source_files_properties(src/game/main.cpp PROPERTIES COMPILE_DEFINITIONS main=re4_game_main)
 add_executable(re4 ${RE4_SOURCES} ${RE4_MODULE_OBJECTS} "${RE4_GEN}/rel_table.cpp" "${RE4_GEN}/rel_unresolved.cpp"
-    platforms/xenon/main_xenon.cpp platforms/xenon/gc_compat.cpp platforms/xenon/os_compat.cpp platforms/xenon/audio_stubs.cpp platforms/xenon/legacy_syms.cpp)
+    platforms/xenon/main_xenon.cpp platforms/xenon/gc_compat.cpp platforms/xenon/os_compat.cpp platforms/xenon/audio_stubs.cpp platforms/xenon/legacy_syms.cpp\n    platforms/xenon/re4_xenon_gfx.cpp)
 re4_settings(re4)
 target_link_libraries(re4 PRIVATE ${RE4_AURORA_LIBS})
 
