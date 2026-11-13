@@ -149,8 +149,17 @@ void buildScene(const World& w, const Atlas& atlas, DrawList& out) {
     for (int i = 0; i < 2; i++) {
         const Player& p = w.players[i];
         if (!p.present) continue;
-        static const char* const playerClasses[3] = {"PlayerVanilla", "PlayerStrawberry", "PlayerChocolate"};
-        const int character = std::max(0, std::min(2, p.characterId));
+        static const char* const playerClasses[8] = {
+            "PlayerVanilla", "PlayerStrawberry", "PlayerChocolate", "PlayerVanilla",
+            "PlayerVanilla", "PlayerVanilla", "PlayerVanilla", "PlayerVanilla"
+        };
+        static const float playerTint[8][3] = {
+            {1.00f, 1.00f, 1.00f}, {1.00f, 0.71f, 0.82f},
+            {0.73f, 0.53f, 0.37f}, {1.00f, 0.84f, 0.35f},
+            {0.51f, 0.84f, 0.54f}, {0.45f, 0.81f, 0.96f},
+            {0.71f, 0.55f, 0.91f}, {0.91f, 0.35f, 0.39f}
+        };
+        const int character = std::max(0, std::min(7, p.characterId));
         const char* cls = playerClasses[character];
         const char* d = kDir[p.lastDir ? p.lastDir : DIR_DOWN];
         std::string an; int idx = p.animFrame; bool loop = true;
@@ -159,7 +168,13 @@ void buildScene(const World& w, const Atlas& atlas, DrawList& out) {
         else if (p.shootTimer > 0) { an = std::string(d) + (p.shootBreak ? "Break" : "Shoot"); idx = p.shootTimer - 1; loop = false; }
         else if (p.moveDir) an = std::string(d) + "Walk";
         else an = std::string(d) + "Stand";
-        addItem(c, cls, an, idx, loop, p.x, p.y, (int)p.y + 2, 5);
+        Quad playerQuad;
+        if (makeQuad(c, pick(atlas.find(cls, an), idx, loop), p.x, p.y, 1.f, playerQuad)) {
+            playerQuad.r = playerTint[character][0];
+            playerQuad.g = playerTint[character][1];
+            playerQuad.b = playerTint[character][2];
+            items.push_back({(int)p.y + 2, 5, playerQuad});
+        }
     }
 
     std::stable_sort(items.begin(), items.end(), [](const Item& a, const Item& b) { return a.key != b.key ? a.key < b.key : a.ord < b.ord; });
