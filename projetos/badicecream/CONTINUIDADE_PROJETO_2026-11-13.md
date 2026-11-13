@@ -52,20 +52,22 @@ O usuário definiu que não precisamos de um menu elaborado. A proposta funciona
 
 1. **JOGAR** — abre a seleção de fases.
 2. **OPÇÕES** — permite ligar/desligar música e efeitos sonoros separadamente.
-3. **SAIR** — encerra o XEX e retorna à dashboard do Xbox 360, se a API/plataforma usada permitir isso com segurança.
+
+Não haverá opção SAIR no menu principal: o usuário prefere sair usando o botão BACK.
 
 ### Pausa durante a partida
 
 1. **CONTINUAR** — retoma a mesma partida sem reiniciar a fase.
 2. **VOLTAR AO MENU** — retorna à seleção de fases, preservando as fases desbloqueadas.
-3. **SAIR DO JOGO** — encerra o XEX e tenta retornar à dashboard.
+
+A saída do jogo fica pelo botão BACK; não criar uma opção de saída duplicada nos menus.
 
 ### Seleção de fases e progresso
 
 - Mostrar as fases já desbloqueadas; fases bloqueadas não devem iniciar.
 - O progresso desbloqueado deve persistir entre sessões (sistema de save ainda precisa ser implementado/confirmado).
 - A pausa atual no código é apenas uma tela com a instrução `START: CONTINUAR`; o menu de pausa com três opções **ainda não está implementado**.
-- O menu principal atual ainda usa START/CO-OP; JOGAR/OPÇÕES/SAIR e a tela de opções **ainda não estão implementados**.
+- O menu principal atual ainda usa START/CO-OP; JOGAR/OPÇÕES e a tela de opções **ainda não estão implementados**.
 
 - O menu reutiliza a animação `Win` dos três sabores originais, com os ciclos defasados para não se moverem juntos.
 - A seleção de oito sabores foi ampliada no código.
@@ -85,10 +87,10 @@ O usuário definiu que não precisamos de um menu elaborado. A proposta funciona
 1. Confirmar o resultado da Actions do commit mais recente e baixar o XEX/runtime_data gerados, se disponíveis.
 2. Corrigir qualquer erro de compilação antes de adicionar novas funções.
 3. Testar se os oito tons aparecem corretamente tanto no seletor quanto durante a partida.
-4. Evoluir a pausa atual para CONTINUAR / VOLTAR AO MENU / SAIR DO JOGO.
-5. Criar o menu principal simples JOGAR / OPÇÕES / SAIR; em OPÇÕES, adicionar controles independentes de música e efeitos sonoros.
+4. Evoluir a pausa atual para CONTINUAR / VOLTAR AO MENU.
+5. Criar o menu principal simples JOGAR / OPÇÕES; em OPÇÕES, adicionar controles independentes de música e efeitos sonoros.
 6. Criar seleção de fases com bloqueio/desbloqueio e persistência do progresso.
-7. Verificar a forma correta de encerrar o XEX e retornar à dashboard pela camada de plataforma do Xbox 360.
+7. Mapear e testar a saída pelo botão BACK, sem adicionar opção SAIR nos menus.
 8. Revisar a neve, o chão e a câmera: suavizar o acompanhamento e evitar que o fundo azul apareça de forma feia nas bordas do cenário.
 9. Quando houver console disponível, testar o XEX real e registrar os resultados.
 
