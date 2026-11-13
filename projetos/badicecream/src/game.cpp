@@ -26,8 +26,19 @@ bool readFile(const std::string& path, std::vector<uint8_t>& out) {
 const int kLevelCount = 40;
 enum State { ST_TITLE, ST_SELECT, ST_PLAYING, ST_PAUSED, ST_WON, ST_LOST, ST_END };
 
-const char* const kCharacterNames[3] = {"BAUNILHA", "MORANGO", "CHOCOLATE"};
-const char* const kCharacterClasses[3] = {"PlayerVanilla", "PlayerStrawberry", "PlayerChocolate"};
+const int kCharacterCount = 8;
+const char* const kCharacterNames[kCharacterCount] = {
+    "BAUNILHA", "MORANGO", "CHOCOLATE", "SORBET",
+    "MENTA CHOC-CHIP", "CHICLETE", "ALCACUZ", "BACON DEFUMADO"
+};
+const char* const kCharacterClasses[kCharacterCount] = {
+    "PlayerVanilla", "PlayerStrawberry", "PlayerChocolate", "PlayerVanilla",
+    "PlayerVanilla", "PlayerVanilla", "PlayerVanilla", "PlayerVanilla"
+};
+const uint32_t kCharacterTints[kCharacterCount] = {
+    0xFFFFFFFF, 0xFFFFB5D2, 0xFFB98762, 0xFFFFD65A,
+    0xFF83D58A, 0xFF72CFF5, 0xFFB58BE8, 0xFFE85A62
+};
 
 struct Game {
     Platform& pf; Options opt;
@@ -130,7 +141,7 @@ struct Game {
         if (!world.load(lv, coop, 1234u + (uint32_t)n * 7919u)) return false;
         world.stage = n; level = n;
         for (int i = 0; i < 2; i++) if (world.players[i].present)
-            world.players[i].characterId = std::max(0, std::min(2, selectedCharacter[i]));
+            world.players[i].characterId = std::max(0, std::min(kCharacterCount - 1, selectedCharacter[i]));
         state = ST_PLAYING; stateTimer = 0;
         setMusic("music_game");
         return true;
@@ -196,7 +207,10 @@ struct Game {
                     q.x0 = (float)x - f.w * 0.5f; q.y0 = 190; q.x1 = q.x0 + f.w; q.y1 = q.y0 + f.h;
                     q.u0 = (float)f.x / pg.w; q.v0 = (float)f.y / pg.h;
                     q.u1 = (float)(f.x + f.w) / pg.w; q.v1 = (float)(f.y + f.h) / pg.h;
-                    q.r = q.g = q.b = q.a = 1.f; q.page = f.page;
+                    q.r = ((kCharacterTints[id] >> 16) & 255) / 255.f;
+                    q.g = ((kCharacterTints[id] >> 8) & 255) / 255.f;
+                    q.b = (kCharacterTints[id] & 255) / 255.f;
+                    q.a = 1.f; q.page = f.page;
                     list.quads.push_back(q);
                 }
                 char label[64];
@@ -261,7 +275,7 @@ struct Game {
                     if (characterConfirmed[i]) continue;
                     int step = (pads[i].right || pads[i].down) ? 1 : (pads[i].left || pads[i].up) ? -1 : 0;
                     if (step && step != previousSelectDirection[i])
-                        selectedCharacter[i] = (selectedCharacter[i] + step + 3) % 3;
+                        selectedCharacter[i] = (selectedCharacter[i] + step + kCharacterCount) % kCharacterCount;
                     previousSelectDirection[i] = step;
                     if (confirm[i]) {
                         characterConfirmed[i] = true;
