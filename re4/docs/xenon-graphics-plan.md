@@ -1,93 +1,58 @@
-# RE4 Xenon — plano da camada gráfica própria
+# RE4 Xenon — renderizador nativo próprio
 
-Branch de trabalho: `re4-xenon-native`
-Base: `debug/re4-boot-trace`
-Objetivo: preservar a lógica de jogo da descompilação G4BE08/Adonis e isolar/substituir, de forma incremental, a implementação gráfica usada no Xbox 360.
+Branch: `re4-xenon-native`
+Base de código do jogo: descompilação G4BE08/Adonis.
+Objetivo: preservar a lógica do RE4 e **recriar a renderização para o Xbox 360**, sem implementar um tradutor GX nem depender do Aurora GX para desenhar.
 
-## Decisão de arquitetura
+## Decisão
 
-Não remover o GX nem reescrever o renderizador antes de medir o que já funciona.
+Não construir uma camada de compatibilidade GX->Vulkan. O GX do GameCube serve apenas como referência para entender o que cada sistema do jogo espera visualmente. O novo renderizador será implementado diretamente em Vulkan4Xenon, que dirige o Xenos.
 
-O estado atual já encaminha as chamadas GX do jogo para o Aurora (`aurora::gx`), com `AURORA_GFX_BACKEND=vulkan4xenon`. Portanto, a hipótese "GX inteiro está quebrado" ainda não está demonstrada. O gargalo pode estar em inicialização do XEX, criação do dispositivo/backend, tradução de estados GX, upload de texturas, shaders/TEV, sincronização de quadros ou em operações GX ausentes.
+A lógica do jogo (IA, entidades, fases, física, inventário, eventos e dados) deve ser preservada sempre que possível. Os pontos de chamada gráficos serão migrados por partes para o renderizador nativo. Até cada grupo estar convertido, a versão completa do jogo não estará pronta para executar com o renderizador novo.
 
-A camada `platforms/xenon/gc_compat.cpp` atual não é um renderizador: contém compatibilidade matemática/cache e utilitários de lista/string. Ela deve permanecer separada do futuro backend gráfico.
+## Primeiro código criado
 
-## Inventário confirmado no código
+- `platforms/xenon/re4_xenon_gfx.h`
+- `platforms/xenon/re4_xenon_gfx.cpp`
+- O novo arquivo foi adicionado ao target `re4` em `CMakeLists.txt`.
+- Implementação inicial usa Vulkan diretamente: cria instância, dispositivo, display surface, swapchain, render pass, framebuffers, command buffers, semáforos e fence.
+- `re4_xenon_gfx_clear_frame(r,g,b,a)` limpa e apresenta um frame com cor escolhida.
+- Logs usam o prefixo `[RE4-GFX]` para identificar cada etapa.
 
-- `CMakeLists.txt`: força `AURORA_GFX_BACKEND=vulkan4xenon`, adiciona Aurora e vincula `aurora::gx`, `aurora::gd`, `aurora::vi` e `vulkan4xenon`.
-- `include/gx.h`: o build Xenon prioriza os headers GX do Aurora.
-- `src/game/gx_sub.cpp`: usa estado GX, projeção ortográfica, TEV, descritores de vértice e `GXBegin` para desenhar o fundo.
-- `src/game/libgpu.cpp`: constrói primitivas (triângulos, quadriláteros, linhas) através de chamadas GX.
-- `main_xenon.cpp`: inicializa Aurora com backend Vulkan e abre a imagem ISO antes de entrar em `re4_game_main()`.
-- `docs/360-port.md` registra `GXClearBoundingBox` e `__GXSetIndirectMask` como no-ops e aponta `GXSetArray` como ponto que exige validação em runtime.
-- O estado anterior também marca `GXCopyDisp`/`GXDrawDone` e o ciclo VI/frame como não revisados em console.
+**Limite atual:** este primeiro módulo é um teste de fundação do renderizador; ainda não está ligado ao loop do jogo nem desenha modelos/texturas do RE4. Não substituirá o XEX existente até compilar e ser testado no console.
 
-## Regras para a nova implementação
+## Arquitetura do renderizador novo
 
-1. Preservar `src/game/**` e os dados/estruturas da descompilação sempre que possível.
-2. Não substituir chamadas GX em massa nem editar a lógica de gameplay para contornar problemas gráficos.
-3. Toda substituição deve ficar atrás de uma interface Xenon, ou em compatibilidade pequena e documentada.
-4. Manter Aurora como backend de referência enquanto a alternativa não provar que desenha corretamente no hardware.
-5. Não declarar um recurso "implementado" apenas porque compila: exigir evidência no console (log e imagem/tela).
-6. Não misturar o diagnóstico da entrada do XEX com o diagnóstico de renderização.
+1. **Display e apresentação:** swapchain, sincronização, resolução, clear e present.
+2. **Geometria:** buffers de vértices/índices, formatos de posição/normal/UV/cor e draws.
+3. **Transformações:** matrizes de mundo, câmera e projeção.
+4. **Materiais e texturas:** conversão dos formatos originais, upload e sampling.
+5. **Iluminação e materiais:** luzes, fog, blending, alpha test, depth e culling.
+6. **Combinação de materiais:** reproduzir os resultados visuais necessários do TEV com shaders Vulkan escritos para o jogo; não traduzir comandos GX em tempo real.
+7. **Sistemas especiais:** sombras, água, efeitos, partículas, transparências e pós-processamento.
 
-## Etapas e critérios de aceite
+## Sequência de integração
 
-### G0 — preservar a base e separar a branch
-- Esta branch foi criada sem alterar a branch de diagnóstico.
-- Nenhuma alteração de gameplay ou GX foi feita nesta etapa.
+- **R0 — inicialização nativa:** Vulkan4Xenon cria o dispositivo e apresenta uma cor de teste.
+- **R1 — triângulo:** pipeline gráfico e shaders próprios, sem Aurora GX.
+- **R2 — textura:** carregar uma textura de teste e exibi-la.
+- **R3 — modelo:** carregar geometria real de um recurso RE4 e desenhar com câmera simples.
+- **R4 — cena:** cenário e objetos estáticos de uma sala/área do jogo.
+- **R5 — materiais:** iluminação, transparência, fog e shaders por família de material.
+- **R6 — integração:** substituir chamadas gráficas do jogo gradualmente, mantendo IA, gameplay e dados originais.
 
-### G1 — auditoria das chamadas GX
-- Enumerar as APIs GX chamadas pelo jogo e seus usos.
-- Cruzar com as implementações do Aurora e classificar: suportada, parcial, no-op, desconhecida.
-- Priorizar chamadas usadas no primeiro frame e no desenho do fundo, antes de cobrir efeitos raros.
-- Saída esperada: tabela de cobertura com arquivo/linha e evidência da implementação.
+## Regras
 
-### G2 — teste gráfico mínimo independente
-- Criar um pequeno alvo de teste Xenon que inicialize o backend e desenhe: limpeza de tela, triângulo de cor sólida e textura simples.
-- Testar separadamente inicialização, upload de textura, estado de blend/depth e apresentação.
-- O teste não deve iniciar a lógica do RE4; assim, uma falha não fica confundida com o boot do jogo.
+- Não escrever stubs que fingem renderizar; cada etapa precisa de evidência visual no console.
+- Não remover os arquivos GX originais: ficam como documentação da semântica e referência de comportamento.
+- Não alterar gameplay para contornar defeitos gráficos.
+- Não declarar o renderer novo integrado até que uma cena real do RE4 seja apresentada.
+- Manter a trilha de diagnóstico do boot separada da trilha do renderizador.
 
-### G3 — adaptadores de compatibilidade
-- Implementar somente as lacunas confirmadas em G1/G2.
-- Preferir adaptar a semântica GX ao backend existente antes de criar outro renderer.
-- Se Aurora/vulkan4xenon não atender a uma operação essencial, definir interface própria `re4_gfx` e implementar essa operação para Xenon.
+## Lacunas já observadas no Aurora GX
 
-### G4 — reconectar o jogo
-- Primeiro desenhar fundo/cena simples.
-- Depois câmera, geometria, textura, iluminação/TEV e efeitos por grupos.
-- Só então retomar o loop completo e o gameplay.
+A auditoria anterior encontrou, em `xenosworks/aurora-xenon`, funções de cópia de framebuffer sem implementação, incluindo `GXCopyDisp`, além de operações de configuração de cópia e bounding box parciais. Isso ajuda a explicar por que não devemos depender do caminho GX existente, mas não prova que essas funções sejam a causa do marcador MAIN_XENON ausente. O novo renderer evita essa dependência para o desenho; a inicialização e leitura de disco ainda precisam de integração própria.
 
-## Não fazer ainda
+## Estado honesto
 
-- Não apagar nem substituir `include/dolphin/gx*` ou `src/lib/GX*` em bloco.
-- Não remover Aurora/vulkan4xenon antes de existir um teste alternativo funcional.
-- Não alterar ISO, RELs, lógica de inimigos, física ou controles para tratar um problema que ainda não foi localizado.
-- Não prometer que o crash atual é causado pelo GX: o log atual ainda precisa provar que a entrada Xenon e a inicialização Aurora foram alcançadas.
-
-## Próxima tarefa técnica
-
-Executar G1: produzir a lista real das APIs GX usadas pelo RE4 e comparar com as implementações da branch `xenon` de `xenosworks/aurora-xenon`. A primeira lista de prioridade é o caminho do primeiro frame: init GX, viewport/projeção, descriptors/arrays, TEV, textura, draw, copy/present e sincronização VI.
-
-## G1 — primeira auditoria externa (Aurora Xenon, branch `xenon`)
-
-Consulta direta ao código de `xenosworks/aurora-xenon` confirmou lacunas reais na implementação GX:
-
-| API / recurso | Estado encontrado | Arquivo Aurora |
-|---|---|---|
-| `GXCopyDisp` | função vazia (`{}`) | `lib/dolphin/gx/GXFrameBuffer.cpp` |
-| `GXSetDispCopySrc` | função vazia | `lib/dolphin/gx/GXFrameBuffer.cpp` |
-| `GXSetDispCopyDst` | função vazia | `lib/dolphin/gx/GXFrameBuffer.cpp` |
-| `GXSetCopyFilter` | função vazia | `lib/dolphin/gx/GXFrameBuffer.cpp` |
-| `GXSetDispCopyGamma` | função vazia | `lib/dolphin/gx/GXFrameBuffer.cpp` |
-| `GXSetDispCopyYScale` | retorna 0 | `lib/dolphin/gx/GXFrameBuffer.cpp` |
-| `GXClearBoundingBox` / leitura | TODO | `lib/dolphin/gx/GXFrameBuffer.cpp` |
-| `GXCopyTex` | envia comando Aurora e publica FIFO | `lib/dolphin/gx/GXFrameBuffer.cpp` |
-
-A observação acima é sobre a implementação da biblioteca, não prova que todas essas APIs sejam chamadas no caminho de boot/primeiro frame do RE4. Antes de implementar qualquer uma, G1 precisa confirmar os call sites no jogo e a semântica esperada.
-
-### Interpretação
-
-Isto confirma que há partes do GX de apresentação/cópia de framebuffer que não estão implementadas no Aurora. É uma hipótese concreta para tela preta ou apresentação incorreta, mas ainda não explica sozinha a ausência do marcador `MAIN_XENON`: esse marcador fica antes da inicialização Aurora e antes do primeiro desenho.
-
-Próxima prioridade: localizar as chamadas do RE4 a `GXCopyDisp`, `GXSetDispCopySrc/Dst`, `GXDrawDone`, `VISetNextFrameBuffer` e `GXClearBoundingBox`; em seguida, decidir se o jogo depende delas no fluxo normal.
+O módulo Vulkan inicial foi escrito e adicionado ao build, mas a compilação automática está em andamento. Ainda não há XEX testado com ele, nem cena do RE4 renderizada. O próximo passo é corrigir eventuais erros do build e fechar R0 antes de implementar shaders/triângulo.
