@@ -117,9 +117,11 @@ public:
         st = xsdk_present_open(XSDK_DISPLAY_720P, BUFFERS, SWAP_INTERVAL, &width, &height);
         if (!NT_SUCCESS(st)) { xsdk_log_write("bic: xsdk_present_open falhou 0x%08X", (unsigned)st); return false; }
         presentOpen = true;
-        // Palco 550x550 centralizado, escalado pela altura.
-        scale = (float)height / (float)SCREEN;
-        offX = ((float)width - (float)SCREEN * scale) * 0.5f;
+        // Teste de tela cheia: reescala X e Y separadamente para preencher 16:9.
+        // A proporção dos sprites fica mais larga, mas não sobra faixa lateral.
+        scaleX = (float)width / (float)SCREEN;
+        scaleY = (float)height / (float)SCREEN;
+        offX = 0.0f;
         offY = 0.0f;
 
         pthread_mutex_init(&audioLock, nullptr); lockOk = true;
@@ -183,8 +185,8 @@ public:
         drawQuads(list);
         for (size_t i = 0; i < list.texts.size(); i++) {
             const TextItem& t = list.texts[i];
-            int sc = (int)(t.scale * scale + 0.5f); if (sc < 1) sc = 1; if (sc > 8) sc = 8;
-            xsdk_text_draw((int32_t)(offX + t.x * scale), (int32_t)(offY + t.y * scale), (uint32_t)sc, t.argb, t.s.c_str());
+            int sc = (int)(t.scale * scaleY + 0.5f); if (sc < 1) sc = 1; if (sc > 8) sc = 8;
+            xsdk_text_draw((int32_t)(offX + t.x * scaleX), (int32_t)(offY + t.y * scaleY), (uint32_t)sc, t.argb, t.s.c_str());
         }
         xsdk_gpu_resolve(address, width, height, list.clearArgb);
         slotFence[slot] = xsdk_gpu_fence();
@@ -235,7 +237,7 @@ public:
 
 private:
     // ---------------- vídeo
-    uint32_t width = 0, height = 0; float scale = 1, offX = 0, offY = 0;
+    uint32_t width = 0, height = 0; float scaleX = 1, scaleY = 1, offX = 0, offY = 0;
     bool gpuOpen = false, textOpen = false, presentOpen = false, shadersOk = false;
     XsdkShader vs = {}, ps = {};
     volatile uint32_t* ring = nullptr; uint32_t ringAddress = 0; XsdkRepeatedIndices indices = {};
@@ -266,7 +268,7 @@ private:
             uint32_t batchStart = written;
             while (i < list.quads.size() && list.quads[i].page == page && written < QUADS_PER_SLOT) {
                 const Quad& q = list.quads[i++];
-                const float x0 = offX + q.x0 * scale, y0 = offY + q.y0 * scale, x1 = offX + q.x1 * scale, y1 = offY + q.y1 * scale;
+                const float x0 = offX + q.x0 * scaleX, y0 = offY + q.y0 * scaleY, x1 = offX + q.x1 * scaleX, y1 = offY + q.y1 * scaleY;
                 const float v[4][VERTEX_FLOATS] = {
                     {x0, y0, q.u0, q.v0, q.r, q.g, q.b, q.a}, {x1, y0, q.u1, q.v0, q.r, q.g, q.b, q.a},
                     {x0, y1, q.u0, q.v1, q.r, q.g, q.b, q.a}, {x1, y1, q.u1, q.v1, q.r, q.g, q.b, q.a}};
