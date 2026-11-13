@@ -24,7 +24,7 @@ bool readFile(const std::string& path, std::vector<uint8_t>& out) {
 }
 
 const int kLevelCount = 40;
-enum State { ST_TITLE, ST_SELECT, ST_PLAYING, ST_WON, ST_LOST, ST_END };
+enum State { ST_TITLE, ST_SELECT, ST_PLAYING, ST_PAUSED, ST_WON, ST_LOST, ST_END };
 
 const char* const kCharacterNames[3] = {"BAUNILHA", "MORANGO", "CHOCOLATE"};
 const char* const kCharacterClasses[3] = {"PlayerVanilla", "PlayerStrawberry", "PlayerChocolate"};
@@ -128,7 +128,7 @@ struct Game {
 
     void hud() {
         char b[96];
-        if (state == ST_PLAYING || state == ST_WON || state == ST_LOST) {
+        if (state == ST_PLAYING || state == ST_PAUSED || state == ST_WON || state == ST_LOST) {
             snprintf(b, sizeof b, "FASE %d", level + 1); text(8, 4, 1, 0xFFFFFFFF, b);
             int secs = world.frameNumber / FPS; snprintf(b, sizeof b, "%d:%02d", secs / 60, secs % 60); text(SCREEN - 8 - 5 * 10, 4, 1, 0xFFFFFFFF, b);
             snprintf(b, sizeof b, "P1 %d", world.players[0].score); text(8, SCREEN - 24, 1, 0xFFFFE070, b);
@@ -175,6 +175,9 @@ struct Game {
             }
             if (selectionCoop && characterConfirmed[0] && characterConfirmed[1])
                 center(475, 1, 0xFF80FF90, "INICIANDO...");
+        } else if (state == ST_PAUSED) {
+            center(205, 3, 0xFFFFFFFF, "PAUSADO");
+            center(260, 1, 0xFFFFE070, "START: CONTINUAR");
         } else if (state == ST_WON) {
             snprintf(b, sizeof b, "FASE COMPLETA!  +%d", world.timeBonus()); center(240, 2, 0xFFFFFFFF, b);
             if (stateTimer > 60) center(280, 1, 0xFFB0D0FF, "START: proxima fase");
@@ -239,11 +242,25 @@ struct Game {
                 }
                 break;
             case ST_PLAYING:
+                // START pausa somente durante uma partida ativa. Não atualiza o
+                // mundo neste quadro: inimigos, jogadores e relógio ficam congelados.
+                if (st[0] || st[1]) {
+                    state = ST_PAUSED;
+                    stateTimer = 0;
+                    break;
+                }
                 world.update(pads);
                 for (const char* s : world.sounds) pf.playSound(s);
                 world.clearSounds();
                 if (world.phase == PHASE_WON) { state = ST_WON; stateTimer = 0; totalScore += world.levelScore; setMusic("music_win"); }
                 else if (world.phase == PHASE_LOST) { state = ST_LOST; stateTimer = 0; setMusic("music_lose"); }
+                break;
+            case ST_PAUSED:
+                // O mundo não recebe update enquanto pausado; START retoma.
+                if (st[0] || st[1]) {
+                    state = ST_PLAYING;
+                    stateTimer = 0;
+                }
                 break;
             case ST_WON:
                 world.frameNumber++;   // mantém as animações andando
@@ -261,7 +278,7 @@ struct Game {
                 if (st[0] || st[1]) { state = ST_TITLE; stateTimer = 0; }
                 break;
         }
-        if (state == ST_PLAYING || state == ST_WON || state == ST_LOST ||
+        if (state == ST_PLAYING || state == ST_PAUSED || state == ST_WON || state == ST_LOST ||
             (state == ST_TITLE && demoReady))
             buildScene(world, atlas, list);
         else { list.clear(); }
