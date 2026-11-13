@@ -75,12 +75,16 @@ int main(int argc, char* argv[])
     re4_diag_write("DVD: before aurora_dvd_open");
     xsdk_log_write("re4: before aurora_dvd_open");
     if (!aurora_dvd_open(RE4_DISC_PATH)) {
-        re4_diag_write("DVD: open failed");
-        xsdk_log_write("re4: cannot open disc image " RE4_DISC_PATH);
-    } else {
-        re4_diag_write("DVD: image opened");
-        xsdk_log_write("re4: disc image opened");
+        // Do not enter the original game with an unavailable disc. Its startup immediately
+        // initializes DVD tables and reads mandatory files; continuing here turns a simple
+        // mount/path problem into a later black-screen crash with a misleading location.
+        re4_diag_write("FATAL: DVD image open failed; game entry skipped");
+        xsdk_log_write("re4: FATAL: cannot open disc image %s; skipping game entry", RE4_DISC_PATH);
+        aurora_shutdown();
+        return 2;
     }
+    re4_diag_write("DVD: image opened");
+    xsdk_log_write("re4: disc image opened");
 
     re4_diag_write("VIDEO: before first aurora_begin_frame");
     xsdk_log_write("re4: before first aurora_begin_frame");
