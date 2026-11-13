@@ -43,6 +43,7 @@ struct Game {
     bool selectionCoop = false;
     int selectedCharacter[2] = {0, 1};
     bool characterConfirmed[2] = {false, false};
+    int previousSelectDirection[2] = {0, 0};
     std::string music;
 
     Game(Platform& p, const Options& o) : pf(p), opt(o) {}
@@ -148,7 +149,7 @@ struct Game {
             center(480, 1, 0xFFE6F4FF, "P1 START: SOLO   P2 START: CO-OP");
         } else if (state == ST_SELECT) {
             center(54, 2, 0xFFFFFFFF, selectionCoop ? "ESCOLHA DOS SORVETES" : "ESCOLHA SEU SORVETE");
-            center(112, 1, 0xFFE6F4FF, "D-PAD: TROCAR   A: CONFIRMAR");
+            center(112, 1, 0xFFE6F4FF, "D-PAD: TROCAR   BOTAO: CONFIRMAR");
             for (int i = 0; i < (selectionCoop ? 2 : 1); i++) {
                 const int x = selectionCoop ? (i == 0 ? 150 : 400) : 275;
                 const int id = std::max(0, std::min(2, selectedCharacter[i]));
@@ -211,6 +212,7 @@ struct Game {
                     if (opt.coop == 0) selectionCoop = false;
                     selectedCharacter[0] = 0; selectedCharacter[1] = 1;
                     characterConfirmed[0] = characterConfirmed[1] = false;
+                    previousSelectDirection[0] = previousSelectDirection[1] = 0;
                     coop = selectionCoop;
                     pf.playSound("select"); totalScore = 0;
                     state = ST_SELECT; stateTimer = 0;
@@ -220,7 +222,9 @@ struct Game {
                 for (int i = 0; i < (selectionCoop ? 2 : 1); i++) {
                     if (characterConfirmed[i]) continue;
                     int step = (pads[i].right || pads[i].down) ? 1 : (pads[i].left || pads[i].up) ? -1 : 0;
-                    if (step) selectedCharacter[i] = (selectedCharacter[i] + step + 3) % 3;
+                    if (step && step != previousSelectDirection[i])
+                        selectedCharacter[i] = (selectedCharacter[i] + step + 3) % 3;
+                    previousSelectDirection[i] = step;
                     if (confirm[i]) {
                         characterConfirmed[i] = true;
                         pf.playSound("select");
