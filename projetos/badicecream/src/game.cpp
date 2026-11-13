@@ -69,7 +69,6 @@ struct Game {
             const int grain = (x * 17 + y * 29 + x * y * 3) % 31;
             if (grain == 0 || grain == 1) color = 0xFFFFFFFF;
             else if (grain == 2 || grain == 3) color = 0xFFDCEBFA;
-            if (y == 0 || y == 35 || x == 0 || x == 35) color = 0xFFE5F1FC;
             if ((x + y * 2) % 19 == 0) color = 0xFFEAF4FD;
             snow[(size_t)y * 36u + (size_t)x] = color;
         }
