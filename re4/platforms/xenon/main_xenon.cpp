@@ -24,6 +24,12 @@ extern "C" void re4_diag_write(const char* message)
     re4_diag_write_file("game:\\re4.log", message);
 }
 
+// Construtor estático: roda antes do main(), junto com os inicializadores globais.
+struct RE4EarlyBootMark {
+    RE4EarlyBootMark() { re4_diag_write("STATIC: construtores globais rodando"); }
+};
+static RE4EarlyBootMark g_re4EarlyBootMark;
+
 extern int re4_game_main();
 
 // One call per presented frame (VISetNextFrameBuffer in os_compat.cpp).
