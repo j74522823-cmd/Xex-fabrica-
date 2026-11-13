@@ -52,9 +52,10 @@ static void LogCb(AuroraLogLevel level, const char* module, const char* message,
 
 int main(int argc, char* argv[])
 {
-    re4_diag_write("ENTRY: main_xenon entered");
+    // First instruction-level diagnostic in the Xenon/Aurora entry point.
+    re4_diag_write("MAIN_XENON: entry point reached");
     xsdk_log_write("re4: started");
-    re4_diag_write("ENTRY: before aurora_initialize");
+    re4_diag_write("MAIN_XENON: before aurora_initialize");
     xsdk_log_write("re4: before aurora_initialize");
 
     AuroraConfig cfg = {};
@@ -84,10 +85,10 @@ int main(int argc, char* argv[])
     re4_diag_write("VIDEO: before first aurora_begin_frame");
     xsdk_log_write("re4: before first aurora_begin_frame");
     aurora_begin_frame();
-    re4_diag_write("GAME: before re4_game_main");
+    re4_diag_write("GAME_MAIN: immediately before re4_game_main call");
     xsdk_log_write("re4: before re4_game_main");
     int r = re4_game_main();
-    re4_diag_write("GAME: re4_game_main returned");
+    re4_diag_write("GAME_MAIN: re4_game_main returned");
     xsdk_log_write("re4: re4_game_main returned");
     aurora_shutdown();
     return r;
