@@ -619,7 +619,9 @@ void World::updateCamera() {
     float maxX = (float)(w * TILE_SIZE - SCREEN), maxY = (float)(h * TILE_SIZE - SCREEN);
     tx = maxX <= 0 ? maxX / 2 : std::max(0.f, std::min(maxX, tx));
     ty = maxY <= 0 ? maxY / 2 : std::max(0.f, std::min(maxY, ty));
-    cameraX += (tx - cameraX) * 0.5f; cameraY += (ty - cameraY) * 0.5f;
+    // Suavização mais gradual: evita a câmera "grudar" no jogador e saltar
+    // quando o próximo trecho do cenário entra no enquadramento.
+    cameraX += (tx - cameraX) * 0.18f; cameraY += (ty - cameraY) * 0.18f;
 }
 
 void World::update(const PadState pads[2]) {
