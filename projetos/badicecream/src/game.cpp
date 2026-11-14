@@ -24,12 +24,12 @@ bool readFile(const std::string& path, std::vector<uint8_t>& out) {
 }
 
 const int kLevelCount = 40;
-enum State { ST_TITLE, ST_SELECT, ST_PLAYING, ST_PAUSED, ST_WON, ST_LOST, ST_END };
+enum State { ST_TITLE, ST_LEVEL_SELECT, ST_SELECT, ST_PLAYING, ST_PAUSED, ST_WON, ST_LOST, ST_END };
 
-const int kCharacterCount = 8;
+const int kCharacterCount = 9;
 const char* const kCharacterNames[kCharacterCount] = {
     "BAUNILHA", "MORANGO", "CHOCOLATE", "SORBET",
-    "MENTA CHOC-CHIP", "CHICLETE", "ALCACUZ", "BACON DEFUMADO"
+    "MENTA CHOC-CHIP", "CHICLETE", "ALCACUZ", "BACON DEFUMADO", "LARANJA"
 };
 const char* const kCharacterClasses[kCharacterCount] = {
     "PlayerVanilla", "PlayerStrawberry", "PlayerChocolate", "PlayerVanilla",
@@ -37,7 +37,7 @@ const char* const kCharacterClasses[kCharacterCount] = {
 };
 const uint32_t kCharacterTints[kCharacterCount] = {
     0xFFFFFFFF, 0xFFFFB5D2, 0xFFB98762, 0xFFFFD65A,
-    0xFF83D58A, 0xFF72CFF5, 0xFFB58BE8, 0xFFE85A62
+    0xFF83D58A, 0xFF72CFF5, 0xFFB58BE8, 0xFFE85A62, 0xFFFF9638
 };
 
 struct Game {
@@ -45,6 +45,7 @@ struct Game {
     Atlas atlas; World world; DrawList list;
     State state = ST_TITLE;
     int level = 0, stateTimer = 0, totalScore = 0;
+    int unlockedLevel = 1, selectedLevel = 0, previousLevelDirection = 0;
     bool coop = false;
     bool demoReady = false;
     bool titleLogoAvailable = false;
@@ -111,6 +112,7 @@ struct Game {
                 pos = e + 1;
             }
         }
+        loadProgress();
         demoReady = loadTitleDemo();
         return true;
     }
@@ -132,6 +134,26 @@ struct Game {
         return true;
     }
 
+    void loadProgress() {
+        // Save simples junto aos dados do jogo. Se o dispositivo não permitir escrita,
+        // o jogo continua normalmente e o progresso fica válido durante esta sessão.
+        FILE* f = fopen((pf.dataDir() + "progress.dat").c_str(), "rb");
+        if (!f) return;
+        char magic[8] = {};
+        int unlocked = 1;
+        if (fscanf(f, "%7s %d", magic, &unlocked) == 2 && strcmp(magic, "BIC1") == 0)
+            unlockedLevel = std::max(1, std::min(kLevelCount, unlocked));
+        fclose(f);
+    }
+
+    void saveProgress() {
+        FILE* f = fopen((pf.dataDir() + "progress.dat").c_str(), "wb");
+        if (!f) return;
+        fprintf(f, "BIC1 %d\\n", unlockedLevel);
+        fflush(f);
+        fclose(f);
+    }
+
     void setMusic(const char* m) { if (music != m) { music = m; pf.playMusic(m); } }
 
     bool startLevel(int n) {
@@ -139,7 +161,7 @@ struct Game {
         std::vector<uint8_t> buf; LevelData lv;
         if (!readFile(pf.dataDir() + path, buf) || !parseLevel(std::string(buf.begin(), buf.end()), lv)) return false;
         if (!world.load(lv, coop, 1234u + (uint32_t)n * 7919u)) return false;
-        world.stage = n; level = n;
+        world.stage = n; level = n; selectedLevel = n;
         for (int i = 0; i < 2; i++) if (world.players[i].present)
             world.players[i].characterId = std::max(0, std::min(kCharacterCount - 1, selectedCharacter[i]));
         state = ST_PLAYING; stateTimer = 0;
@@ -196,15 +218,29 @@ struct Game {
                 q.r = q.g = q.b = q.a = 1.f; q.page = f.page;
                 list.quads.push_back(q);
             }
-            center(414, 2, 0xFFFFE070, "START");
-            center(458, 2, 0xFFFF90B0, "CO-OP");
-            center(510, 1, 0xFFE6F4FF, "P1 START: SOLO   P2 START: CO-OP");
+            center(414, 2, 0xFFFFE070, "JOGAR");
+            center(458, 2, 0xFFFF90B0, "P1 START: SOLO   P2 START: CO-OP");
+        } else if (state == ST_LEVEL_SELECT) {
+            center(42, 2, 0xFFFFFFFF, "ESCOLHA A FASE");
+            center(82, 1, 0xFFE6F4FF, "D-PAD: NAVEGAR   A: CONFIRMAR");
+            for (int n = 0; n < kLevelCount; ++n) {
+                const int col = n % 5, row = n / 5;
+                const int x = 38 + col * 108, y = 132 + row * 42;
+                char label[16];
+                if (n < unlockedLevel) snprintf(label, sizeof label, "%02d", n + 1);
+                else snprintf(label, sizeof label, "--");
+                const uint32_t color = n == selectedLevel ? 0xFF80FF90 : (n < unlockedLevel ? 0xFFFFE070 : 0xFF65717D);
+                text(x, y, 2, color, label);
+            }
+            char progress[48];
+            snprintf(progress, sizeof progress, "LIBERADAS: %d / %d", unlockedLevel, kLevelCount);
+            center(482, 1, 0xFFE6F4FF, progress);
         } else if (state == ST_SELECT) {
             center(54, 2, 0xFFFFFFFF, selectionCoop ? "ESCOLHA DOS SORVETES" : "ESCOLHA SEU SORVETE");
             center(112, 1, 0xFFE6F4FF, "D-PAD: TROCAR   BOTAO: CONFIRMAR");
             for (int i = 0; i < (selectionCoop ? 2 : 1); i++) {
                 const int x = selectionCoop ? (i == 0 ? 150 : 400) : 275;
-                const int id = std::max(0, std::min(2, selectedCharacter[i]));
+                const int id = std::max(0, std::min(kCharacterCount - 1, selectedCharacter[i]));
                 const Anim* preview = atlas.find(kCharacterClasses[id], "DownStand");
                 if (preview && !preview->f.empty()) {
                     const Frame& f = preview->f[0];
@@ -273,9 +309,29 @@ struct Game {
                     previousSelectDirection[0] = previousSelectDirection[1] = 0;
                     coop = selectionCoop;
                     pf.playSound("select"); totalScore = 0;
-                    state = ST_SELECT; stateTimer = 0;
+                    selectedLevel = std::min(unlockedLevel - 1, std::max(0, opt.startLevel));
+                    previousLevelDirection = 0;
+                    state = ST_LEVEL_SELECT; stateTimer = 0;
                 }
                 break;
+            case ST_LEVEL_SELECT: {
+                int step = (pads[0].right || pads[0].down) ? 1 : (pads[0].left || pads[0].up) ? -1 : 0;
+                if (pads[0].up && !pads[0].down) step = -5;
+                else if (pads[0].down && !pads[0].up) step = 5;
+                if (step && step != previousLevelDirection) {
+                    const int next = selectedLevel + step;
+                    if (next >= 0 && next < unlockedLevel) selectedLevel = next;
+                }
+                previousLevelDirection = step;
+                if (confirm[0]) {
+                    selectedCharacter[0] = 0; selectedCharacter[1] = 1;
+                    characterConfirmed[0] = characterConfirmed[1] = false;
+                    previousSelectDirection[0] = previousSelectDirection[1] = 0;
+                    state = ST_SELECT; stateTimer = 0;
+                    pf.playSound("select");
+                }
+                break;
+            }
             case ST_SELECT:
                 for (int i = 0; i < (selectionCoop ? 2 : 1); i++) {
                     if (characterConfirmed[i]) continue;
@@ -290,7 +346,7 @@ struct Game {
                 }
                 if (characterConfirmed[0] && (!selectionCoop || characterConfirmed[1])) {
                     coop = selectionCoop;
-                    if (!startLevel(opt.startLevel)) {
+                    if (!startLevel(selectedLevel)) {
                         printf("falha ao carregar a fase\n");
                         state = ST_TITLE;
                     }
@@ -307,7 +363,12 @@ struct Game {
                 world.update(pads);
                 for (const char* s : world.sounds) pf.playSound(s);
                 world.clearSounds();
-                if (world.phase == PHASE_WON) { state = ST_WON; stateTimer = 0; totalScore += world.levelScore; setMusic("music_win"); }
+                if (world.phase == PHASE_WON) {
+                    state = ST_WON; stateTimer = 0; totalScore += world.levelScore;
+                    unlockedLevel = std::max(unlockedLevel, std::min(kLevelCount, level + 2));
+                    saveProgress();
+                    setMusic("music_win");
+                }
                 else if (world.phase == PHASE_LOST) { state = ST_LOST; stateTimer = 0; setMusic("music_lose"); }
                 break;
             case ST_PAUSED:
