@@ -166,7 +166,13 @@ struct Game {
                 q.r = q.g = q.b = q.a = 1; q.page = 6;
                 list.quads.push_back(q);
             } else {
-                center(72, 3, 0xFFFFFFFF, "BAD ICE-CREAM");
+                // Logo tipográfica provisória: mantém o título forte mesmo quando
+                // title_logo.argb ainda não foi incluído na pasta data.
+                center(76, 4, 0xFF090D12, "BAD");
+                center(72, 4, 0xFF7DE6F5, "BAD");
+                center(158, 3, 0xFF090D12, "ICE CREAM");
+                center(154, 3, 0xFFFFFFFF, "ICE CREAM");
+                center(218, 1, 0xFFB8EAF2, "THE ORIGINAL ICE-CREAM PUZZLE");
             }
             // Trio decorativo do menu: reaproveita a animação original "Win"
             // dos três sabores. Os ciclos ficam defasados para não se moverem juntos.
