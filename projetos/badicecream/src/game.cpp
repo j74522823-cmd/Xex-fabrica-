@@ -149,7 +149,7 @@ struct Game {
     void saveProgress() {
         FILE* f = fopen((pf.dataDir() + "progress.dat").c_str(), "wb");
         if (!f) return;
-        fprintf(f, "BIC1 %d\\n", unlockedLevel);
+        fprintf(f, "BIC1 %d\n", unlockedLevel);
         fflush(f);
         fclose(f);
     }
