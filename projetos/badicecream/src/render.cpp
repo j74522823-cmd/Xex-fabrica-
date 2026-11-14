@@ -149,17 +149,20 @@ void buildScene(const World& w, const Atlas& atlas, DrawList& out) {
     for (int i = 0; i < 2; i++) {
         const Player& p = w.players[i];
         if (!p.present) continue;
-        static const char* const playerClasses[8] = {
+        static const char* const playerClasses[12] = {
             "PlayerVanilla", "PlayerStrawberry", "PlayerChocolate", "PlayerVanilla",
+            "PlayerVanilla", "PlayerVanilla", "PlayerVanilla", "PlayerVanilla",
             "PlayerVanilla", "PlayerVanilla", "PlayerVanilla", "PlayerVanilla"
         };
-        static const float playerTint[8][3] = {
+        static const float playerTint[12][3] = {
             {1.00f, 1.00f, 1.00f}, {1.00f, 0.71f, 0.82f},
             {0.73f, 0.53f, 0.37f}, {1.00f, 0.84f, 0.35f},
             {0.51f, 0.84f, 0.54f}, {0.45f, 0.81f, 0.96f},
-            {0.71f, 0.55f, 0.91f}, {0.91f, 0.35f, 0.39f}
+            {0.71f, 0.55f, 0.91f}, {0.91f, 0.35f, 0.39f},
+            {0.95f, 0.88f, 0.76f}, {1.00f, 0.62f, 0.25f},
+            {0.46f, 0.78f, 0.28f}, {0.91f, 0.71f, 0.77f}
         };
-        const int character = std::max(0, std::min(7, p.characterId));
+        const int character = std::max(0, std::min(11, p.characterId));
         const char* cls = playerClasses[character];
         const char* d = kDir[p.lastDir ? p.lastDir : DIR_DOWN];
         std::string an; int idx = p.animFrame; bool loop = true;
