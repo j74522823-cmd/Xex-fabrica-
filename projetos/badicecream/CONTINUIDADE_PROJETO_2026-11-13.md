@@ -29,9 +29,9 @@ O projeto **ainda não está finalizado**. Ele já tem uma base funcional e vár
 | [2939f33](https://github.com/j74522823-cmd/Xex-fabrica-/commit/2939f33fb4d729ad7a04d783e99a729cd3d67adc) | Aplicação de tintas às sprites dos jogadores |
 | [538e4bf](https://github.com/j74522823-cmd/Xex-fabrica-/commit/538e4bfa620998f8491c9f044b9ae6adf5a5210c) | Comentário/documentação dos IDs de personagem 0–7 |
 
-## Elenco de oito sabores
+## Elenco de doze sabores
 
-A primeira versão será simples, como combinado: **reutilizar a sprite-base e mudar a cor**, sem inventar detalhes ou desenhos extras.
+A primeira versão será simples: **reutilizar a sprite-base e mudar a cor**, sem inventar detalhes ou desenhos extras.
 
 1. Baunilha — branco
 2. Morango — rosa
@@ -41,8 +41,12 @@ A primeira versão será simples, como combinado: **reutilizar a sprite-base e m
 6. Chiclete — azul
 7. Alcaçuz — roxo
 8. Bacon defumado — vermelho
+9. Coco — creme
+10. Maracujá — amarelo/laranja
+11. Kiwi — verde
+12. Napolitano — rosa claro
 
-Os três primeiros usam as classes originais Vanilla, Strawberry e Chocolate. Os cinco restantes reaproveitam a classe Vanilla com tonalidades diferentes. Isso é uma implementação provisória de recoloração, não sprites originais exclusivas dos oito sabores.
+Os três primeiros usam as classes originais Vanilla, Strawberry e Chocolate. Os nove restantes reaproveitam a classe Vanilla com tonalidades diferentes. Isso é uma implementação provisória de recoloração, não sprites originais exclusivas dos oito sabores.
 
 ## Menu e fluxo desejado (escopo simplificado aprovado)
 
@@ -70,7 +74,7 @@ A saída do jogo fica pelo botão BACK; não criar uma opção de saída duplica
 - O menu principal atual ainda usa START/CO-OP; JOGAR/OPÇÕES e a tela de opções **ainda não estão implementados**.
 
 - O menu reutiliza a animação `Win` dos três sabores originais, com os ciclos defasados para não se moverem juntos.
-- A seleção de oito sabores foi ampliada no código.
+- A seleção foi ampliada de oito para doze sabores no código; os quatro novos são Coco, Maracujá, Kiwi e Napolitano.
 - O seletor completo inspirado nas telas originais de escolha de fase/sabor/quantidade de jogadores ainda precisa ser integrado e revisado.
 - Não foi implementado um GIF de gameplay como fundo nesta etapa.
 
