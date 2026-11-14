@@ -13,7 +13,7 @@ struct TextItem { int x, y, scale; uint32_t argb; std::string s; };   // x,y em 
 struct DrawList {
     std::vector<Quad> quads;
     std::vector<TextItem> texts;
-    uint32_t clearArgb = 0xFF141B3A;
+    uint32_t clearArgb = 0xFF17191F; // carvão neutro: remove o azul sem perder contraste do texto
     void clear() { quads.clear(); texts.clear(); }
 };
 
