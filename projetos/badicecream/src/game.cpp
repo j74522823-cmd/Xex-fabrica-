@@ -33,7 +33,7 @@ const char* const kCharacterNames[kCharacterCount] = {
 };
 const char* const kCharacterClasses[kCharacterCount] = {
     "PlayerVanilla", "PlayerStrawberry", "PlayerChocolate", "PlayerVanilla",
-    "PlayerVanilla", "PlayerVanilla", "PlayerVanilla", "PlayerVanilla"
+    "PlayerVanilla", "PlayerVanilla", "PlayerVanilla", "PlayerVanilla", "PlayerVanilla"
 };
 const uint32_t kCharacterTints[kCharacterCount] = {
     0xFFFFFFFF, 0xFFFFB5D2, 0xFFB98762, 0xFFFFD65A,
