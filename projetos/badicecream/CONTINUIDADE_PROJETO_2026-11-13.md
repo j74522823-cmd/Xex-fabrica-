@@ -1,5 +1,5 @@
 # Bad Ice Cream — continuidade do projeto
-**Atualizado em:** 13/11/2026  
+**Atualizado em:** 14/11/2026  
 **Repositório:** https://github.com/j74522823-cmd/Xex-fabrica-  
 **Pasta:** `projetos/badicecream`
 
@@ -65,12 +65,13 @@ A saída do jogo fica pelo botão BACK; não criar uma opção de saída duplica
 ### Seleção de fases e progresso
 
 - Mostrar as fases já desbloqueadas; fases bloqueadas não devem iniciar.
-- O progresso desbloqueado deve persistir entre sessões (sistema de save ainda precisa ser implementado/confirmado).
+- Seletor de 40 fases adicionado: fases bloqueadas não iniciam; a navegação usa direcional e A confirma.
+- Save inicial adicionado em `data/progress.dat` (formato `BIC1`), armazenando a quantidade de fases desbloqueadas. A persistência real ainda depende de testar escrita no dispositivo do Xbox 360.
 - A pausa atual no código é apenas uma tela com a instrução `START: CONTINUAR`; o menu de pausa com três opções **ainda não está implementado**.
 - O menu principal atual ainda usa START/CO-OP; JOGAR/OPÇÕES e a tela de opções **ainda não estão implementados**.
 
 - O menu reutiliza a animação `Win` dos três sabores originais, com os ciclos defasados para não se moverem juntos.
-- A seleção de oito sabores foi ampliada no código.
+- A seleção foi ampliada para nove sabores, incluindo LARANJA (recoloração da sprite-base).
 - O seletor completo inspirado nas telas originais de escolha de fase/sabor/quantidade de jogadores ainda precisa ser integrado e revisado.
 - Não foi implementado um GIF de gameplay como fundo nesta etapa.
 
@@ -86,13 +87,15 @@ A saída do jogo fica pelo botão BACK; não criar uma opção de saída duplica
 
 1. Confirmar o resultado da Actions do commit mais recente e baixar o XEX/runtime_data gerados, se disponíveis.
 2. Corrigir qualquer erro de compilação antes de adicionar novas funções.
-3. Testar se os oito tons aparecem corretamente tanto no seletor quanto durante a partida.
+3. Testar se os nove tons aparecem corretamente tanto no seletor quanto durante a partida.
+4. Testar se `data/progress.dat` pode ser criado e atualizado no armazenamento escolhido do Xbox 360; se `game:/data/` for somente leitura, migrar o save para armazenamento gravável do console.
 4. Evoluir a pausa atual para CONTINUAR / VOLTAR AO MENU.
-5. Criar o menu principal simples JOGAR / OPÇÕES; em OPÇÕES, adicionar controles independentes de música e efeitos sonoros.
-6. Criar seleção de fases com bloqueio/desbloqueio e persistência do progresso.
-7. Mapear e testar a saída pelo botão BACK, sem adicionar opção SAIR nos menus.
-8. Revisar a neve, o chão e a câmera: suavizar o acompanhamento e evitar que o fundo azul apareça de forma feia nas bordas do cenário.
-9. Quando houver console disponível, testar o XEX real e registrar os resultados.
+6. Criar o menu principal simples JOGAR / OPÇÕES; em OPÇÕES, adicionar controles independentes de música e efeitos sonoros.
+7. Validar o seletor de fases e o save no console.
+8. Implementar câmera cooperativa com split-screen como alternativa quando a distância entre jogadores exigir.
+9. Mapear e testar a saída pelo botão BACK, sem adicionar opção SAIR nos menus.
+10. Revisar a neve, o chão e a câmera: suavizar o acompanhamento e evitar que o fundo azul apareça de forma feia nas bordas do cenário.
+11. Quando houver console disponível, testar o XEX real e registrar os resultados.
 
 ## Regras de continuidade
 
@@ -100,7 +103,7 @@ A saída do jogo fica pelo botão BACK; não criar uma opção de saída duplica
 - Preservar a IA dos inimigos e a capacidade deles de procurar caminhos alternativos.
 - Priorizar primeiro a apresentação visual e a estabilidade; desempenho máximo não é a prioridade inicial.
 - Diferenciar sempre: **implementado no código**, **compilado**, **testado no emulador** e **testado no Xbox 360 real**.
-- A recoloração simples dos oito sabores está aprovada como primeira versão.
+- A recoloração simples dos nove sabores está aprovada como primeira versão.
 
 ---
 **Resumo:** temos uma base de jogo e alterações reais registradas no GitHub. O projeto está em andamento, não concluído. A próxima etapa é validar a compilação mais recente e testar as oito cores antes de avançar no menu completo.
