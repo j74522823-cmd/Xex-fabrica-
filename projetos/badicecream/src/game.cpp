@@ -26,18 +26,21 @@ bool readFile(const std::string& path, std::vector<uint8_t>& out) {
 const int kLevelCount = 40;
 enum State { ST_TITLE, ST_SELECT, ST_PLAYING, ST_PAUSED, ST_WON, ST_LOST, ST_END };
 
-const int kCharacterCount = 8;
+const int kCharacterCount = 12;
 const char* const kCharacterNames[kCharacterCount] = {
     "BAUNILHA", "MORANGO", "CHOCOLATE", "SORBET",
-    "MENTA CHOC-CHIP", "CHICLETE", "ALCACUZ", "BACON DEFUMADO"
+    "MENTA CHOC-CHIP", "CHICLETE", "ALCACUZ", "BACON DEFUMADO",
+    "COCO", "MARACUJA", "KIWI", "NAPOLITANO"
 };
 const char* const kCharacterClasses[kCharacterCount] = {
     "PlayerVanilla", "PlayerStrawberry", "PlayerChocolate", "PlayerVanilla",
+    "PlayerVanilla", "PlayerVanilla", "PlayerVanilla", "PlayerVanilla",
     "PlayerVanilla", "PlayerVanilla", "PlayerVanilla", "PlayerVanilla"
 };
 const uint32_t kCharacterTints[kCharacterCount] = {
     0xFFFFFFFF, 0xFFFFB5D2, 0xFFB98762, 0xFFFFD65A,
-    0xFF83D58A, 0xFF72CFF5, 0xFFB58BE8, 0xFFE85A62
+    0xFF83D58A, 0xFF72CFF5, 0xFFB58BE8, 0xFFE85A62,
+    0xFFF1E2C8, 0xFFFFB347, 0xFF75C94A, 0xFFE8B5C5
 };
 
 struct Game {
@@ -198,7 +201,7 @@ struct Game {
             center(112, 1, 0xFFE6F4FF, "D-PAD: TROCAR   BOTAO: CONFIRMAR");
             for (int i = 0; i < (selectionCoop ? 2 : 1); i++) {
                 const int x = selectionCoop ? (i == 0 ? 150 : 400) : 275;
-                const int id = std::max(0, std::min(2, selectedCharacter[i]));
+                const int id = std::max(0, std::min(kCharacterCount - 1, selectedCharacter[i]));
                 const Anim* preview = atlas.find(kCharacterClasses[id], "DownStand");
                 if (preview && !preview->f.empty()) {
                     const Frame& f = preview->f[0];
