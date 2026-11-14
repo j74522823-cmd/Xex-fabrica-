@@ -24,7 +24,7 @@ bool readFile(const std::string& path, std::vector<uint8_t>& out) {
 }
 
 const int kLevelCount = 40;
-enum State { ST_TITLE, ST_LEVEL_SELECT, ST_SELECT, ST_PLAYING, ST_PAUSED, ST_WON, ST_LOST, ST_END };
+enum State { ST_TITLE, ST_SCOOPS, ST_LEVEL_SELECT, ST_SELECT, ST_PLAYING, ST_PAUSED, ST_WON, ST_LOST, ST_END };
 
 const int kCharacterCount = 9;
 const char* const kCharacterNames[kCharacterCount] = {
@@ -46,6 +46,7 @@ struct Game {
     State state = ST_TITLE;
     int level = 0, stateTimer = 0, totalScore = 0;
     int unlockedLevel = 1, selectedLevel = 0, previousLevelDirection = 0;
+    int scoopChoice = 1, previousScoopDirection = 0;
     bool coop = false;
     bool demoReady = false;
     bool titleLogoAvailable = false;
@@ -220,6 +221,34 @@ struct Game {
             }
             center(414, 2, 0xFFFFE070, "JOGAR");
             center(458, 2, 0xFFFF90B0, "P1 START: SOLO   P2 START: CO-OP");
+        } else if (state == ST_SCOOPS) {
+            center(72, 2, 0xFFFFFFFF, "HOW MANY SCOOPS?");
+            center(112, 1, 0xFFE6F4FF, "ESCOLHA 1 OU 2 JOGADORES");
+            // Prévia animada com os sprites originais do atlas. A tela de escolha
+            // fica separada do seletor de personagens, como no fluxo clássico.
+            const int previewX[2] = {205, 345};
+            for (int i = 0; i < 2; ++i) {
+                if (i == 1 && scoopChoice == 1) continue;
+                const char* cls = i == 0 ? "PlayerVanilla" : "PlayerStrawberry";
+                const Anim* a = atlas.find(cls, "Win");
+                if (!a || a->f.empty()) a = atlas.find(cls, "DownStand");
+                if (!a || a->f.empty()) continue;
+                const int frame = (stateTimer / 5 + i * 7) % (int)a->f.size();
+                const Frame& f = a->f[frame];
+                const Atlas::Page& pg = atlas.pages[f.page];
+                Quad q = {};
+                q.x0 = (float)previewX[i] - f.ox;
+                q.y0 = 220.0f - f.oy;
+                q.x1 = q.x0 + f.w; q.y1 = q.y0 + f.h;
+                q.u0 = (float)f.x / pg.w; q.v0 = (float)f.y / pg.h;
+                q.u1 = (float)(f.x + f.w) / pg.w; q.v1 = (float)(f.y + f.h) / pg.h;
+                q.r = q.g = q.b = q.a = 1.f; q.page = f.page;
+                list.quads.push_back(q);
+            }
+            text(105, 360, 2, scoopChoice == 1 ? 0xFF80FF90 : 0xFFE6F4FF, "1 JOGADOR");
+            text(300, 360, 2, scoopChoice == 2 ? 0xFF80FF90 : 0xFFE6F4FF, "2 JOGADORES");
+            center(438, 1, 0xFFE6F4FF, "ESQUERDA / DIREITA: ESCOLHER");
+            center(474, 1, 0xFFFFE070, "A: CONFIRMAR");
         } else if (state == ST_LEVEL_SELECT) {
             center(42, 2, 0xFFFFFFFF, "ESCOLHA A FASE");
             center(82, 1, 0xFFE6F4FF, "D-PAD: NAVEGAR   A: CONFIRMAR");
@@ -302,18 +331,30 @@ struct Game {
                 }
                 if (opt.skipTitle) { coop = opt.coop == 1; startLevel(opt.startLevel); break; }
                 if (st[0] || st[1]) {
-                    selectionCoop = (st[1] && pads[1].connected) || opt.coop == 1;
-                    if (opt.coop == 0) selectionCoop = false;
+                    scoopChoice = ((st[1] && pads[1].connected) || opt.coop == 1) && opt.coop != 0 ? 2 : 1;
+                    previousScoopDirection = 0;
+                    pf.playSound("select"); totalScore = 0;
+                    state = ST_SCOOPS; stateTimer = 0;
+                }
+                break;
+            case ST_SCOOPS: {
+                int step = (pads[0].right || pads[0].down) ? 1 : (pads[0].left || pads[0].up) ? -1 : 0;
+                if (step && step != previousScoopDirection)
+                    scoopChoice = scoopChoice == 1 ? 2 : 1;
+                previousScoopDirection = step;
+                if (confirm[0] || (scoopChoice == 2 && st[1] && pads[1].connected)) {
+                    selectionCoop = scoopChoice == 2;
+                    coop = selectionCoop;
                     selectedCharacter[0] = 0; selectedCharacter[1] = 1;
                     characterConfirmed[0] = characterConfirmed[1] = false;
                     previousSelectDirection[0] = previousSelectDirection[1] = 0;
-                    coop = selectionCoop;
-                    pf.playSound("select"); totalScore = 0;
                     selectedLevel = std::min(unlockedLevel - 1, std::max(0, opt.startLevel));
                     previousLevelDirection = 0;
                     state = ST_LEVEL_SELECT; stateTimer = 0;
+                    pf.playSound("select");
                 }
                 break;
+            }
             case ST_LEVEL_SELECT: {
                 int step = (pads[0].right || pads[0].down) ? 1 : (pads[0].left || pads[0].up) ? -1 : 0;
                 if (pads[0].up && !pads[0].down) step = -5;
