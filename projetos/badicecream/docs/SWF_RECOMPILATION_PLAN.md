@@ -58,3 +58,19 @@ A ferramenta não traduz ActionScript automaticamente. O disassembly precisa ser
 ## Critério de sucesso
 
 Não basta abrir e parecer semelhante. A conversão deve reproduzir a mesma sequência de gameplay sob as mesmas entradas: movimentos, ataques de gelo, colisões, comportamento dos inimigos, coleta, pontuação, vitória/derrota, animações, áudio e coop. Só depois disso podemos chamar o resultado de adaptação quase 1:1.
+
+## Auditoria de temporização — 14/11/2026
+
+Os cabeçalhos dos dois arquivos fornecidos declaram 30 FPS para a timeline raiz (campo FIXED8: 7680 / 256 = 30). Isso foi confirmado lendo os bytes dos próprios arquivos, não inferido dos símbolos.
+
+Há uma diferença importante no port atual: `src/engine.hpp` define `FPS = 25`, e `World::timeBonus()` usa a hipótese `121 * FPS`. Portanto, não se deve simplesmente trocar o motor para 30 Hz com base no cabeçalho SWF. O FPS da timeline controla avanço de frames/timelines Flash; o passo da simulação pode ser controlado separadamente por Timer, ENTER_FRAME, setInterval ou acumulador próprio.
+
+### Verificação necessária antes de alterar FPS
+
+1. No ABC dos dois SWFs, localizar o bootstrap do jogo e os métodos que iniciam o loop principal.
+2. Identificar se o jogo usa ENTER_FRAME, Timer, setInterval ou outro agendador.
+3. Rastrear os contadores usados em movimento, IA, gelo, frutas, animações e bônus de tempo.
+4. Distinguir tempo de gameplay de avanço das timelines dos MovieClips.
+5. Só então definir um tick fixo e uma conversão de frames que preserve a duração observada.
+
+Até essa análise, manter `FPS = 25` no port atual como hipótese histórica documentada, e registrar 30 FPS como taxa declarada das timelines originais. Não afirmar equivalência temporal ainda.
