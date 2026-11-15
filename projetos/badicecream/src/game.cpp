@@ -37,7 +37,7 @@ const char* const kCharacterClasses[kCharacterCount] = {
 };
 const uint32_t kCharacterTints[kCharacterCount] = {
     0xFFFFFFFF, 0xFFFFB5D2, 0xFFB98762, 0xFFFFD65A,
-    0xFF83D58A, 0xFF72CFF5, 0xFFB58BE8, 0xFFE85A62, 0xFFFF9638, 0xFF9B63E8
+    0xFF83D58A, 0xFF2AA8FF, 0xFFB58BE8, 0xFFE85A62, 0xFFFF9638, 0xFF9B63E8
 };
 
 struct Game {
