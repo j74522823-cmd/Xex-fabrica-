@@ -26,10 +26,10 @@ bool readFile(const std::string& path, std::vector<uint8_t>& out) {
 const int kLevelCount = 40;
 enum State { ST_TITLE, ST_SCOOPS, ST_LEVEL_SELECT, ST_SELECT, ST_PLAYING, ST_PAUSED, ST_WON, ST_LOST, ST_END };
 
-const int kCharacterCount = 9;
+const int kCharacterCount = 10;
 const char* const kCharacterNames[kCharacterCount] = {
     "BAUNILHA", "MORANGO", "CHOCOLATE", "SORBET",
-    "MENTA CHOC-CHIP", "CHICLETE", "ALCACUZ", "BACON DEFUMADO", "LARANJA"
+    "MENTA CHOC-CHIP", "CHICLETE", "ALCACUZ", "BACON DEFUMADO", "LARANJA", "ROXO"
 };
 const char* const kCharacterClasses[kCharacterCount] = {
     "PlayerVanilla", "PlayerStrawberry", "PlayerChocolate", "PlayerVanilla",
@@ -37,7 +37,7 @@ const char* const kCharacterClasses[kCharacterCount] = {
 };
 const uint32_t kCharacterTints[kCharacterCount] = {
     0xFFFFFFFF, 0xFFFFB5D2, 0xFFB98762, 0xFFFFD65A,
-    0xFF83D58A, 0xFF72CFF5, 0xFFB58BE8, 0xFFE85A62, 0xFFFF9638
+    0xFF83D58A, 0xFF72CFF5, 0xFFB58BE8, 0xFFE85A62, 0xFFFF9638, 0xFF9B63E8
 };
 
 struct Game {
