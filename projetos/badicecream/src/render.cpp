@@ -156,7 +156,7 @@ void buildScene(const World& w, const Atlas& atlas, DrawList& out) {
         static const float playerTint[10][3] = {
             {1.00f, 1.00f, 1.00f}, {1.00f, 0.71f, 0.82f},
             {0.73f, 0.53f, 0.37f}, {1.00f, 0.84f, 0.35f},
-            {0.51f, 0.84f, 0.54f}, {0.45f, 0.81f, 0.96f},
+            {0.51f, 0.84f, 0.54f}, {0.16f, 0.66f, 1.00f},
             {0.71f, 0.55f, 0.91f}, {0.91f, 0.35f, 0.39f}, {1.00f, 0.59f, 0.22f},
             {0.61f, 0.39f, 0.91f}
         };
