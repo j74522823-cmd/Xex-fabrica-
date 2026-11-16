@@ -97,6 +97,8 @@ entrega esse mesmo snapshot a um callback associado ao ator lógico selecionado
 (0 = principal, 1 = parceiro). Não consulta um segundo controle e não exige
 rede ou System Link.
 
+O despachante também remove `switch_button_mask` da cópia entregue ao ator. Assim, o botão usado para alternar não dispara simultaneamente uma ação normal do personagem no mesmo frame. Os demais botões, analógicos e gatilhos são preservados.
+
 O adaptador específico do jogo deverá:
 1. ler o controle local uma vez por frame;
 2. converter botões, analógicos e gatilhos para `RevPadInput`;
