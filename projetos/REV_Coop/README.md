@@ -87,3 +87,34 @@ cc -std=c99 -Wall -Wextra -Werror -Iprojetos/REV_Coop/src \
 do segundo personagem. Ainda falta ligar `active_player` ao caminho real de
 atualização de input dos personagens do jogo. O botão definitivo também deve
 ser escolhido após confirmar quais botões estão livres na campanha.
+
+
+## Entrada local única → personagem selecionado
+
+O módulo `src/rev_local_input.h/.c` acrescenta uma camada acima do roteador:
+recebe um único snapshot do controle local, verifica o botão de alternância e
+entrega esse mesmo snapshot a um callback associado ao ator lógico selecionado
+(0 = principal, 1 = parceiro). Não consulta um segundo controle e não exige
+rede ou System Link.
+
+O adaptador específico do jogo deverá:
+1. ler o controle local uma vez por frame;
+2. converter botões, analógicos e gatilhos para `RevPadInput`;
+3. chamar `rev_local_input_dispatch`;
+4. no callback, encaminhar o input para a rotina real de atualização do ator
+   selecionado.
+
+Teste local do despachante:
+
+```sh
+cc -std=c99 -Wall -Wextra -Werror -Iprojetos/REV_Coop/src \
+  projetos/REV_Coop/src/rev_control_router.c \
+  projetos/REV_Coop/src/rev_local_input.c \
+  projetos/REV_Coop/tests/test_local_input.c -o /tmp/test_rev_local_input
+/tmp/test_rev_local_input
+```
+
+**Ainda não integrado ao Revelations:** o callback de teste prova apenas a
+seleção e o encaminhamento lógico. Falta localizar no XEX a função real que
+consome o input de cada personagem e confirmar como o ator parceiro é criado
+na campanha. O módulo não deve ser ligado a endereços especulativos.
