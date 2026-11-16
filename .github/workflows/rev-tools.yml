@@ -34,3 +34,11 @@ jobs:
             projetos/REV_Coop/tests/test_control_router.c \
             -o /tmp/test_rev_router
           /tmp/test_rev_router
+      - name: Compile and test local actor input dispatcher
+        run: |
+          cc -std=c99 -Wall -Wextra -Werror -Iprojetos/REV_Coop/src \
+            projetos/REV_Coop/src/rev_control_router.c \
+            projetos/REV_Coop/src/rev_local_input.c \
+            projetos/REV_Coop/tests/test_local_input.c \
+            -o /tmp/test_rev_local_input
+          /tmp/test_rev_local_input
