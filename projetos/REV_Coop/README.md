@@ -62,3 +62,28 @@ instruções básicas do disassembler.
 - Preservar a cópia original do XEX.
 - Não alterar áudio/dublagem nesta etapa.
 - Nenhum patch é considerado funcional sem teste no Xbox 360 real.
+
+
+## Protótipo: alternar controle entre dois personagens
+
+Os arquivos `src/rev_control_router.h` e `src/rev_control_router.c`
+implementam a lógica independente de alternância do controle único:
+
+- inicia com o jogador principal (índice 0);
+- uma pressão nova do botão configurado alterna para o parceiro (índice 1);
+- manter o botão pressionado não alterna repetidamente;
+- outra pressão, depois de soltar, retorna ao jogador principal.
+
+Teste local:
+
+```sh
+cc -std=c99 -Wall -Wextra -Werror -Iprojetos/REV_Coop/src \
+  projetos/REV_Coop/src/rev_control_router.c \
+  projetos/REV_Coop/tests/test_control_router.c -o /tmp/test_rev_router
+/tmp/test_rev_router
+```
+
+**Limite importante:** isso é a camada de roteamento de input, não a criação
+do segundo personagem. Ainda falta ligar `active_player` ao caminho real de
+atualização de input dos personagens do jogo. O botão definitivo também deve
+ser escolhido após confirmar quais botões estão livres na campanha.
