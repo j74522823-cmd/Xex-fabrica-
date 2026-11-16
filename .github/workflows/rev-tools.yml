@@ -1,0 +1,20 @@
+name: REV Coop tools
+
+on:
+  push:
+    paths:
+      - 'projetos/REV_Coop/tools/**'
+      - '.github/workflows/rev-tools.yml'
+  pull_request:
+    paths:
+      - 'projetos/REV_Coop/tools/**'
+      - '.github/workflows/rev-tools.yml'
+  workflow_dispatch:
+
+jobs:
+  ppc-minidisasm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile and smoke-test PowerPC decoder
+        run: bash projetos/REV_Coop/tools/test_ppc_minidisasm.sh
