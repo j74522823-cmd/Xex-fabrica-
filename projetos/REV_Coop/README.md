@@ -30,6 +30,24 @@ Argumentos:
 
 A entrada deve ser um trecho bruto de código já extraído. O programa **não** abre XEX, não remove compressão, não resolve imports/relocations e não substitui o Ghidra.
 
+
+## Busca de referências a funções
+
+A ferramenta `tools/ppc_find_refs.py` procura branches diretos PowerPC
+(`b`, `bl`, `bc`, `bcl`) que apontem para um endereço virtual:
+
+```sh
+python3 tools/ppc_find_refs.py trecho.bin 82000000 828DD1B0
+```
+
+O primeiro endereço é a VA correspondente ao início do trecho bruto. A busca
+não encontra chamadas indiretas por registradores (`bctr`/`bctrl`), tabelas
+de ponteiros ou referências de dados. Portanto, resultado zero não prova que
+uma função não tenha chamadores.
+
+O teste automático também verifica uma branch relativa sintética, além das
+instruções básicas do disassembler.
+
 ## Próximas etapas de engenharia reversa
 
 1. Confirmar o caminho de leitura/escrita do estado consultado por `isCoop()`.
