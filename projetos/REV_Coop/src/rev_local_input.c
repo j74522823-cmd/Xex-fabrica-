@@ -17,6 +17,7 @@ int rev_local_input_dispatch(RevLocalInput *local,
                              uint8_t *switched)
 {
     RevControlRoute route;
+    RevPadInput actor_input;
 
     if (active_actor)
         *active_actor = 0;
@@ -30,7 +31,15 @@ int rev_local_input_dispatch(RevLocalInput *local,
                                      pad->buttons,
                                      local->switch_button_mask);
 
-    dispatch(route.active_player, pad, user_data);
+    /*
+     * The switch key is a router command, not a gameplay action.
+     * Remove it from the snapshot sent to the selected actor so a button
+     * press cannot also trigger an in-game action on the same frame.
+     */
+    actor_input = *pad;
+    actor_input.buttons &= ~local->switch_button_mask;
+
+    dispatch(route.active_player, &actor_input, user_data);
 
     if (active_actor)
         *active_actor = route.active_player;
