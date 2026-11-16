@@ -15,7 +15,7 @@ def sign_extend(value, bits):
 
 def main():
     if len(sys.argv) != 4:
-        print(f"Usage: {sys.argv[0]} code.bin <base_va_hex> <target_va_hex}", file=sys.stderr)
+        print(f"Usage: {sys.argv[0]} code.bin <base_va_hex> <target_va_hex>", file=sys.stderr)
         return 2
 
     path = sys.argv[1]
