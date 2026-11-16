@@ -6,12 +6,12 @@ on:
       - 'projetos/REV_Coop/tools/**'
       - 'projetos/REV_Coop/src/**'
       - 'projetos/REV_Coop/tests/**'
-      - 'projetos/REV_Coop/src/**'
-      - 'projetos/REV_Coop/tests/**'
       - '.github/workflows/rev-tools.yml'
   pull_request:
     paths:
       - 'projetos/REV_Coop/tools/**'
+      - 'projetos/REV_Coop/src/**'
+      - 'projetos/REV_Coop/tests/**'
       - '.github/workflows/rev-tools.yml'
   workflow_dispatch:
 
