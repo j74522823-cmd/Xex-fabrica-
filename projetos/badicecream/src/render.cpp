@@ -181,6 +181,24 @@ void buildScene(const World& w, const Atlas& atlas, DrawList& out) {
     std::stable_sort(items.begin(), items.end(), [](const Item& a, const Item& b) { return a.key != b.key ? a.key < b.key : a.ord < b.ord; });
     out.quads = floor;
     for (const Item& it : items) out.quads.push_back(it.q);
+
+    // Neve em queda: partículas em coordenadas da tela, independentes da câmera.
+    // Usa o pixel claro da textura procedural da página 7, já carregada pelo jogo.
+    // O padrão é determinístico para evitar cintilação entre quadros.
+    for (int i = 0; i < 72; ++i) {
+        const int speed = 2 + (i % 3);
+        const int y = (i * 67 + (w.frameNumber * speed) / 2) % (SCREEN + 12) - 6;
+        const int wind = ((w.frameNumber / 6) * ((i % 5) - 2));
+        const int x = (i * 97 + wind + SCREEN * 8) % SCREEN;
+        const float size = (i % 9 == 0) ? 3.0f : ((i % 3 == 0) ? 2.0f : 1.25f);
+        Quad flake = {};
+        flake.x0 = (float)x; flake.y0 = (float)y;
+        flake.x1 = flake.x0 + size; flake.y1 = flake.y0 + size;
+        flake.u0 = 0.5f / 36.0f; flake.v0 = 0.5f / 36.0f;
+        flake.u1 = 1.5f / 36.0f; flake.v1 = 1.5f / 36.0f;
+        flake.r = flake.g = flake.b = 1.0f; flake.a = 0.72f; flake.page = 7;
+        out.quads.push_back(flake);
+    }
 }
 
 }  // namespace bic
