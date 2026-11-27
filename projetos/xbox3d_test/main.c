@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "house_shaders.h"
+#include "xbox3d_test_shaders.h"
 #include "xsdk/gpu.h"
 #include "xsdk/kernel.h"
 #include "xsdk/log.h"
