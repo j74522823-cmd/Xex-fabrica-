@@ -94,8 +94,10 @@ bool World::load(const LevelData& lvl, bool coopMode, uint32_t seed) {
     }
     if (!players[0].present) return false;
     players[0].present = true;
-    cameraX = std::max(0.f, std::min((float)(w * TILE_SIZE - VIEW_W), players[0].x - VIEW_W / 2.f));
-    cameraY = std::max(0.f, std::min((float)(h * TILE_SIZE - SCREEN), players[0].y - SCREEN / 2.f));
+    const float maxCameraX = (float)(w * TILE_SIZE - VIEW_W);
+    const float maxCameraY = (float)(h * TILE_SIZE - SCREEN);
+    cameraX = maxCameraX <= 0.f ? maxCameraX * 0.5f : std::max(0.f, std::min(maxCameraX, players[0].x - VIEW_W / 2.f));
+    cameraY = maxCameraY <= 0.f ? maxCameraY * 0.5f : std::max(0.f, std::min(maxCameraY, players[0].y - SCREEN / 2.f));
     findPath();
     curWave = -1; startWave();
     return true;
