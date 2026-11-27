@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <cstring>
 
-#include "square3d_shaders.h"
+#include "xbox3d_test_shaders.h"
 
 #include "xsdk/display.h"
 #include "xsdk/gpu.h"
