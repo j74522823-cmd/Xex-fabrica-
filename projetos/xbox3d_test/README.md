@@ -1,22 +1,21 @@
-# XSDK 3D Test — primeiro quadrado 3D
+# XSDK Two Player House
 
-Projeto independente para o Xbox 360, compilado pela Fábrica de XEX com o XSDK.
+A first 3D sandbox for Xbox 360, built directly on the XSDK GPU path (no GX).
 
-## Primeira versão
-- Um quadrado 3D feito com dois triângulos.
-- Rotação nos eixos X e Y pelo analógico esquerdo.
-- Fundo azul escuro.
-- Vértices coloridos; sem textura, áudio, física ou cenário.
-- XEX independente: `xbox3d_test.xex`.
+## Scene
+- A small open-front room generated procedurally from cube meshes.
+- Two simple mannequin characters, each with independent world coordinates.
+- Fixed shared camera.
+- Two controller slots: player 1 uses controller index 0, player 2 uses controller index 1.
+- BACK on player 1 exits.
 
-## Controles
-- Analógico esquerdo: girar o quadrado.
-- BACK: sair do teste.
+## Controls
+- Controller 1 left stick: move the blue-green character.
+- Controller 2 left stick: move the orange character.
+- Controller 1 BACK: exit.
 
-## Build
-O workflow `.github/workflows/xex.yml` detecta esta pasta por seu `CMakeLists.txt`, compila os shaders GLSL e gera o XEX com o XSDK.
+## Build and test
+The XSDK GitHub Actions workflow compiles this folder into `xbox3d_test.xex`.
+A successful Actions build proves compilation only. The XEX still needs to be launched on a real Xbox 360 to verify rendering and controller behavior.
 
-## Estado
-Código inicial preparado para o primeiro build PowerPC/XSDK. A compilação do GitHub Actions precisa ser verificada; depois o XEX ainda precisa ser testado no Xbox 360 real. Nenhum funcionamento no console é presumido.
-
-A Fábrica executa o workflow automaticamente quando este projeto recebe alterações em `projetos/**`.
+This is a procedural prototype, not an imported RE4 house or production character model. It intentionally avoids external assets so the first test is self-contained.
