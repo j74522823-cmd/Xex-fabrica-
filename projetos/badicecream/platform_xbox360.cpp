@@ -117,9 +117,9 @@ public:
         st = xsdk_present_open(XSDK_DISPLAY_720P, BUFFERS, SWAP_INTERVAL, &width, &height);
         if (!NT_SUCCESS(st)) { xsdk_log_write("bic: xsdk_present_open falhou 0x%08X", (unsigned)st); return false; }
         presentOpen = true;
-        // Palco 550x550 centralizado, escalado pela altura.
+        // Palco lógico 978x550: ocupa 16:9 inteiro em 720p sem esticar os sprites.
         scale = (float)height / (float)SCREEN;
-        offX = ((float)width - (float)SCREEN * scale) * 0.5f;
+        offX = 0.0f;
         offY = 0.0f;
 
         pthread_mutex_init(&audioLock, nullptr); lockOk = true;
