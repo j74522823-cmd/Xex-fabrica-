@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "xbox3d_test_shaders.h"
+#include "player_obj.h"
 #include "xsdk/gpu.h"
 #include "xsdk/kernel.h"
 #include "xsdk/log.h"
@@ -42,6 +43,8 @@ typedef struct {
     XsdkDepthStencilState depth;
     volatile uint32_t *vertices;
     volatile uint32_t *indices;
+    volatile uint32_t *model_vertices;
+    volatile uint32_t *model_indices;
 } Scene;
 
 typedef struct {
@@ -208,13 +211,18 @@ static void draw_box(const Scene *scene, const Matrix *view_projection,
 
 static void draw_player(const Scene *scene, const Matrix *vp, const Player *p)
 {
-    // A deliberately simple articulated-looking mannequin made from boxes.
-    draw_box(scene, vp, p->x, 1.16f, p->z, 0.62f, 0.82f, 0.38f, p->r, p->g, p->b);
-    draw_box(scene, vp, p->x, 1.82f, p->z, 0.43f, 0.43f, 0.43f, 0.94f, 0.82f, 0.68f);
-    draw_box(scene, vp, p->x - 0.43f, 1.18f, p->z, 0.18f, 0.72f, 0.20f, p->r, p->g, p->b);
-    draw_box(scene, vp, p->x + 0.43f, 1.18f, p->z, 0.18f, 0.72f, 0.20f, p->r, p->g, p->b);
-    draw_box(scene, vp, p->x - 0.17f, 0.43f, p->z, 0.22f, 0.72f, 0.25f, 0.18f, 0.20f, 0.24f);
-    draw_box(scene, vp, p->x + 0.17f, 0.43f, p->z, 0.22f, 0.72f, 0.25f, 0.18f, 0.20f, 0.24f);
+    const Matrix model = model_matrix(p->x, 0.0f, p->z, 1.0f, 1.0f, 1.0f);
+    const Matrix mvp = multiply(vp, &model);
+    float push[20] = {0};
+    memcpy(push, mvp.m, sizeof(mvp.m));
+    push[16] = p->r;
+    push[17] = p->g;
+    push[18] = p->b;
+    push[19] = 1.0f;
+    xsdk_gpu_set_vertices(0, xsdk_gpu_address(scene->model_vertices), sizeof(player_obj_vertices));
+    xsdk_gpu_set_vertex_constants(HOUSE_VERT_PUSH, push, HOUSE_VERT_PUSH_REGISTERS);
+    xsdk_gpu_draw_indexed(XSDK_PRIMITIVE_TRIANGLE_LIST,
+        xsdk_gpu_address(scene->model_indices), PLAYER_OBJ_INDEX_COUNT, false);
 }
 
 static float axis_value(int16_t value)
@@ -225,20 +233,28 @@ static float axis_value(int16_t value)
 
 static void update_player(Player *p, const INPUT_STATE *input)
 {
+    const float old_z = p->z;
     p->x += axis_value(input->gamepad.thumb_lx) * MOVE_SPEED;
     p->z -= axis_value(input->gamepad.thumb_ly) * MOVE_SPEED;
     if (p->x < -3.2f) p->x = -3.2f;
     if (p->x >  3.2f) p->x =  3.2f;
-    if (p->z < -2.9f) p->z = -2.9f;
+    if (p->z < -10.8f) p->z = -10.8f;
     if (p->z >  2.9f) p->z =  2.9f;
+
+    // Only block crossing the partition outside the central doorway.
+    if ((old_z >= -4.0f && p->z < -4.0f) ||
+        (old_z < -4.0f && p->z >= -4.0f)) {
+        if (p->x < -1.25f || p->x > 1.25f)
+            p->z = -4.0f;
+    }
 }
 
 static void render_scene(const Scene *scene, uint32_t address, uint32_t width, uint32_t height,
                          const Player *p1, const Player *p2)
 {
     const Matrix projection = perspective((float)width / (float)height);
-    const Matrix view = look_at((Vec3){0.0f, 5.3f, 9.5f},
-                                (Vec3){0.0f, 1.0f, 0.0f},
+    const Matrix view = look_at((Vec3){0.0f, 8.0f, 15.0f},
+                                (Vec3){0.0f, 1.0f, -4.0f},
                                 (Vec3){0.0f, 1.0f, 0.0f});
     const Matrix vp = multiply(&projection, &view);
 
@@ -249,11 +265,20 @@ static void render_scene(const Scene *scene, uint32_t address, uint32_t width, u
     xsdk_built_shader_set_literals(&house_frag);
     xsdk_gpu_set_vertices(0, xsdk_gpu_address(scene->vertices), VERTEX_BYTES);
 
-    // Open-front room: floor, rear wall and two side walls.
+    // Two connected open-front rooms. The divider has a central doorway.
     draw_box(scene, &vp, 0.0f, -0.12f, 0.0f, 8.0f, 0.24f, 8.0f, 0.72f, 0.70f, 0.60f);
-    draw_box(scene, &vp, 0.0f, 1.95f, -3.9f, 8.0f, 4.0f, 0.20f, 0.62f, 0.72f, 0.84f);
-    draw_box(scene, &vp, -3.9f, 1.95f, 0.0f, 0.20f, 4.0f, 8.0f, 0.52f, 0.64f, 0.78f);
-    draw_box(scene, &vp,  3.9f, 1.95f, 0.0f, 0.20f, 4.0f, 8.0f, 0.52f, 0.64f, 0.78f);
+    draw_box(scene, &vp, 0.0f, -0.12f, -8.0f, 8.0f, 0.24f, 8.0f, 0.66f, 0.68f, 0.60f);
+    draw_box(scene, &vp, -2.55f, 1.95f, -4.0f, 2.9f, 4.0f, 0.20f, 0.62f, 0.72f, 0.84f);
+    draw_box(scene, &vp,  2.55f, 1.95f, -4.0f, 2.9f, 4.0f, 0.20f, 0.62f, 0.72f, 0.84f);
+    draw_box(scene, &vp, -1.36f, 1.90f, -4.0f, 0.22f, 3.8f, 0.24f, 0.48f, 0.34f, 0.22f);
+    draw_box(scene, &vp,  1.36f, 1.90f, -4.0f, 0.22f, 3.8f, 0.24f, 0.48f, 0.34f, 0.22f);
+    draw_box(scene, &vp, 0.0f, 3.78f, -4.0f, 2.95f, 0.24f, 0.24f, 0.48f, 0.34f, 0.22f);
+    // Door leaf left ajar; the middle of the opening remains passable.
+    draw_box(scene, &vp, -1.48f, 1.30f, -4.0f, 0.12f, 2.55f, 1.65f, 0.42f, 0.25f, 0.14f);
+    // Continuous side walls and the far wall of the second room.
+    draw_box(scene, &vp, -3.9f, 1.95f, -4.0f, 0.20f, 4.0f, 16.0f, 0.52f, 0.64f, 0.78f);
+    draw_box(scene, &vp,  3.9f, 1.95f, -4.0f, 0.20f, 4.0f, 16.0f, 0.52f, 0.64f, 0.78f);
+    draw_box(scene, &vp, 0.0f, 1.95f, -11.9f, 8.0f, 4.0f, 0.20f, 0.62f, 0.72f, 0.84f);
 
     // Player 1: blue-green; Player 2: warm orange. The separate positions are controlled independently.
     draw_player(scene, &vp, p1);
@@ -292,9 +317,24 @@ static bool create_scene(Scene *scene)
     };
     xsdk_gpu_depth_stencil_state(&scene->depth, &depth);
 
+    scene->model_vertices = xsdk_gpu_alloc(sizeof(player_obj_vertices));
+    scene->model_indices = xsdk_gpu_alloc(sizeof(player_obj_indices));
+    if (!scene->model_vertices || !scene->model_indices) {
+        xsdk_log_write("house: OBJ mesh allocation failed");
+        if (scene->model_indices) xsdk_gpu_free(scene->model_indices);
+        if (scene->model_vertices) xsdk_gpu_free(scene->model_vertices);
+        xsdk_shader_free(&scene->pixel);
+        xsdk_shader_free(&scene->vertex);
+        return false;
+    }
+    write_gpu(scene->model_vertices, player_obj_vertices, sizeof(player_obj_vertices));
+    write_gpu(scene->model_indices, player_obj_indices, sizeof(player_obj_indices));
+
     if (!make_cube_mesh(scene)) {
         if (scene->indices) xsdk_gpu_free(scene->indices);
         if (scene->vertices) xsdk_gpu_free(scene->vertices);
+        if (scene->model_indices) xsdk_gpu_free(scene->model_indices);
+        if (scene->model_vertices) xsdk_gpu_free(scene->model_vertices);
         xsdk_shader_free(&scene->pixel);
         xsdk_shader_free(&scene->vertex);
         return false;
@@ -307,13 +347,15 @@ static void destroy_scene(Scene *scene)
     (void)xsdk_gpu_wait(xsdk_gpu_fence(), 1000);
     if (scene->indices) xsdk_gpu_free(scene->indices);
     if (scene->vertices) xsdk_gpu_free(scene->vertices);
+    if (scene->model_indices) xsdk_gpu_free(scene->model_indices);
+    if (scene->model_vertices) xsdk_gpu_free(scene->model_vertices);
     xsdk_shader_free(&scene->pixel);
     xsdk_shader_free(&scene->vertex);
 }
 
 int main(void)
 {
-    xsdk_log_write("house: two-player procedural 3D test starting");
+    xsdk_log_write("house: two-player OBJ/two-room 3D test starting");
     const NTSTATUS splash = xsdk_splash_show(SPLASH_MS);
     if (!NT_SUCCESS(splash))
         xsdk_log_write("house: splash returned 0x%08X", (unsigned)splash);
@@ -338,7 +380,7 @@ int main(void)
         (void)xsdk_gpu_close();
         return 1;
     }
-    xsdk_log_write("house: running at %ux%u; left sticks control each player; BACK exits",
+    xsdk_log_write("house: running at %ux%u; OBJ mannequin and two rooms; BACK exits",
         (unsigned)width, (unsigned)height);
 
     Player p1 = {-1.25f, 1.0f, 0.18f, 0.82f, 0.92f};
