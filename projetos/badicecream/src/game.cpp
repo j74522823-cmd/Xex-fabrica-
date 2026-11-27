@@ -101,7 +101,7 @@ struct Game {
     void addSnow() {
         const int f = titleDemoReady ? titleWorld.frameNumber : stateTimer;
         for (int i = 0; i < 34; ++i) {
-            const int x = (i * 137 + f * (1 + i % 3)) % SCREEN;
+            const int x = (i * 137 + f * (1 + i % 3)) % VIEW_W;
             const int y = (i * 71 + f * (2 + i % 3)) % SCREEN;
             const char* flake = (i % 5 == 0) ? "*" : ".";
             const uint32_t color = (i % 3 == 0) ? 0xFFE8F7FF : 0xFFB9DFFF;
@@ -122,15 +122,15 @@ struct Game {
     }
 
     void text(int x, int y, int scale, uint32_t argb, const std::string& s) { list.texts.push_back({x, y, scale, argb, s}); }
-    void center(int y, int scale, uint32_t argb, const std::string& s) { text(std::max(0, (SCREEN - (int)s.size() * 10 * scale / 2) / 2), y, scale, argb, s); }
+    void center(int y, int scale, uint32_t argb, const std::string& s) { text(std::max(0, (VIEW_W - (int)s.size() * 10 * scale / 2) / 2), y, scale, argb, s); }
 
     void hud() {
         char b[96];
         if (state == ST_PLAYING || state == ST_WON || state == ST_LOST) {
             snprintf(b, sizeof b, "FASE %d", level + 1); text(8, 4, 1, 0xFFFFFFFF, b);
-            int secs = world.frameNumber / FPS; snprintf(b, sizeof b, "%d:%02d", secs / 60, secs % 60); text(SCREEN - 8 - 5 * 10, 4, 1, 0xFFFFFFFF, b);
+            int secs = world.frameNumber / FPS; snprintf(b, sizeof b, "%d:%02d", secs / 60, secs % 60); text(VIEW_W - 8 - 5 * 10, 4, 1, 0xFFFFFFFF, b);
             snprintf(b, sizeof b, "P1 %d", world.players[0].score); text(8, SCREEN - 24, 1, 0xFFFFE070, b);
-            if (coop) { snprintf(b, sizeof b, "P2 %d", world.players[1].score); text(SCREEN - 8 - (int)strlen(b) * 10, SCREEN - 24, 1, 0xFFFF90B0, b); }
+            if (coop) { snprintf(b, sizeof b, "P2 %d", world.players[1].score); text(VIEW_W - 8 - (int)strlen(b) * 10, SCREEN - 24, 1, 0xFFFF90B0, b); }
         }
         if (state == ST_TITLE) {
             center(120, 3, 0xFFFFFFFF, "BAD ICE-CREAM");

@@ -27,7 +27,7 @@ const Frame* pick(const Anim* a, int idx, bool loop) {
 bool makeQuad(const Ctx& c, const Frame* f, float px, float py, float alpha, Quad& q) {
     if (!f) return false;
     float x0 = std::floor(px - f->ox - c.camX + 0.5f), y0 = std::floor(py - f->oy - c.camY + 0.5f);
-    if (x0 > SCREEN || y0 > SCREEN || x0 + f->w < 0 || y0 + f->h < 0) return false;
+    if (x0 > VIEW_W || y0 > SCREEN || x0 + f->w < 0 || y0 + f->h < 0) return false;
     const Atlas::Page& pg = c.atlas.pages[f->page];
     q.x0 = x0; q.y0 = y0; q.x1 = x0 + f->w; q.y1 = y0 + f->h;
     q.u0 = (float)f->x / pg.w; q.v0 = (float)f->y / pg.h; q.u1 = (float)(f->x + f->w) / pg.w; q.v1 = (float)(f->y + f->h) / pg.h;
@@ -52,7 +52,7 @@ void buildScene(const World& w, const Atlas& atlas, DrawList& out) {
     const float T = TILE_SIZE;
 
     // ---- tiles
-    int x0 = std::max(0, (int)(c.camX / T) - 1), x1 = std::min(w.w, (int)((c.camX + SCREEN) / T) + 2);
+    int x0 = std::max(0, (int)(c.camX / T) - 1), x1 = std::min(w.w, (int)((c.camX + VIEW_W) / T) + 2);
     int y0 = std::max(0, (int)(c.camY / T) - 1), y1 = std::min(w.h, (int)((c.camY + SCREEN) / T) + 4);
     for (int y = y0; y < y1; y++)
         for (int x = x0; x < x1; x++) {
