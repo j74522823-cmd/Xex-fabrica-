@@ -11,7 +11,8 @@
 namespace bic {
 
 constexpr int FPS = 25;          // inferido da fórmula do bônus de tempo (25 * 121); confirmar no cabeçalho do SWF
-constexpr int SCREEN = 550;      // palco 550x550
+constexpr int SCREEN = 550;      // altura lógica do palco
+constexpr int VIEW_W = 978;      // largura lógica para 16:9 em 720p (mantém pixels proporcionais)
 constexpr int INF = 1000000000;
 
 // Estado de um controle, preenchido pela plataforma a cada quadro.
