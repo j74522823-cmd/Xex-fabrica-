@@ -78,7 +78,7 @@ int main()
     volatile uint32_t* vertexBuffer = nullptr;
 
     status = xsdk_shader_load(
-        &vertexShader, xbox3d_test_vert.container, xbox3d_test_vert.container_bytes);
+        &vertexShader, square3d_vert.container, square3d_vert.container_bytes);
     if (!NT_SUCCESS(status)) {
         xsdk_log_write("xbox3d_test: vertex shader load failed 0x%08X", (unsigned)status);
         goto cleanup;
@@ -86,7 +86,7 @@ int main()
     vertexLoaded = true;
 
     status = xsdk_shader_load(
-        &pixelShader, xbox3d_test_frag.container, xbox3d_test_frag.container_bytes);
+        &pixelShader, square3d_frag.container, square3d_frag.container_bytes);
     if (!NT_SUCCESS(status)) {
         xsdk_log_write("xbox3d_test: pixel shader load failed 0x%08X", (unsigned)status);
         goto cleanup;
@@ -149,8 +149,8 @@ int main()
 
             xsdk_gpu_set_target(width, height);
             xsdk_gpu_set_shaders(&vertexShader, &pixelShader);
-            xsdk_built_shader_set_literals(&xbox3d_test_vert);
-            xsdk_built_shader_set_literals(&xbox3d_test_frag);
+            xsdk_built_shader_set_literals(&square3d_vert);
+            xsdk_built_shader_set_literals(&square3d_frag);
             xsdk_gpu_set_raster(&rasterState);
             xsdk_gpu_set_depth_stencil(&depthState);
             xsdk_gpu_set_vertices(0, xsdk_gpu_address(vertexBuffer), kVertexBytes);
