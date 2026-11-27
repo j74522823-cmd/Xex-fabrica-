@@ -18,3 +18,5 @@ O workflow `.github/workflows/xex.yml` detecta esta pasta por seu `CMakeLists.tx
 
 ## Estado
 Código inicial preparado para o primeiro build PowerPC/XSDK. A compilação do GitHub Actions precisa ser verificada; depois o XEX ainda precisa ser testado no Xbox 360 real. Nenhum funcionamento no console é presumido.
+
+A Fábrica executa o workflow automaticamente quando este projeto recebe alterações em `projetos/**`.
