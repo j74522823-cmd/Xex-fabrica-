@@ -190,11 +190,18 @@ static Matrix model_matrix(float x, float y, float z, float sx, float sy, float 
 }
 
 static void draw_box(const Scene *scene, const Matrix *view_projection,
-                     float x, float y, float z, float sx, float sy, float sz)
+                     float x, float y, float z, float sx, float sy, float sz,
+                     float red, float green, float blue)
 {
     const Matrix model = model_matrix(x, y, z, sx, sy, sz);
     const Matrix mvp = multiply(view_projection, &model);
-    xsdk_gpu_set_vertex_constants(HOUSE_VERT_PUSH, mvp.m, HOUSE_VERT_PUSH_REGISTERS);
+    float push[20] = {0};
+    memcpy(push, mvp.m, sizeof(mvp.m));
+    push[16] = red;
+    push[17] = green;
+    push[18] = blue;
+    push[19] = 1.0f;
+    xsdk_gpu_set_vertex_constants(HOUSE_VERT_PUSH, push, HOUSE_VERT_PUSH_REGISTERS);
     xsdk_gpu_draw_indexed(XSDK_PRIMITIVE_TRIANGLE_LIST,
         xsdk_gpu_address(scene->indices), INDEX_COUNT, false);
 }
@@ -202,12 +209,12 @@ static void draw_box(const Scene *scene, const Matrix *view_projection,
 static void draw_player(const Scene *scene, const Matrix *vp, const Player *p)
 {
     // A deliberately simple articulated-looking mannequin made from boxes.
-    draw_box(scene, vp, p->x, 1.16f, p->z, 0.62f, 0.82f, 0.38f);
-    draw_box(scene, vp, p->x, 1.82f, p->z, 0.43f, 0.43f, 0.43f);
-    draw_box(scene, vp, p->x - 0.43f, 1.18f, p->z, 0.18f, 0.72f, 0.20f);
-    draw_box(scene, vp, p->x + 0.43f, 1.18f, p->z, 0.18f, 0.72f, 0.20f);
-    draw_box(scene, vp, p->x - 0.17f, 0.43f, p->z, 0.22f, 0.72f, 0.25f);
-    draw_box(scene, vp, p->x + 0.17f, 0.43f, p->z, 0.22f, 0.72f, 0.25f);
+    draw_box(scene, vp, p->x, 1.16f, p->z, 0.62f, 0.82f, 0.38f, p->r, p->g, p->b);
+    draw_box(scene, vp, p->x, 1.82f, p->z, 0.43f, 0.43f, 0.43f, 0.94f, 0.82f, 0.68f);
+    draw_box(scene, vp, p->x - 0.43f, 1.18f, p->z, 0.18f, 0.72f, 0.20f, p->r, p->g, p->b);
+    draw_box(scene, vp, p->x + 0.43f, 1.18f, p->z, 0.18f, 0.72f, 0.20f, p->r, p->g, p->b);
+    draw_box(scene, vp, p->x - 0.17f, 0.43f, p->z, 0.22f, 0.72f, 0.25f, 0.18f, 0.20f, 0.24f);
+    draw_box(scene, vp, p->x + 0.17f, 0.43f, p->z, 0.22f, 0.72f, 0.25f, 0.18f, 0.20f, 0.24f);
 }
 
 static float axis_value(int16_t value)
@@ -243,10 +250,10 @@ static void render_scene(const Scene *scene, uint32_t address, uint32_t width, u
     xsdk_gpu_set_vertices(0, xsdk_gpu_address(scene->vertices), VERTEX_BYTES);
 
     // Open-front room: floor, rear wall and two side walls.
-    draw_box(scene, &vp, 0.0f, -0.12f, 0.0f, 8.0f, 0.24f, 8.0f);
-    draw_box(scene, &vp, 0.0f, 1.95f, -3.9f, 8.0f, 4.0f, 0.20f);
-    draw_box(scene, &vp, -3.9f, 1.95f, 0.0f, 0.20f, 4.0f, 8.0f);
-    draw_box(scene, &vp,  3.9f, 1.95f, 0.0f, 0.20f, 4.0f, 8.0f);
+    draw_box(scene, &vp, 0.0f, -0.12f, 0.0f, 8.0f, 0.24f, 8.0f, 0.72f, 0.70f, 0.60f);
+    draw_box(scene, &vp, 0.0f, 1.95f, -3.9f, 8.0f, 4.0f, 0.20f, 0.62f, 0.72f, 0.84f);
+    draw_box(scene, &vp, -3.9f, 1.95f, 0.0f, 0.20f, 4.0f, 8.0f, 0.52f, 0.64f, 0.78f);
+    draw_box(scene, &vp,  3.9f, 1.95f, 0.0f, 0.20f, 4.0f, 8.0f, 0.52f, 0.64f, 0.78f);
 
     // Player 1: blue-green; Player 2: warm orange. The separate positions are controlled independently.
     draw_player(scene, &vp, p1);
