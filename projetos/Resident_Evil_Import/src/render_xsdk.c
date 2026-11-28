@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "xsdk/gpu.h"
+#include "xsdk/present.h"
 #include "xsdk/texture.h"
 #include "re4coop_shaders.h"
 
