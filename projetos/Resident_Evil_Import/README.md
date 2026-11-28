@@ -34,7 +34,7 @@ pip install numpy pillow
 python3 tools/convert_map.py 3.glb farm.rfm
 ```
 
-O `farm.rfm` já vai pronto no pacote, então só precisa rodar isso se trocar de mapa.
+O `farm.rfm` está no repositório e o workflow agora o coloca automaticamente em `re4coop-data.zip` na Release.
 Para outro mapa, use `--root NomeDoNo` para escolher o nó do cenário.
 
 ### 2. Testar a lógica no PC (opcional)
@@ -68,7 +68,11 @@ estão marcados com `XSDK:` no código. Para conferir:
 
 Se der erro de compilação, me mande a saída junto com o `gpu.h` (ou o sample do cubo) e eu corrijo.
 
-### 5. Compilar e mandar para o console
+### 5. Baixar e instalar no console
+
+Na Release `ultimo-xex`, baixe `re4coop.xex` **e** `re4coop-data.zip`. Extraia `farm.rfm` do ZIP na mesma pasta do XEX, por exemplo `Hdd1/re4coop/farm.rfm`. O jogo procura esse arquivo em `game:/farm.rfm`; sem o mapa, ele encerra logo no início.
+
+### 6. Compilar e mandar para o console
 
 ```
 cmake -B build-xbox -G Ninja -DCMAKE_TOOLCHAIN_FILE=$HOME/xsdk/cmake/xsdk.cmake
