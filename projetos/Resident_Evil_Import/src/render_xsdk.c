@@ -8,6 +8,7 @@
 #include "xsdk/gpu.h"
 #include "xsdk/present.h"
 #include "xsdk/texture.h"
+#include "xsdk/log.h"
 #include "re4coop_shaders.h"
 
 static const Map *g_map;
@@ -82,8 +83,9 @@ static int upload_texture(XsdkTexture *texture, const MapTexture *src) {
 int render_init(const Map *map, int screen_w, int screen_h) {
     g_map=map; g_screen_w=screen_w; g_screen_h=screen_h;
     NTSTATUS status=xsdk_shader_load(&g_vs, map_vert.container, map_vert.container_bytes);
-    if (NT_SUCCESS(status)) status=xsdk_shader_load(&g_ps, map_frag.container, map_frag.container_bytes);
-    if (!NT_SUCCESS(status)) return 0;
+    if (!NT_SUCCESS(status)) { xsdk_log_write("RE4: vertex shader load failed: 0x%08X", (unsigned)status); return 0; }
+    status=xsdk_shader_load(&g_ps, map_frag.container, map_frag.container_bytes);
+    if (!NT_SUCCESS(status)) { xsdk_log_write("RE4: pixel shader load failed: 0x%08X", (unsigned)status); return 0; }
 
     const XsdkVertexElement layout[] = {
         {.usage=XSDK_USAGE_POSITION,.format=XSDK_VERTEX_FLOAT3,.stream=0,.offset_bytes=0},
@@ -92,29 +94,29 @@ int render_init(const Map *map, int screen_w, int screen_h) {
     };
     const uint32_t strides[]={sizeof(MapVertex)};
     status=xsdk_shader_set_vertex_layout(&g_vs, layout, 3, strides);
-    if (!NT_SUCCESS(status)) return 0;
+    if (!NT_SUCCESS(status)) { xsdk_log_write("RE4: vertex layout failed: 0x%08X", (unsigned)status); return 0; }
 
     g_vb=gpu_copy(map->vertices, map->num_vertices*sizeof(MapVertex), &g_vb_addr);
     g_ib=gpu_copy(map->indices, map->num_indices*sizeof(uint32_t), &g_ib_addr);
-    if (!g_vb || !g_ib) return 0;
+    if (!g_vb || !g_ib) { xsdk_log_write("RE4: map GPU buffers allocation failed"); return 0; }
 
     MapVertex cube_v[24]; uint32_t cube_i[36];
     build_cube(cube_v,cube_i);
     g_cube_vb=gpu_copy(cube_v,sizeof cube_v,&g_cube_vb_addr);
     g_cube_ib=gpu_copy(cube_i,sizeof cube_i,&g_cube_ib_addr);
-    if (!g_cube_vb || !g_cube_ib) return 0;
+    if (!g_cube_vb || !g_cube_ib) { xsdk_log_write("RE4: cube GPU buffers allocation failed"); return 0; }
 
     if (map->num_textures) {
         g_textures=(XsdkTexture *)calloc(map->num_textures,sizeof *g_textures);
-        if (!g_textures) return 0;
+        if (!g_textures) { xsdk_log_write("RE4: texture array allocation failed"); return 0; }
         for (uint32_t i=0;i<map->num_textures;++i)
-            if (!upload_texture(&g_textures[i],&map->textures[i])) return 0;
+            if (!upload_texture(&g_textures[i],&map->textures[i])) { xsdk_log_write("RE4: texture upload failed at %u", (unsigned)i); return 0; }
     }
 
     static uint32_t white_pixels[16];
     for (unsigned i=0;i<16;++i) white_pixels[i]=0xFFFFFFFFu;
     status=xsdk_texture_create(&g_white,XSDK_FORMAT_A8R8G8B8,4,4,1,true);
-    if (!NT_SUCCESS(status)) return 0;
+    if (!NT_SUCCESS(status)) { xsdk_log_write("RE4: white texture creation failed: 0x%08X", (unsigned)status); return 0; }
     xsdk_texture_upload(&g_white,0,white_pixels,4*4);
     xsdk_gpu_invalidate(g_white.address,g_white.size_bytes);
 
@@ -136,6 +138,7 @@ int render_init(const Map *map, int screen_w, int screen_h) {
     float sx=0.45f,sy=0.75f,sz=0.35f,sl=sqrtf(sx*sx+sy*sy+sz*sz);
     g_psc.sun_dir[0]=sx/sl; g_psc.sun_dir[1]=sy/sl; g_psc.sun_dir[2]=sz/sl;
     g_psc.fog[0]=0.46f; g_psc.fog[1]=0.44f; g_psc.fog[2]=0.40f; g_psc.fog[3]=0.018f;
+    xsdk_log_write("RE4: render initialization complete");
     return 1;
 }
 
