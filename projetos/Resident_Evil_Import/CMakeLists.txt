@@ -17,3 +17,4 @@ target_compile_options(re4coop PRIVATE -Wall -Wextra)
 target_include_directories(re4coop PRIVATE src)
 xsdk_add_shaders(re4coop shaders/map.vert shaders/map.frag)
 xsdk_add_xex(re4coop)
+
